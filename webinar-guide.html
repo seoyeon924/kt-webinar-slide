@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 데이터 분석 실전 가이드 — Fastcampus Webinar</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --bd: rgba(110,93,80,0.16);
+      --bds: rgba(96,79,67,0.24);
+      --offwhite: rgba(247,244,239,0.97);
+      --lavender: rgba(237,231,245,0.96);
+      --mint: rgba(225,241,236,0.96);
+      --rose: rgba(247,229,235,0.96);
+      --cream: rgba(247,241,226,0.96);
+      --beige: rgba(239,232,223,0.97);
+      --acc: #4fb799;
+      --dk: #2f2b27;
+      --mu: #766c63;
+      --so: #9a9086;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #000; color: #fff; padding: 36px 40px 80px; }
+
+    /* HEADER */
+    .hdr { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 56px; padding-bottom: 32px; border-bottom: 1px solid var(--bd); }
+    .hdr-eye { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.7); margin-bottom: 12px; }
+    .hdr-title { font-family: 'Barlow', sans-serif; font-size: 44px; font-weight: 400; line-height: 1.15; letter-spacing: -.02em; }
+    .hdr-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: rgba(255,255,255,.85); }
+    .hdr-meta { font-size: 13px; color: rgba(255,255,255,.38); text-align: right; line-height: 1.8; }
+
+    /* SECTION DIVIDER */
+    .sec-hdr { display: flex; align-items: center; gap: 16px; margin: 56px 0 28px; }
+    .sec-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: rgba(255,255,255,.28); letter-spacing: .14em; text-transform: uppercase; }
+    .sec-title { font-family: 'Barlow', sans-serif; font-size: 22px; font-weight: 600; color: rgba(255,255,255,.9); letter-spacing: -.01em; }
+    .sec-line { flex: 1; height: 1px; background: var(--bd); }
+
+    /* STEP CARD */
+    .step { border-radius: 22px; border: 1px solid var(--bd); overflow: hidden; margin-bottom: 20px; box-shadow: 0 8px 28px rgba(42,30,18,.08); }
+    .step.c-offwhite { background: var(--offwhite); }
+    .step.c-lavender  { background: var(--lavender); }
+    .step.c-rose      { background: var(--rose); }
+    .step.c-cream     { background: var(--cream); }
+    .step.c-mint      { background: var(--mint); }
+    .step.c-beige     { background: var(--beige); }
+
+    .step-top { padding: 26px 28px 22px; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; transition: background .15s; }
+    .step-top:hover { background: rgba(47,43,39,.04); }
+    .step-left { flex: 1; }
+    .step-num { display: none; }
+    .step-icon { width: 44px; height: 44px; border-radius: 13px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 14px; }
+    .step-title { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--dk); margin-bottom: 7px; line-height: 1.3; letter-spacing: -.01em; }
+    .step-desc { font-size: 13px; color: var(--mu); line-height: 1.65; }
+    .step-toggle { font-size: 11px; color: var(--so); flex-shrink: 0; padding: 5px 12px; background: rgba(47,43,39,.07); border-radius: 8px; font-family: 'JetBrains Mono', monospace; transition: background .15s; }
+    .step.open .step-toggle { background: rgba(79,183,153,.15); color: #218d72; }
+
+    /* PROMPT AREA */
+    .prompt-wrap { display: none !important; }
+    .sub-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--so); margin-bottom: 9px; }
+    .prompt-box { background: rgba(18,14,10,.88); border: 1px solid rgba(96,79,67,.22); border-radius: 12px; padding: 16px 18px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.75; color: rgba(255,255,255,.75); white-space: pre-wrap; word-break: break-word; }
+    .prompt-box .kw { color: #9dd8c7; }
+
+    /* RESPONSE AREA */
+    .response-wrap { padding: 0 28px 26px; display: none; }
+    .step.open .response-wrap { display: block; }
+    .response-card { background: rgba(255,252,247,.94); border: 1px solid rgba(96,79,67,.12); border-radius: 16px; overflow: hidden; }
+    .response-header { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid rgba(96,79,67,.1); }
+    .ai-avatar { width: 30px; height: 30px; border-radius: 9px; background: rgba(79,183,153,.2); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .ai-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--dk); }
+    .ai-badge { margin-left: auto; font-size: 10px; padding: 3px 10px; background: rgba(79,183,153,.15); color: #218d72; border: 1px solid rgba(79,183,153,.2); border-radius: 99px; font-weight: 700; }
+    .response-body { padding: 20px 22px 22px; }
+
+    /* RESPONSE CONTENT STYLES */
+    .r-text { font-size: 14px; color: var(--dk); line-height: 1.75; margin-bottom: 14px; }
+    .r-text strong { font-weight: 700; }
+    .r-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
+    .r-table th { background: rgba(47,43,39,.09); color: var(--dk); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; padding: 9px 12px; text-align: left; }
+    .r-table td { padding: 9px 12px; color: var(--dk); border-top: 1px solid rgba(96,79,67,.08); vertical-align: top; line-height: 1.6; }
+    .r-table tr:nth-child(even) td { background: rgba(47,43,39,.02); }
+    .tag-ok  { display: inline-block; background: rgba(53,201,149,.18); color: #0d7a5c; border-radius: 5px; padding: 1px 7px; font-size: 10px; font-weight: 700; }
+    .tag-warn { display: inline-block; background: rgba(239,176,93,.2); color: #a0620a; border-radius: 5px; padding: 1px 7px; font-size: 10px; font-weight: 700; }
+    .tag-bad { display: inline-block; background: rgba(239,125,134,.2); color: #9b2d38; border-radius: 5px; padding: 1px 7px; font-size: 10px; font-weight: 700; }
+    .r-finding { display: flex; gap: 10px; align-items: flex-start; background: rgba(47,43,39,.05); border: 1px solid rgba(96,79,67,.1); border-radius: 10px; padding: 12px 14px; margin-bottom: 9px; }
+    .r-fn { width: 22px; height: 22px; border-radius: 50%; background: rgba(79,183,153,.15); color: #218d72; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+    .r-ft { font-size: 13px; color: var(--dk); line-height: 1.65; }
+    .r-ft strong { font-weight: 700; }
+    .r-code { background: rgba(18,14,10,.06); border: 1px solid rgba(96,79,67,.1); border-radius: 8px; padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--dk); line-height: 1.75; margin-bottom: 12px; white-space: pre; }
+    .r-section { margin-bottom: 16px; }
+    .r-sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--so); margin-bottom: 10px; }
+    .r-hierarchy { border-left: 2px solid var(--bds); padding-left: 16px; margin-bottom: 14px; }
+    .h-p { font-size: 14px; font-weight: 700; color: var(--dk); margin-bottom: 9px; }
+    .h-c1 { font-size: 13px; color: var(--dk); margin: 7px 0 3px; padding-left: 13px; border-left: 1px solid rgba(96,79,67,.2); }
+    .h-c1::before { content: "↳ "; color: var(--mu); }
+    .h-c2 { font-size: 12.5px; color: var(--mu); margin: 3px 0; padding-left: 28px; }
+    .h-c2::before { content: "· "; }
+    .h-action { display: inline-flex; align-items: center; gap: 5px; background: rgba(79,183,153,.12); border: 1px solid rgba(79,183,153,.2); border-radius: 7px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: #218d72; margin: 3px 0 3px 28px; }
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-bottom: 14px; }
+    .kpi-box { background: rgba(47,43,39,.06); border: 1px solid rgba(96,79,67,.09); border-radius: 10px; padding: 12px; text-align: center; }
+    .kpi-v { font-family: 'Barlow', sans-serif; font-size: 20px; font-weight: 600; color: var(--dk); margin-bottom: 4px; }
+    .kpi-l { font-size: 10px; color: var(--mu); text-transform: uppercase; letter-spacing: .06em; }
+
+    /* METHODOLOGY SELECTOR */
+    .method-section { background: rgba(14,12,10,.6); border: 1px solid var(--bds); border-radius: 22px; padding: 28px; margin-bottom: 28px; }
+    .method-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--acc); margin-bottom: 18px; }
+    .method-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 0; }
+    .method-btn { border-radius: 16px; border: 1px solid rgba(255,255,255,.1); padding: 18px 16px; cursor: pointer; transition: transform .2s, border-color .2s, background .2s; text-align: left; background: rgba(255,255,255,.04); }
+    .method-btn:hover { border-color: rgba(79,183,153,.3); background: rgba(79,183,153,.07); transform: translateY(-2px); }
+    .method-btn.active { border-color: var(--acc); background: rgba(79,183,153,.1); }
+    .mb-icon { font-size: 24px; margin-bottom: 10px; }
+    .mb-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(255,255,255,.35); margin-bottom: 5px; letter-spacing: .08em; }
+    .mb-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.85); margin-bottom: 6px; line-height: 1.35; }
+    .mb-desc { font-size: 11px; color: rgba(255,255,255,.45); line-height: 1.55; }
+    .mb-tag { display: inline-block; padding: 2px 7px; background: rgba(79,183,153,.12); border-radius: 5px; font-size: 10px; color: var(--acc); font-weight: 600; margin-top: 8px; }
+
+    /* DASHBOARD PANELS */
+    .dash-panel { display: none; }
+    .dash-panel.active { display: block; }
+    .dash { background: rgba(250,246,240,.97); border-radius: 20px; border: 1px solid var(--bds); overflow: hidden; box-shadow: 0 16px 48px rgba(42,30,18,.12); }
+    .dash-topbar { background: #111; padding: 18px 26px; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+    .dash-topbar-title { font-family: 'Barlow', sans-serif; font-size: 22px; font-weight: 600; color: #fff; letter-spacing: -.02em; line-height: 1.2; }
+    .dash-topbar-meta { font-size: 11px; color: rgba(255,255,255,.35); white-space: nowrap; flex-shrink: 0; }
+    .dash-body { padding: 22px; }
+    .dash-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .dk-box { background: #fff; border: 1px solid rgba(96,79,67,.1); border-radius: 14px; padding: 16px; }
+    .dk-val { font-family: 'Barlow', sans-serif; font-size: 26px; font-weight: 600; color: #0a0a0a; margin-bottom: 4px; }
+    .dk-lbl { font-size: 11px; color: var(--mu); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 7px; }
+    .dk-delta { font-size: 12px; font-weight: 600; }
+    .dk-delta.up { color: #218d72; }
+    .dk-delta.dn { color: #9b2d38; }
+    .dk-delta.warn { color: #a0620a; }
+    .dash-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; min-width: 0; align-items: start; }
+    .dash-charts > * { min-width: 0; overflow: hidden; }
+    .dash-charts.three { grid-template-columns: 1.6fr 1fr 1fr; }
+    .dash-charts.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .dash-charts.full { grid-template-columns: 1fr; }
+    .dash-charts.three-eq { grid-template-columns: 1fr 1fr 1fr; }
+    .chart-card { background: #fff; border: 1px solid rgba(96,79,67,.1); border-radius: 14px; padding: 18px; overflow: hidden; min-width: 0; box-sizing: border-box; }
+    .chart-card svg { display: block; max-width: 100%; overflow: hidden; }
+    .cc-title { font-size: 13px; font-weight: 700; color: var(--dk); margin-bottom: 5px; line-height: 1.4; }
+    .cc-desc { font-size: 12px; color: var(--mu); margin-bottom: 14px; line-height: 1.6; }
+    .dash-actions { background: transparent; border-radius: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .da-item { background: rgba(247,244,239,.97); border: 1px solid rgba(96,79,67,.12); border-radius: 12px; padding: 13px 14px; }
+    .da-p { font-size: 10px; font-weight: 700; color: rgba(47,43,39,.45); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+    .da-title { font-size: 13px; font-weight: 700; color: var(--dk); margin-bottom: 5px; line-height: 1.4; }
+    .da-why { font-size: 12px; color: rgba(47,43,39,.55); line-height: 1.6; }
+
+    /* METRIC TREE */
+    .metric-tree { background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.12); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+    .metric-tree-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--so); margin-bottom: 12px; }
+
+    /* AI BADGE INLINE */
+    .ai-badge-inline { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 7px; background: rgba(91,142,240,.12); border: 1px solid rgba(91,142,240,.25); border-radius: 5px; color: #3b5bbf; margin-left: 6px; vertical-align: middle; }
+
+    /* DATA STORY BLOCK */
+    /* ── Story Flow Block ── */
+    .story-block { background: transparent; border: none; border-bottom: 1px solid rgba(96,79,67,.12); padding: 0 0 18px; margin-bottom: 20px; }
+    .story-flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+    .sf-cell { padding: 12px 14px; position: relative; }
+    .sf-cell + .sf-cell::before { content: '→'; position: absolute; left: -7px; top: 50%; transform: translateY(-50%); font-size: 12px; color: rgba(96,79,67,.3); font-family: 'JetBrains Mono', monospace; }
+    .sf-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; padding: 2px 7px; border-radius: 5px; display: inline-block; }
+    .sf-label.lbl-now  { background: rgba(47,43,39,.07); color: rgba(47,43,39,.5); }
+    .sf-label.lbl-why  { background: rgba(239,176,93,.15); color: #8a5c00; }
+    .sf-label.lbl-so   { background: rgba(239,125,134,.13); color: #7a2430; }
+    .sf-label.lbl-act  { background: rgba(53,201,149,.14); color: #1a6b50; }
+    .sf-label.lbl-risk { background: rgba(239,125,134,.13); color: #7a2430; }
+    .sf-val  { font-family: 'Barlow', sans-serif; font-size: 16px; font-weight: 700; color: var(--dk); line-height: 1.3; margin-bottom: 4px; }
+    .sf-desc { font-size: 12px; color: rgba(47,43,39,.55); line-height: 1.6; }
+    .sf-desc strong { color: var(--dk); font-weight: 700; }
+    .sf-desc .num-red  { color: #9b2d38; font-weight: 700; }
+    .sf-desc .num-grn  { color: #1a6b50; font-weight: 700; }
+    .sf-desc .num-yel  { color: #8a5c00; font-weight: 700; }
+
+    /* DATA STORYTELLING LESSON CARD */
+    .lesson-card { background: rgba(247,244,239,.97); border-radius: 18px; border: 1px solid rgba(96,79,67,.14); padding: 28px 32px 26px; margin-bottom: 16px; }
+    .lesson-title { font-family: 'Barlow', sans-serif; font-size: 22px; font-weight: 600; color: #2f2b27; margin-bottom: 8px; letter-spacing: -.01em; }
+    .lesson-body { font-size: 14px; color: #766c63; line-height: 1.8; margin-bottom: 16px; }
+    .lesson-body strong { color: #2f2b27; }
+    .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .ba-card { border-radius: 12px; border: 1px solid rgba(96,79,67,.12); padding: 16px; }
+    .ba-before { background: rgba(239,125,134,.06); }
+    .ba-after  { background: rgba(53,201,149,.06); }
+    .ba-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
+    .ba-before .ba-label { color: #9b2d38; }
+    .ba-after  .ba-label { color: #0d7a5c; }
+    .ba-text { font-size: 13px; color: #2f2b27; line-height: 1.65; }
+    .principle-list { display: flex; flex-direction: column; gap: 8px; }
+    .principle-item { display: flex; gap: 10px; align-items: flex-start; background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 10px 12px; }
+    .pi-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #2f2b27; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
+    .pi-text { font-size: 13px; color: #2f2b27; line-height: 1.65; }
+    .pi-text strong { font-weight: 700; }
+
+    /* ── 대시보드 내부 폰트 통일 (Inter) ── */
+    .dash .dk-val, .dash .dk-lbl, .dash .dk-delta,
+    .dash .cc-title, .dash .cc-desc,
+    .dash .da-p, .dash .da-title, .dash .da-why,
+    .dash .sf-val, .dash .sf-desc, .dash .sf-label,
+    .dash .r-sec-title, .dash .r-ft, .dash .r-fn,
+    .dash svg text { font-family: 'Inter', -apple-system, sans-serif; font-style: normal; }
+
+    /* ── 대시보드 상단바 — analysis 제목 디자인 ── */
+    .dash-topbar { background: #000; padding: 20px 26px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+    .dash-topbar-left { flex: 1; }
+    .dash-topbar-title { font-family: 'Barlow', sans-serif; font-size: 24px; font-weight: 600; color: #fff; letter-spacing: -.02em; line-height: 1.25; }
+    .dash-topbar-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: rgba(255,255,255,.65); font-weight: 400; }
+    .dash-topbar-problem { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,.38); margin-top: 5px; letter-spacing: .03em; }
+
+    /* ══ PIPELINE BAR ══ */
+    .pipe-bar { margin-bottom: 36px; padding-bottom: 28px; border-bottom: 1px solid rgba(110,93,80,0.16); }
+    .pipe-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 400; letter-spacing: 0;
+      text-transform: none; color: rgba(255,255,255,.38);
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .pipe-eyebrow::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.07); }
+    .pipe-row {
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; position: relative;
+    }
+    .pipe-row::before {
+      content: ''; position: absolute; top: 38px;
+      left: calc(100% / 12); right: calc(100% / 12);
+      height: 1px;
+      background: linear-gradient(90deg, rgba(96,79,67,0) 0%, rgba(96,79,67,.22) 8%, rgba(96,79,67,.22) 92%, rgba(96,79,67,0) 100%);
+      pointer-events: none; z-index: 0;
+    }
+    .pipe-wrap { padding: 0 5px; position: relative; z-index: 1; }
+    .pipe-card {
+      border-radius: 16px; border: 1px solid rgba(96,79,67,.14);
+      padding: 13px 12px 12px; cursor: pointer;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+      box-shadow: 0 6px 18px rgba(42,30,18,.09);
+      display: flex; flex-direction: column;
+    }
+    .pipe-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(42,30,18,.14); border-color: rgba(96,79,67,.26); }
+    .pipe-card.active { transform: translateY(-4px); border-color: rgba(79,183,153,.55); box-shadow: 0 0 0 2px rgba(79,183,153,.18), 0 16px 32px rgba(42,30,18,.14); }
+    .pc-offwhite { background: rgba(247,244,239,0.97); }
+    .pc-lavender  { background: rgba(237,231,245,0.96); }
+    .pc-rose      { background: rgba(247,229,235,0.94); }
+    .pc-cream     { background: rgba(247,241,226,0.94); }
+    .pc-mint      { background: rgba(225,241,236,0.96); }
+    .pc-sky       { background: rgba(224,237,248,0.96); }
+    .pc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 9px; }
+    .pc-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #1a1a1a; flex-shrink: 0; }
+    .pc-step { display: none; }
+    .pc-name { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #2f2b27; margin-bottom: 8px; line-height: 1.35; letter-spacing: -.01em; }
+    .pc-skill {
+      display: inline-flex; align-items: center;
+      font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600;
+      padding: 3px 8px; border-radius: 5px; margin-bottom: 9px; align-self: flex-start;
+    }
+    .sk-green  { color: #2a7a5e; background: rgba(79,183,153,.14); border: 1px solid rgba(79,183,153,.2); }
+    .sk-muted  { color: rgba(47,43,39,.5); background: rgba(47,43,39,.06); border: 1px solid rgba(47,43,39,.08); }
+    .sk-rose   { color: #8a3552; background: rgba(219,39,119,.08); border: 1px solid rgba(219,39,119,.14); }
+    .pc-divider { height: 1px; background: rgba(96,79,67,.1); margin-bottom: 8px; }
+    .pc-out-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #9a9086; margin-bottom: 5px; }
+    .pc-out-item { display: flex; align-items: center; gap: 5px; font-size: 9.5px; color: #766c63; margin-bottom: 4px; line-height: 1.3; }
+    .pc-out-item::before { content: ''; width: 3px; height: 3px; border-radius: 50%; background: #9a9086; flex-shrink: 0; }
+    .pipe-arrow { position: absolute; right: -3px; top: 36px; z-index: 2; color: rgba(96,79,67,.35); font-size: 10px; pointer-events: none; }
+    .pipe-wrap:last-child .pipe-arrow { display: none; }
+
+    /* ══ PIPELINE INLINE PANEL ══ */
+    .pipe-panel-wrap { margin-top: 14px; display: none; }
+    @keyframes panelIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .pipe-inline-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pipe-inline-steps > * { min-width: 0; }
+    .pipe-inline-steps > .full-width { grid-column: 1 / -1; }
+    .pipe-inline-steps .step { display: block !important; margin: 0; background: rgba(247,244,239,.97) !important; }
+    .pipe-inline-steps .method-section { display: block !important; margin: 0; }
+    .pipe-inline-steps .dash-panel { display: none !important; }
+    .pipe-inline-steps .dash-panel.active { display: block !important; }
+
+    /* ══ AI WORKBENCH ══ */
+    .ai-workbench { font-family: 'Inter', sans-serif; }
+    .aiw-header { margin-bottom: 18px; }
+    .aiw-title { font-family: 'Barlow', sans-serif; font-size: 24px; font-weight: 500; color: #fff; line-height: 1.25; letter-spacing: -.01em; }
+    .aiw-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: rgba(255,255,255,.75); }
+    .aiw-subtitle { font-size: 12px; color: rgba(255,255,255,.38); margin-top: 6px; font-family: 'JetBrains Mono', monospace; letter-spacing: .03em; }
+    .aiw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .aiw-card { background: rgba(247,244,239,.97); border-radius: 18px; border: 1px solid rgba(96,79,67,.14); padding: 18px 20px 16px; }
+    .aiw-card-head { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 12px; }
+    .aiw-card-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .aiw-card-title { font-size: 14px; font-weight: 700; color: var(--dk); margin-bottom: 3px; }
+    .aiw-card-sub { font-size: 11px; color: var(--mu); font-family: 'JetBrains Mono', monospace; line-height: 1.5; }
+    .aiw-badge { margin-left: auto; font-size: 9px; font-weight: 700; padding: 3px 9px; background: rgba(91,142,240,.12); border: 1px solid rgba(91,142,240,.22); border-radius: 99px; color: #3b5bbf; white-space: nowrap; }
+    .aiw-insights { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+    .aiw-ins { background: rgba(47,43,39,.05); border: 1px solid rgba(96,79,67,.1); border-radius: 8px; padding: 7px 10px; display: flex; justify-content: space-between; align-items: center; }
+    .aiw-ins-label { font-size: 11px; color: var(--mu); }
+    .aiw-ins-val { font-size: 13px; font-weight: 700; color: var(--dk); }
+    .aiw-seg-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .aiw-seg { border-radius: 10px; border: 1px solid rgba(96,79,67,.12); padding: 10px 12px; }
+    .aiw-seg-name { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+    .aiw-seg-stat { font-size: 10px; color: var(--mu); margin-bottom: 4px; }
+    .aiw-seg-act { font-size: 10px; color: var(--dk); font-weight: 600; }
+    .aiw-action { font-size: 12px; font-weight: 700; color: #218d72; background: rgba(79,183,153,.1); border: 1px solid rgba(79,183,153,.2); border-radius: 8px; padding: 10px 13px; }
+    .aiw-scenario { background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 12px; padding: 12px 14px; }
+    .aiw-sc-label { font-size: 10px; font-weight: 700; color: var(--dk); margin-bottom: 6px; }
+
+    /* analysis sidebar layout */
+    .analysis-layout { display: flex; flex-direction: column; gap: 14px; }
+    .analysis-sidebar { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    .analysis-method-btn {
+      background: rgba(247,244,239,0.97); border: 1px solid rgba(96,79,67,.14);
+      border-radius: 14px; padding: 11px 16px; cursor: pointer;
+      transition: transform .18s, border-color .2s, box-shadow .2s;
+      text-align: left; flex: 1; min-width: 180px; max-width: 280px;
+    }
+    .analysis-method-btn:hover { transform: translateY(-2px); border-color: rgba(96,79,67,.26); box-shadow: 0 8px 20px rgba(42,30,18,.1); }
+    .analysis-method-btn.active { border-color: rgba(79,183,153,.55); box-shadow: 0 0 0 2px rgba(79,183,153,.18); }
+    .amb-icon { display: none; }
+    .amb-title { font-size: 12px; font-weight: 700; color: var(--dk); margin-bottom: 3px; line-height: 1.3; }
+    .amb-problem { font-size: 13px; font-weight: 700; color: var(--dk); margin-bottom: 5px; line-height: 1.4; }
+    .amb-desc { font-size: 11px; color: var(--mu); line-height: 1.5; }
+    .amb-tag { display: inline-block; margin-top: 7px; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 5px; background: rgba(47,43,39,.07); color: rgba(47,43,39,.5); border: 1px solid rgba(96,79,67,.14); }
+    .analysis-dash-pane { min-width: 0; }
+    .analysis-dash-pane .dash-panel { display: none; }
+    .analysis-dash-pane .dash-panel.active { display: block; }
+
+    /* ── Dashboard side-layout (left sidebar) ── */
+    .analysis-layout.side-layout { flex-direction: row; align-items: flex-start; gap: 16px; }
+    .analysis-layout.side-layout .analysis-sidebar { flex-direction: column; width: 210px; flex-shrink: 0; flex-wrap: nowrap; gap: 6px; }
+    .analysis-layout.side-layout .analysis-method-btn { flex: unset; min-width: unset; max-width: unset; width: 100%; box-sizing: border-box; }
+    .analysis-sidebar .analysis-method-btn { box-sizing: border-box; }
+
+    /* ── Active problem button color ── */
+    .analysis-method-btn.active { border-color: rgba(79,183,153,.6) !important; box-shadow: 0 0 0 2px rgba(79,183,153,.18) !important; background: #218d72 !important; }
+    .analysis-method-btn.active .amb-problem { color: #fff; }
+    .analysis-method-btn.active .amb-desc { color: rgba(255,255,255,.7); }
+    .analysis-method-btn.active .amb-tag { background: rgba(255,255,255,.15); color: rgba(255,255,255,.85); border-color: rgba(255,255,255,.2); }
+
+    /* report plan card */
+    .report-plan-card { background: rgba(247,244,239,.97); border-radius: 18px; border: 1px solid rgba(96,79,67,.14); overflow: hidden; }
+    .rpc-head { display: flex; align-items: center; gap: 12px; padding: 18px 22px 14px; border-bottom: 1px solid rgba(96,79,67,.1); }
+    .rpc-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+    .rpc-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--dk); margin-bottom: 2px; }
+    .rpc-meta { font-size: 11px; color: var(--mu); }
+    .rpc-badge { margin-left: auto; font-size: 10px; padding: 4px 11px; background: rgba(79,183,153,.14); border: 1px solid rgba(79,183,153,.22); border-radius: 99px; font-weight: 700; color: #218d72; white-space: nowrap; }
+    .rpc-body { padding: 18px 22px 20px; }
+
+    .ppanel-inner {
+      border-radius: 18px;
+      border: 1px solid rgba(96,79,67,.18);
+      overflow: hidden;
+    }
+    .ppanel-head {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 22px;
+      border-bottom: 1px solid rgba(96,79,67,.1);
+    }
+    .ppanel-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .ppanel-step { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--so); margin-bottom: 2px; }
+    .ppanel-name { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: var(--dk); }
+    .ppanel-meta { font-size: 12px; color: var(--mu); margin-top: 2px; }
+    .ppanel-badge { margin-left: auto; font-size: 10px; padding: 4px 11px; background: rgba(79,183,153,.14); border: 1px solid rgba(79,183,153,.22); border-radius: 99px; font-weight: 700; color: #218d72; white-space: nowrap; }
+    .ppanel-body { padding: 18px 22px 20px; }
+    .ppanel-ai-hdr { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
+    .ppanel-ai-ava { width: 22px; height: 22px; border-radius: 6px; background: rgba(79,183,153,.18); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--dk); }
+    .ppanel-ai-nm { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: var(--dk); }
+
+    /* panel content atoms */
+    .pp-text { font-size: 13px; color: var(--dk); line-height: 1.75; margin-bottom: 12px; }
+    .pp-find { display: flex; gap: 10px; align-items: flex-start; background: rgba(47,43,39,.05); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 11px 13px; margin-bottom: 8px; }
+    .pp-fn { width: 22px; height: 22px; border-radius: 50%; background: rgba(79,183,153,.14); color: #218d72; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+    .pp-ft { font-size: 13px; color: var(--dk); line-height: 1.65; }
+    .pp-ft strong { font-weight: 700; }
+    .pp-box { background: rgba(47,43,39,.05); border: 1px solid rgba(96,79,67,.1); border-radius: 10px; padding: 11px 14px; margin-bottom: 10px; }
+    .pp-box-lbl { font-size: 9px; font-weight: 700; color: var(--so); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+    .pp-tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 12px; }
+    .pp-tbl th { background: rgba(47,43,39,.09); color: var(--dk); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; padding: 8px 11px; text-align: left; }
+    .pp-tbl td { padding: 8px 11px; color: var(--dk); border-top: 1px solid rgba(96,79,67,.08); vertical-align: top; line-height: 1.6; }
+    .pp-kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px; margin-bottom: 10px; }
+    .pp-kpi-box { background: rgba(47,43,39,.06); border: 1px solid rgba(96,79,67,.08); border-radius: 10px; padding: 10px; text-align: center; }
+    .pp-kpi-v { font-family: 'Barlow', sans-serif; font-size: 20px; font-weight: 600; color: var(--dk); margin-bottom: 4px; }
+    .pp-kpi-l { font-size: 10px; color: var(--mu); text-transform: uppercase; letter-spacing: .06em; }
+    .pp-q-list { display: flex; flex-direction: column; gap: 7px; }
+    .pp-q-item { display: flex; gap: 10px; align-items: flex-start; background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 10px; }
+    .pp-q-num { width: 22px; height: 22px; background: var(--rose); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #A13D5C; flex-shrink: 0; }
+    .pp-q-txt { font-size: 13px; color: #5d534b; line-height: 1.6; }
+    .pp-sec-list { display: flex; flex-direction: column; gap: 7px; }
+    .pp-sec-row { padding: 9px 11px; border-radius: 9px; border: 1px solid rgba(96,79,67,.1); background: rgba(47,43,39,.04); }
+    .pp-sec-h { font-size: 9px; font-weight: 700; color: var(--dk); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+    .pp-sec-b { font-size: 13px; color: #5d534b; line-height: 1.65; }
+    .pp-act-list { display: flex; flex-direction: column; gap: 7px; }
+    .pp-act-row { background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 11px; }
+    .pp-act-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .pp-act-p { font-size: 9px; font-weight: 700; color: #0D9488; text-transform: uppercase; letter-spacing: .08em; }
+    .pp-act-own { font-size: 10px; color: var(--mu); }
+    .pp-act-ttl { font-size: 13px; font-weight: 700; color: var(--dk); margin-bottom: 5px; line-height: 1.4; }
+    .pp-act-imp { font-size: 11.5px; color: #4a9f87; margin-bottom: 5px; }
+    .pp-act-why { font-size: 12px; color: #5d534b; line-height: 1.65; }
+    .pp-tag-ok   { display:inline-block; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:700; background:rgba(53,201,149,.14); color:#1a7a5a; border:1px solid rgba(53,201,149,.2); }
+    .pp-tag-warn { display:inline-block; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:700; background:rgba(239,176,93,.14); color:#8a5e1e; border:1px solid rgba(239,176,93,.2); }
+    .pp-tag-bad  { display:inline-block; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:700; background:rgba(239,125,134,.14); color:#8a2233; border:1px solid rgba(239,125,134,.2); }
+
+    /* dashboard embed in panel */
+    .pp-dash-embed { margin-top: 4px; }
+    .pp-dash-embed .dash { box-shadow: none; border-radius: 14px; }
+
+    /* ══ DASHBOARD STEP HEADERS ══ */
+    .dash-step-hdr {
+      display: flex; align-items: center; gap: 10px;
+      margin: 22px 0 10px;
+    }
+    .dash-step-hdr:first-child { margin-top: 0; }
+    .dash-step-hdr-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: #fff; background: rgba(47,43,39,.7);
+      padding: 3px 9px; border-radius: 6px; white-space: nowrap;
+    }
+    .dash-step-hdr-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 600; color: rgba(47,43,39,.55);
+      white-space: nowrap;
+    }
+    .dash-step-hdr::after { content: ''; flex: 1; height: 1px; background: rgba(96,79,67,.12); }
+
+    /* ══ EDA CHARTS ══ */
+    .eda-row { display: grid; grid-template-columns: 1fr 180px; gap: 10px; align-items: center; margin-bottom: 8px; }
+    .eda-mini-chart { background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
+    .eda-chart-label { font-size: 9px; font-weight: 700; color: var(--so); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+    .eda-multi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; margin-top: 8px; }
+    @media (max-width: 900px) {
+      .eda-row { grid-template-columns: 1fr; }
+      .eda-multi-row { grid-template-columns: 1fr; }
+    }
+
+    /* ══ METRIC HIERARCHY (s07) ══ */
+    .mh-wrap { padding: 4px 0; }
+    .mh-tier { margin-bottom: 14px; }
+    .mh-tier-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 7px;
+    }
+    .mh-tier-label::after { content: ''; flex:1; height:1px; background:rgba(96,79,67,.12); }
+    .mh-output .mh-tier-label { color: #218d72; }
+    .mh-driver .mh-tier-label { color: #5b6bbf; }
+    .mh-input  .mh-tier-label { color: #a0620a; }
+    .mh-guard  .mh-tier-label { color: #9b2d38; }
+    .mh-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+    .mh-card {
+      border-radius: 11px; border: 1px solid rgba(96,79,67,.14);
+      padding: 9px 12px; min-width: 100px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .mh-output .mh-card { background: rgba(225,241,236,.85); border-color: rgba(79,183,153,.25); }
+    .mh-driver .mh-card { background: rgba(237,231,245,.85); border-color: rgba(91,107,191,.2); }
+    .mh-input  .mh-card { background: rgba(247,241,226,.85); border-color: rgba(239,176,93,.25); }
+    .mh-guard  .mh-card { background: rgba(247,229,235,.85); border-color: rgba(239,125,134,.25); }
+    .mh-card-val { font-family: 'Barlow', sans-serif; font-size: 19px; font-weight: 600; color: var(--dk); }
+    .mh-card-name { font-size: 11px; font-weight: 600; color: var(--dk); }
+    .mh-card-note { font-size: 10px; color: var(--mu); line-height: 1.5; }
+    .mh-arrow { width: 100%; display: flex; justify-content: center; margin: 2px 0; color: rgba(96,79,67,.3); font-size: 12px; }
+
+    /* ══ MECE TREE ══ */
+    .mece-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 4px 0 8px; }
+    .mece-tree { display: flex; flex-direction: column; gap: 0; min-width: 760px; font-family: 'Inter', sans-serif; }
+    .mece-row { display: flex; align-items: stretch; gap: 0; }
+    .mece-row-label {
+      width: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase; writing-mode: vertical-rl;
+      padding: 8px 0; border-radius: 8px; margin-right: 10px;
+    }
+    .mece-row-label.ml-prob  { background: rgba(47,43,39,.07); color: rgba(47,43,39,.5); }
+    .mece-row-label.ml-cause { background: rgba(239,176,93,.15); color: #8a5c00; }
+    .mece-row-label.ml-sol   { background: rgba(53,201,149,.12); color: #1a6b50; }
+    .mece-row-label.ml-kpi   { background: rgba(91,107,191,.12); color: #3d4fa0; }
+    .mece-row-label.ml-goal  { background: rgba(47,43,39,.07); color: rgba(47,43,39,.5); }
+    .mece-cells { flex: 1; display: grid; gap: 8px; }
+    .mece-cells.g1 { grid-template-columns: 1fr; }
+    .mece-cells.g3 { grid-template-columns: repeat(3, 1fr); }
+    .mece-cells.g6 { grid-template-columns: repeat(3, 1fr); row-gap: 4px; }
+    .mece-cell {
+      border-radius: 11px; border: 1px solid rgba(96,79,67,.14);
+      padding: 10px 12px; background: rgba(247,244,239,.97);
+      font-size: 11px; color: var(--dk); line-height: 1.45; position: relative;
+    }
+    .mece-cell-title { font-weight: 700; color: var(--dk); font-size: 11.5px; margin-bottom: 3px; }
+    .mece-cell-sub { font-size: 10px; color: var(--mu); line-height: 1.4; }
+    .mece-cell.c-prob { background: rgba(47,43,39,.04); border-color: rgba(47,43,39,.15); text-align: center; }
+    .mece-cell.c-prob .mece-cell-title { font-size: 13px; color: var(--dk); }
+    .mece-cell.c-cause { background: rgba(247,241,226,.9); border-color: rgba(239,176,93,.25); }
+    .mece-cell.c-user { background: rgba(247,241,226,.7); border-color: rgba(239,176,93,.2); }
+    .mece-cell.c-biz { background: rgba(225,241,236,.8); border-color: rgba(79,183,153,.22); }
+    .mece-cell.c-kpi { background: rgba(237,231,245,.8); border-color: rgba(91,107,191,.2); }
+    .mece-cell.c-goal { background: rgba(47,43,39,.04); border-color: rgba(47,43,39,.15); text-align: center; }
+    .mece-cell.c-goal .mece-cell-title { font-size: 13px; }
+    .mece-badge { display: inline-block; font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-bottom: 5px; }
+    .mb-user { background: rgba(239,176,93,.18); color: #8a5c00; }
+    .mb-biz  { background: rgba(79,183,153,.16); color: #1a6b50; }
+    .mece-connector { display: flex; justify-content: center; align-items: center; height: 22px; flex-shrink: 0; }
+    .mece-connector svg { width: 100%; height: 22px; }
+
+
+    /* ══ SCENARIO TABS (metrics / analysis) ══ */
+    .sc-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .sc-tab { padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(96,79,67,.15); font-size: 10.5px; font-weight: 700; cursor: pointer; background: rgba(47,43,39,.04); color: rgba(47,43,39,.55); transition: all .15s; font-family: 'Inter', sans-serif; white-space: nowrap; }
+    .sc-tab:hover { border-color: rgba(96,79,67,.28); color: var(--dk); }
+    .sc-tab.active { background: rgba(79,183,153,.14); border-color: rgba(79,183,153,.45); color: #1a6b50; }
+    .sc-pane { display: none; }
+    .sc-pane.active { display: block; }
+    .sc-q { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(47,43,39,.4); margin-bottom: 10px; }
+    .pp-method-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .pp-method-tag { background: rgba(91,107,191,.1); border: 1px solid rgba(91,107,191,.2); border-radius: 6px; padding: 3px 9px; font-size: 10px; font-weight: 700; color: #3d4fa0; font-family: 'JetBrains Mono', monospace; }
+    .pp-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin: 10px 0; }
+    .pp-stat { background: rgba(247,244,239,.97); border: 1px solid rgba(96,79,67,.12); border-radius: 10px; padding: 10px 12px; }
+    .pp-stat-v { font-family: 'Barlow', sans-serif; font-size: 20px; font-weight: 600; color: var(--dk); }
+    .pp-stat-l { font-size: 10px; color: var(--mu); margin-top: 2px; }
+    .pp-stat-d { font-size: 10px; font-weight: 700; margin-top: 4px; }
+    .pp-stat-d.up { color: #1a6b50; }
+    .pp-stat-d.dn { color: #7a2430; }
+    .pp-stat-d.warn { color: #8a5c00; }
+    .pp-insight { background: rgba(247,244,239,.97); border: 1px solid rgba(96,79,67,.12); border-radius: 10px; padding: 13px 15px; margin-bottom: 9px; }
+    .pp-insight-title { font-size: 13px; font-weight: 700; color: var(--dk); margin-bottom: 5px; }
+    .pp-insight-body { font-size: 12px; color: rgba(47,43,39,.65); line-height: 1.65; }
+    .pp-insight-body strong { color: var(--dk); }
+    .pp-insight-body .nr { color: #7a2430; font-weight: 700; }
+    .pp-insight-body .ng { color: #1a6b50; font-weight: 700; }
+    .pp-insight-body .ny { color: #8a5c00; font-weight: 700; }
+    /* Simulation widget */
+    .sim-widget {
+      background: rgba(247,241,226,.7); border: 1px solid rgba(239,176,93,.3);
+      border-radius: 14px; padding: 14px 16px; margin-top: 12px;
+    }
+    .sim-title { font-size: 12px; font-weight: 700; color: var(--dk); margin-bottom: 8px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; line-height: 1.5; }
+    .sim-badge { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 5px; background: rgba(239,176,93,.2); color: #8a5c00; border: 1px solid rgba(239,176,93,.3); white-space: nowrap; }
+    .sim-note { font-size: 12px; color: var(--mu); line-height: 1.65; margin-bottom: 12px; }
+    .sim-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .sim-label { font-size: 11px; color: var(--mu); white-space: nowrap; }
+    .sim-input { width: 80px; font-size: 13px; font-weight: 700; color: var(--dk); background: #fff; border: 1px solid rgba(96,79,67,.2); border-radius: 8px; padding: 5px 8px; text-align: center; font-family: 'Barlow', sans-serif; }
+    .sim-slider-group { margin-bottom: 10px; }
+    .sim-slider-row { margin-bottom: 10px; }
+    .sim-slider-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    /* ── custom range slider ── */
+    .sim-range {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 5px; border-radius: 99px; outline: none; cursor: pointer;
+      background: linear-gradient(to right, #4fb799 50%, rgba(96,79,67,.15) 50%);
+      transition: background .1s;
+    }
+    .sim-range::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; border: 2px solid #4fb799;
+      box-shadow: 0 2px 8px rgba(42,30,18,.18);
+      cursor: pointer; transition: transform .15s, box-shadow .15s;
+    }
+    .sim-range::-webkit-slider-thumb:hover { transform: scale(1.2); box-shadow: 0 3px 12px rgba(42,30,18,.24); }
+    .sim-range::-moz-range-thumb {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; border: 2px solid #4fb799;
+      box-shadow: 0 2px 8px rgba(42,30,18,.18); cursor: pointer;
+    }
+    .sim-range::-moz-range-track { height: 5px; border-radius: 99px; background: rgba(96,79,67,.15); }
+    .sim-range-val { font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 700; color: #4fb799; }
+    .sim-scenario-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .sim-scenario-btn { flex: 1; padding: 10px 6px; border-radius: 12px; border: 1px solid rgba(96,79,67,.15); font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s; background: rgba(47,43,39,.05); color: var(--dk); text-align: center; line-height: 1.5; font-family: 'Inter', sans-serif; }
+    .sim-scenario-btn:hover { border-color: rgba(96,79,67,.28); transform: translateY(-2px); }
+    .sim-scenario-btn.active { background: rgba(79,183,153,.14); border-color: rgba(79,183,153,.4); color: #218d72; }
+    .scenario-note { font-size: 11px; margin-top: 8px; }
+    .sim-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .sim-res { background: #fff; border: 1px solid rgba(96,79,67,.12); border-radius: 9px; padding: 8px 10px; text-align: center; }
+    .sim-res-val { font-family: 'Barlow', sans-serif; font-size: 16px; font-weight: 600; color: var(--dk); }
+    .sim-res-lbl { font-size: 9px; color: var(--mu); margin-top: 2px; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1100px) {
+      .method-grid { grid-template-columns: repeat(3, 1fr) !important; }
+      .dash-charts { grid-template-columns: 1fr; }
+      .dash-charts.three { grid-template-columns: 1fr; }
+      .dash-charts.three-eq { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 800px) {
+      body { padding: 20px 16px 60px; }
+      .dash-kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .dash-actions { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div>
+    <div class="hdr-eye">7-Step AI 분석 파이프라인</div>
+    <div class="hdr-title">AI Data <em>Analysis OS</em></div>
+  </div>
+  <div class="hdr-meta">
+    KPI Dashboard Dataset · 9,994행 · 24컬럼<br>
+    Order ID / Category / Product / Sales / Discount / Unit Price
+  </div>
+</header>
+
+<!-- ══ PIPELINE BAR ══ -->
+<div class="pipe-bar">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+    <div class="pipe-eyebrow" style="margin-bottom:0;">AI 분석 파이프라인 — 카드를 클릭해 결과물 전환</div>
+    <a href="dashboard.html" target="_blank" style="
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+      color: #35c995; text-decoration: none;
+      padding: 7px 16px; border-radius: 9px;
+      border: 1px solid rgba(79,183,153,.3);
+      background: rgba(79,183,153,.08);
+      transition: all .15s; white-space: nowrap; flex-shrink: 0;
+    " onmouseover="this.style.background='rgba(79,183,153,.15)'" onmouseout="this.style.background='rgba(79,183,153,.08)'">
+      대시보드 탭으로 이동하기 →
+    </a>
+  </div>
+  <div class="pipe-row" id="pipeRow"></div>
+  <div class="pipe-panel-wrap" id="pipePanelWrap"></div>
+</div>
+
+<!-- ══ TEMPLATE BANK (hidden — cloned by pipeline) ══ -->
+<div id="templateBank" style="display:none">
+
+<!-- ══════════════════════════════════════════════════════
+     PART 01 · 데이터 준비
+════════════════════════════════════════════════════════ -->
+<div class="sec-hdr">
+  <span class="sec-num">Part 01</span>
+  <span class="sec-title">데이터 준비</span>
+  <div class="sec-line"></div>
+</div>
+
+<!-- STEP 01 -->
+<div class="step c-offwhite" id="s01">
+  <div class="step-top" onclick="toggleStep('s01')">
+    <div class="step-left">
+      <div class="step-num">STEP 01 · 결측치 및 이상치 확인</div>
+      <div class="step-icon">🔍</div>
+      <div class="step-title">데이터 품질 진단</div>
+      <div class="step-desc">분석 전 신뢰할 수 있는 데이터인지 확인 — 결측·이상치 식별 및 처리 방향 제시</div>
+    </div>
+    <div class="step-toggle" id="s01-t">열기</div>
+  </div>
+  <div class="prompt-wrap">
+    <div class="sub-label">INPUT 프롬프트</div>
+    <div class="prompt-box"><span class="kw">데이터 설명:</span> 이 데이터는 일자별 고객의 주문 내역
+(고객, 주문 ID, 카테고리, 상품, 판매량, 매출, 할인율)을 담은 데이터야.
+해당 데이터의 결측치 확인 및 이상치를 확인하고
+어떻게 전처리하는 게 좋을지 조언해줘</div>
+  </div>
+  <div class="response-wrap">
+    <div class="sub-label">AI OUTPUT</div>
+    <div class="response-card">
+      <div class="response-header">
+        <div class="ai-avatar">✦</div>
+        <span class="ai-label">AI 분석 결과</span>
+        <span class="ai-badge">분석 완료</span>
+      </div>
+      <div class="response-body">
+        <div class="r-text">업로드된 데이터(9,994행, 24컬럼)를 직접 분석했어요. 아래에 결측치 요약 + 이상치 포인트 + 전처리 전략을 정리해드릴게요.</div>
+        <div class="r-sec-title">1. 결측치 확인</div>
+        <table class="r-table">
+          <tr><th>컬럼</th><th>결측치</th><th>결측 비율</th><th>판정</th></tr>
+          <tr><td>Promotion name</td><td>4,559건</td><td>45.6%</td><td><span class="tag-warn">처리 필요</span></td></tr>
+          <tr><td>Sales / Quantity / Discount</td><td>0건</td><td>0%</td><td><span class="tag-ok">정상</span></td></tr>
+          <tr><td>Ship Mode / Segment 등 나머지</td><td>0건</td><td>0%</td><td><span class="tag-ok">정상</span></td></tr>
+        </table>
+        <div class="r-finding">
+          <div class="r-fn">→</div>
+          <div class="r-ft"><strong>Promotion name</strong>만 결측 존재. 결측 = 프로모션 미적용 의미일 가능성 높음. <code style="background:rgba(47,43,39,.08);padding:1px 5px;border-radius:4px;font-size:11px">fillna('No Promotion')</code> 권장.</div>
+        </div>
+        <div class="r-sec-title" style="margin-top:14px">2. 이상치 확인</div>
+        <table class="r-table">
+          <tr><th>컬럼</th><th>평균</th><th>최댓값</th><th>이상치 가능성</th></tr>
+          <tr><td>unitprice</td><td>98,432원</td><td>9,810,000원</td><td><span class="tag-bad">⚠ 100배 차이 — 입력 오류 의심</span></td></tr>
+          <tr><td>Discount</td><td>0.156</td><td>0.80 (80%)</td><td><span class="tag-warn">이벤트성 가능 — 별도 관리 권장</span></td></tr>
+          <tr><td>Quantity</td><td>3.79</td><td>14</td><td><span class="tag-ok">정상 분포</span></td></tr>
+        </table>
+        <div class="r-sec-title" style="margin-top:14px">3. 전처리 전략 요약</div>
+        <div class="r-finding">
+          <div class="r-fn">1</div>
+          <div class="r-ft">Promotion name → <strong>"No Promotion"으로 치환</strong> (제거 아님)</div>
+        </div>
+        <div class="r-finding">
+          <div class="r-fn">2</div>
+          <div class="r-ft">unitprice → <strong>IQR 기반 이상치 제거</strong>. Q3 + 1.5×IQR = 약 296,000원 이상 제거</div>
+        </div>
+        <div class="r-finding">
+          <div class="r-fn">3</div>
+          <div class="r-ft">파생 컬럼 추가: <strong>할인액 = unitprice × Quantity × Discount</strong>, <strong>순매출(Net Sales) = unitprice × Quantity × (1−Discount)</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 02 -->
+<div class="step c-beige" id="s02">
+  <div class="step-top" onclick="toggleStep('s02')">
+    <div class="step-left">
+      <div class="step-num">STEP 01 · 이상치 처리 Before → After</div>
+      <div class="step-icon">🔧</div>
+      <div class="step-title">전처리 비포 애프터 비교</div>
+      <div class="step-desc">처리 방식 설명 + 샘플 데이터 전후 비교표 생성</div>
+    </div>
+    <div class="step-toggle" id="s02-t">열기</div>
+  </div>
+  <div class="prompt-wrap">
+    <div class="sub-label">INPUT 프롬프트</div>
+    <div class="prompt-box">결측치와 이상치를 적절한 방식으로 처리해주고,
+해당 방식을 설명해주고,
+비포 애프터를 샘플 데이터로 비교해줘</div>
+  </div>
+  <div class="response-wrap">
+    <div class="sub-label">AI OUTPUT</div>
+    <div class="response-card">
+      <div class="response-header">
+        <div class="ai-avatar">✦</div>
+        <span class="ai-label">AI 분석 결과</span>
+        <span class="ai-badge">처리 완료</span>
+      </div>
+      <div class="response-body">
+        <div class="r-section">
+          <div class="r-sec-title">결측치 처리 — Promotion name</div>
+          <div class="r-finding"><div class="r-fn">→</div><div class="r-ft">결측 4,559건(45.6%)은 <strong>프로모션 미적용 주문</strong>. 제거 시 절반 데이터 손실 → "No Promotion"으로 치환해 카테고리 변수로 활용.</div></div>
+          <table class="r-table">
+            <tr><th>Order ID</th><th>Product</th><th>Before</th><th>After</th></tr>
+            <tr><td style="font-size:11px">CA-2019-108218</td><td>서류함</td><td style="color:#9b2d38">NaN</td><td><span class="tag-ok">No Promotion</span></td></tr>
+            <tr><td style="font-size:11px">CA-2019-122013</td><td>의자</td><td>월간 정기 쿠폰</td><td>월간 정기 쿠폰</td></tr>
+            <tr><td style="font-size:11px">CA-2019-130420</td><td>펜</td><td style="color:#9b2d38">NaN</td><td><span class="tag-ok">No Promotion</span></td></tr>
+          </table>
+        </div>
+        <div class="r-section">
+          <div class="r-sec-title">이상치 처리 — unitprice (IQR 기반 제거)</div>
+          <div class="r-finding"><div class="r-fn">→</div><div class="r-ft">IQR 방법으로 상한 234,150원 산출. 9,810,000원 등 <strong>입력 오류로 보이는 144건 제거</strong>. 정상 고가 상품(120,000원)은 유지.</div></div>
+          <table class="r-table">
+            <tr><th>Order ID</th><th>Product</th><th>Before</th><th>After</th><th>처리</th></tr>
+            <tr><td style="font-size:11px">CA-2019-140717</td><td>의자</td><td style="color:#9b2d38;font-weight:700">9,810,000원</td><td style="color:#9b2d38">제거됨</td><td><span class="tag-bad">삭제</span></td></tr>
+            <tr><td style="font-size:11px">CA-2019-111453</td><td>모니터</td><td>120,000원</td><td>120,000원</td><td><span class="tag-ok">유지</span></td></tr>
+            <tr><td style="font-size:11px">CA-2019-159210</td><td>펜</td><td>1,200원</td><td>1,200원</td><td><span class="tag-ok">유지</span></td></tr>
+          </table>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-box"><div class="kpi-v">0건</div><div class="kpi-l">결측 After</div></div>
+          <div class="kpi-box"><div class="kpi-v">234K원</div><div class="kpi-l">unitprice 상한</div></div>
+          <div class="kpi-box"><div class="kpi-v">9,850건</div><div class="kpi-l">클린 데이터</div></div>
+          <div class="kpi-box"><div class="kpi-v">144건</div><div class="kpi-l">제거된 이상치</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 03 -->
+<div class="step c-cream" id="s03">
+  <div class="step-top" onclick="toggleStep('s03')">
+    <div class="step-left">
+      <div class="step-num">STEP 02 · 기술 통계 분석 (APA 형식)</div>
+      <div class="step-icon">📊</div>
+      <div class="step-title">Descriptive Statistics — APA Table</div>
+      <div class="step-desc">수치 변수 전체에 대한 N / Mean / SD / Min / Max 정리</div>
+    </div>
+    <div class="step-toggle" id="s03-t">열기</div>
+  </div>
+  <div class="prompt-wrap">
+    <div class="sub-label">INPUT 프롬프트</div>
+    <div class="prompt-box">데이터 세트에 대한 종합적인 기술 통계 분석을 수행해줘.
+기술 통계 분석 결과를 APA 형식의 표로 구체적으로 작성해줘</div>
+  </div>
+  <div class="response-wrap">
+    <div class="sub-label">AI OUTPUT</div>
+    <div class="response-card">
+      <div class="response-header">
+        <div class="ai-avatar">✦</div>
+        <span class="ai-label">AI 분석 결과</span>
+        <span class="ai-badge">APA Table 1</span>
+      </div>
+      <div class="response-body">
+        <div class="r-text"><em>Table 1.</em> Descriptive Statistics for Numeric Variables in the Customer Order Dataset</div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <table class="r-table">
+          <tr><th>Variable</th><th>N</th><th>M</th><th>SD</th><th>Min</th><th>25%</th><th>Mdn</th><th>75%</th><th>Max</th></tr>
+          <tr><td>Sales (원)</td><td>9,994</td><td>299,501</td><td>811,525</td><td>560</td><td>22,400</td><td>71,070</td><td>272,400</td><td>29,430,000</td></tr>
+          <tr><td>Quantity</td><td>9,994</td><td>3.79</td><td>2.23</td><td>1</td><td>2</td><td>3</td><td>5</td><td>14</td></tr>
+          <tr><td>Discount</td><td>9,994</td><td>0.156</td><td>0.206</td><td>0.00</td><td>0.00</td><td>0.20</td><td>0.20</td><td>0.80</td></tr>
+          <tr><td>Unit Price (원)</td><td>9,994</td><td>98,432</td><td>245,977</td><td>1,200</td><td>8,400</td><td>25,900</td><td>98,700</td><td>9,810,000</td></tr>
+        </table></div>
+        <div class="r-text" style="font-size:11px;color:var(--mu)"><em>Note.</em> N = 9,994. Monetary units in KRW. Large max values in Sales/Unit Price indicate extreme outliers requiring pre-processing.</div>
+        <div style="margin-top:12px">
+          <div class="r-finding"><div class="r-fn">!</div><div class="r-ft">Sales와 Unit Price의 <strong>평균/중앙값 괴리</strong> 심각 — 중앙값 기준 분석 권장. 평균은 이상치가 왜곡.</div></div>
+          <div class="r-finding"><div class="r-fn">!</div><div class="r-ft">Discount <strong>중앙값 0.20, 0% 또는 20%</strong>가 대부분 — 할인 정책이 단순 구조임을 의미.</div></div>
+          <div class="r-finding"><div class="r-fn">!</div><div class="r-ft">Quantity는 <strong>정상적인 분포</strong> — 재고/수요 예측에 바로 활용 가능.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 04: EDA -->
+<div class="step c-lavender" id="s04">
+  <div class="step-top" onclick="toggleStep('s04')">
+    <div class="step-left">
+      <div class="step-num">STEP 02 · 일변량 / 다변량 EDA</div>
+      <div class="step-icon">🔬</div>
+      <div class="step-title">탐색적 데이터 분석 (EDA)</div>
+      <div class="step-desc">단일 변수 분포 + 변수 간 상관관계 — 인사이트 5개 도출</div>
+    </div>
+    <div class="step-toggle" id="s04-t">열기</div>
+  </div>
+  <div class="prompt-wrap">
+    <div class="sub-label">INPUT 프롬프트</div>
+    <div class="prompt-box">데이터 세트에 대해 일변량 / 다변량 EDA를 실시해줘.</div>
+  </div>
+  <div class="response-wrap">
+    <div class="sub-label">AI OUTPUT</div>
+    <div class="response-card">
+      <div class="response-header">
+        <div class="ai-avatar">✦</div>
+        <span class="ai-label">AI 분석 결과</span>
+        <span class="ai-badge">EDA 완료 · 핵심 5개</span>
+      </div>
+      <div class="response-body">
+        <div class="r-sec-title">일변량 (Univariate)</div>
+
+        <!-- Finding 1 + histogram -->
+        <div class="eda-row">
+          <div class="r-finding" style="margin:0"><div class="r-fn">1</div><div class="r-ft"><strong>Sales 분포:</strong> 오른쪽 꼬리 분포(Skewed Right). 대부분 0~300K원이지만 최대 2,943만원. 보고/평가 시 <strong>평균보다 중앙값 사용 권장.</strong></div></div>
+          <div class="eda-mini-chart">
+            <div class="eda-chart-label">Sales 분포 — 오른쪽 꼬리</div>
+            <svg viewBox="0 0 200 90" width="100%" height="auto">
+              <!-- axis -->
+              <line x1="18" y1="72" x2="192" y2="72" stroke="rgba(96,79,67,.2)" stroke-width="1"/>
+              <!-- histogram bars: skewed right (tall left, drops off quickly) -->
+              <rect x="20" y="10" width="22" height="62" fill="#5b8ef0" opacity=".75" rx="2"/>
+              <rect x="44" y="30" width="22" height="42" fill="#5b8ef0" opacity=".65" rx="2"/>
+              <rect x="68" y="46" width="22" height="26" fill="#5b8ef0" opacity=".55" rx="2"/>
+              <rect x="92" y="56" width="22" height="16" fill="#5b8ef0" opacity=".5" rx="2"/>
+              <rect x="116" y="63" width="22" height="9" fill="#5b8ef0" opacity=".4" rx="2"/>
+              <rect x="140" y="67" width="22" height="5" fill="#5b8ef0" opacity=".35" rx="2"/>
+              <rect x="164" y="69" width="22" height="3" fill="#5b8ef0" opacity=".3" rx="2"/>
+              <!-- median line -->
+              <line x1="42" y1="8" x2="42" y2="72" stroke="#35c995" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="44" y="7" font-size="7" fill="#218d72" font-weight="700">Median</text>
+              <!-- mean line -->
+              <line x1="74" y1="8" x2="74" y2="72" stroke="#ef7d86" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="76" y="7" font-size="7" fill="#9b2d38">Mean</text>
+              <!-- x labels -->
+              <text x="20" y="82" font-size="7" fill="var(--so)">0</text>
+              <text x="82" y="82" font-size="7" fill="var(--so)">300K</text>
+              <text x="152" y="82" font-size="7" fill="var(--so)">2.9M</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Finding 2 + box plot -->
+        <div class="eda-row">
+          <div class="r-finding" style="margin:0"><div class="r-fn">2</div><div class="r-ft"><strong>unitprice 분포:</strong> 1만~10만원 사이 집중, 981만원 이상치 다수. 박스플롯에서 위쪽 꼬리 길게 확인 — <strong>전처리 필수.</strong></div></div>
+          <div class="eda-mini-chart">
+            <div class="eda-chart-label">Unit Price — 박스플롯</div>
+            <svg viewBox="0 0 200 90" width="100%" height="auto">
+              <!-- axis -->
+              <line x1="14" y1="78" x2="192" y2="78" stroke="rgba(96,79,67,.2)" stroke-width="1"/>
+              <!-- whisker line full range -->
+              <line x1="20" y1="44" x2="182" y2="44" stroke="rgba(96,79,67,.35)" stroke-width="1.5"/>
+              <!-- box IQR (10K~100K) -->
+              <rect x="20" y="30" width="52" height="28" fill="#efb05d" opacity=".35" rx="3" stroke="#efb05d" stroke-width="1.5"/>
+              <!-- median line inside box -->
+              <line x1="34" y1="30" x2="34" y2="58" stroke="#a0620a" stroke-width="2"/>
+              <!-- whisker caps -->
+              <line x1="20" y1="38" x2="20" y2="50" stroke="rgba(96,79,67,.5)" stroke-width="1.5"/>
+              <line x1="72" y1="38" x2="72" y2="50" stroke="rgba(96,79,67,.5)" stroke-width="1.5"/>
+              <!-- outlier dots -->
+              <circle cx="90"  cy="44" r="3" fill="#ef7d86" opacity=".7"/>
+              <circle cx="110" cy="44" r="3" fill="#ef7d86" opacity=".6"/>
+              <circle cx="130" cy="44" r="3" fill="#ef7d86" opacity=".55"/>
+              <circle cx="148" cy="44" r="3" fill="#ef7d86" opacity=".5"/>
+              <circle cx="163" cy="44" r="3" fill="#ef7d86" opacity=".45"/>
+              <circle cx="175" cy="44" r="3" fill="#ef7d86" opacity=".4"/>
+              <circle cx="183" cy="44" r="3" fill="#ef7d86" opacity=".35"/>
+              <!-- labels -->
+              <text x="14"  y="76" font-size="7" fill="var(--so)">1K</text>
+              <text x="22"  y="68" font-size="7" fill="#a0620a">Q1</text>
+              <text x="58"  y="68" font-size="7" fill="#a0620a">Q3</text>
+              <text x="84"  y="40" font-size="7" fill="#9b2d38">이상치</text>
+              <text x="170" y="40" font-size="7" fill="#9b2d38">9.8M</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Finding 3 + discount bar chart -->
+        <div class="eda-row">
+          <div class="r-finding" style="margin:0"><div class="r-fn">3</div><div class="r-ft"><strong>Discount 분포:</strong> 0%와 20%가 주류 → <strong>두 개의 프로모션 구조 명확.</strong> 40/60/80%는 이벤트성 소수.</div></div>
+          <div class="eda-mini-chart">
+            <div class="eda-chart-label">Discount 분포 — 비중</div>
+            <svg viewBox="0 0 200 90" width="100%" height="auto">
+              <line x1="14" y1="72" x2="192" y2="72" stroke="rgba(96,79,67,.2)" stroke-width="1"/>
+              <!-- bars: 0%(52%), 20%(31%), 30%(8%), 40%(5%), 60%(2%), 80%(2%) -->
+              <rect x="18" y="12" width="30" height="60" fill="#35c995" opacity=".75" rx="2"/>
+              <text x="33"  y="10" text-anchor="middle" font-size="7" fill="#218d72" font-weight="700">52%</text>
+              <rect x="56" y="36" width="30" height="36" fill="#5b8ef0" opacity=".65" rx="2"/>
+              <text x="71"  y="34" text-anchor="middle" font-size="7" fill="#3b5bbf" font-weight="700">31%</text>
+              <rect x="94" y="62" width="22" height="10" fill="rgba(96,79,67,.4)" opacity=".8" rx="2"/>
+              <text x="105" y="60" text-anchor="middle" font-size="7" fill="var(--so)">8%</text>
+              <rect x="122" y="65" width="16" height="7" fill="rgba(96,79,67,.3)" rx="2"/>
+              <rect x="144" y="67" width="14" height="5" fill="rgba(96,79,67,.25)" rx="2"/>
+              <rect x="164" y="68" width="14" height="4" fill="rgba(96,79,67,.2)" rx="2"/>
+              <!-- x labels -->
+              <text x="33"  y="82" text-anchor="middle" font-size="7" fill="var(--so)">0%</text>
+              <text x="71"  y="82" text-anchor="middle" font-size="7" fill="var(--so)">20%</text>
+              <text x="105" y="82" text-anchor="middle" font-size="7" fill="var(--so)">30%</text>
+              <text x="130" y="82" text-anchor="middle" font-size="7" fill="var(--so)">40%</text>
+              <text x="151" y="82" text-anchor="middle" font-size="7" fill="var(--so)">60%</text>
+              <text x="171" y="82" text-anchor="middle" font-size="7" fill="var(--so)">80%</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="r-sec-title" style="margin-top:16px">다변량 (Multivariate) — 상관 분석</div>
+
+        <!-- correlation table + scatter plots side by side -->
+        <div class="eda-multi-row">
+          <table class="r-table" style="flex:1;min-width:0">
+            <tr><th>변수 쌍</th><th>r</th><th>해석</th></tr>
+            <tr><td>Sales ↔ Unit Price</td><td style="font-weight:700;color:#218d72">0.86</td><td>단가 높을수록 매출 증가 — 가장 강력한 드라이버</td></tr>
+            <tr><td>Sales ↔ Quantity</td><td>0.20</td><td>수량은 매출에 소폭 영향 — 단가보다 약함</td></tr>
+            <tr><td>Sales ↔ Discount</td><td style="color:#9b2d38">−0.03</td><td><strong>할인 → 매출 증가 연결 안 됨</strong></td></tr>
+          </table>
+          <div style="display:flex;flex-direction:column;gap:8px;min-width:0;flex:1">
+            <!-- Scatter 1: Sales vs Unit Price (r=0.86) -->
+            <div class="eda-mini-chart" style="margin:0">
+              <div class="eda-chart-label">Sales × Unit Price (r = 0.86) — 강한 양의 상관</div>
+              <svg viewBox="0 0 180 80" width="100%" height="auto">
+                <line x1="16" y1="66" x2="172" y2="66" stroke="rgba(96,79,67,.2)" stroke-width="1"/>
+                <line x1="16" y1="6"  x2="16"  y2="66" stroke="rgba(96,79,67,.2)" stroke-width="1"/>
+                <!-- trend line -->
+                <line x1="20" y1="62" x2="168" y2="10" stroke="#35c995" stroke-width="1.5" stroke-dasharray="4,2" opacity=".7"/>
+                <!-- scatter dots -->
+                <circle cx="28"  cy="60" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <circle cx="38"  cy="55" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <circle cx="50"  cy="50" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <circle cx="60"  cy="44" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <circle cx="72"  cy="40" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <circle cx="84"  cy="35" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <circle cx="96"  cy="30" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <circle cx="110" cy="26" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <circle cx="124" cy="20" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <circle cx="140" cy="16" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <circle cx="155" cy="13" r="2.5" fill="#5b8ef0" opacity=".6"/>
+                <!-- noise -->
+                <circle cx="35"  cy="52" r="2"   fill="#5b8ef0" opacity=".35"/>
+                <circle cx="65"  cy="47" r="2"   fill="#5b8ef0" opacity=".35"/>
+                <circle cx="90"  cy="38" r="2"   fill="#5b8ef0" opacity=".35"/>
+                <circle cx="118" cy="23" r="2"   fill="#5b8ef0" opacity=".35"/>
+                <text x="16" y="75" font-size="7" fill="var(--so)">Unit Price →</text>
+                <text x="2"  y="35" font-size="7" fill="var(--so)" transform="rotate(-90,8,35)">Sales</text>
+              </svg>
+            </div>
+            <!-- Scatter 2: Sales vs Discount (r=-0.03) -->
+            <div class="eda-mini-chart" style="margin:0">
+              <div class="eda-chart-label">Sales × Discount (r = −0.03) — 거의 무상관</div>
+              <svg viewBox="0 0 180 80" width="100%" height="auto">
+                <line x1="16" y1="66" x2="172" y2="66" stroke="rgba(96,79,67,.2)" stroke-width="1"/>
+                <line x1="16" y1="6"  x2="16"  y2="66" stroke="rgba(96,79,67,.2)" stroke-width="1"/>
+                <!-- near-flat trend line -->
+                <line x1="20" y1="37" x2="168" y2="38" stroke="#ef7d86" stroke-width="1.5" stroke-dasharray="4,2" opacity=".6"/>
+                <!-- random scatter (no pattern) -->
+                <circle cx="25"  cy="52" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="32"  cy="20" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="42"  cy="44" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="55"  cy="30" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="65"  cy="58" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="75"  cy="15" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="85"  cy="48" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="95"  cy="35" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="108" cy="60" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="118" cy="22" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="130" cy="42" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="142" cy="18" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <circle cx="155" cy="54" r="2.5" fill="#ef7d86" opacity=".5"/>
+                <text x="16" y="75" font-size="7" fill="var(--so)">Discount →</text>
+                <text x="2"  y="35" font-size="7" fill="var(--so)" transform="rotate(-90,8,35)">Sales</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="r-finding" style="margin-top:8px"><div class="r-fn">🔥</div><div class="r-ft">핵심 발견: <strong>할인율이 높아져도 매출이 늘지 않음 (r = −0.03).</strong> 할인 정책이 특정 카테고리에서만 효과 있거나, 전체적으로 비효율적일 가능성.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PART 02 · 분석 방향 설정
+════════════════════════════════════════════════════════ -->
+<div class="sec-hdr">
+  <span class="sec-num">Part 02</span>
+  <span class="sec-title">분석 방향 설정 + 방법론 선택</span>
+  <div class="sec-line"></div>
+</div>
+
+<!-- STEP 05: 방법론 탐색 -->
+<div class="step c-mint" id="s05">
+  <div class="step-top" onclick="toggleStep('s05')">
+    <div class="step-left">
+      <div class="step-num">STEP 03 · 방법론 탐색</div>
+      <div class="step-icon">🧭</div>
+      <div class="step-title">잠재적 분석 방법론 도출</div>
+      <div class="step-desc">EDA 결과 기반으로 이 데이터에서 적용 가능한 분석 방법론을 기초 → 심화 4단계로 정리</div>
+    </div>
+    <div class="step-toggle" id="s05-t">열기</div>
+  </div>
+  <div class="prompt-wrap">
+    <div class="sub-label">INPUT 프롬프트</div>
+    <div class="prompt-box">위에서 살펴본 내용을 바탕으로
+해당 데이터 세트를 기반으로 한
+잠재적인 분석 방법론을 탐구해줘</div>
+  </div>
+  <div class="response-wrap">
+    <div class="sub-label">AI OUTPUT</div>
+    <div class="response-card">
+      <div class="response-header">
+        <div class="ai-avatar">✦</div>
+        <span class="ai-label">AI 분석 결과</span>
+        <span class="ai-badge">방법론 4단계</span>
+      </div>
+      <div class="response-body">
+        <table class="r-table">
+          <tr><th>단계</th><th>방법론</th><th>질문</th><th>적용 이유</th></tr>
+          <tr><td><span class="tag-ok">기초</span></td><td><strong>매출 구조 분석</strong><br><small>Pareto, Category Analysis</small></td><td>무엇이 매출을 만드는가?</td><td>카테고리 간 편차 크고 상위 20% 집중 구조</td></tr>
+          <tr><td><span class="tag-ok">중급</span></td><td><strong>고객 세그먼테이션</strong><br><small>RFM, K-Means</small></td><td>어떤 고객이 핵심인가?</td><td>고객/주문 ID 존재 → RFM 가능</td></tr>
+          <tr><td><span class="tag-warn">중급</span></td><td><strong>가격 탄력성 분석</strong><br><small>회귀, 할인 효율</small></td><td>할인이 정말 효과 있는가?</td><td>r(Sales, Discount) = −0.03 → 할인 비효율 의심</td></tr>
+          <tr><td><span class="tag-warn">고급</span></td><td><strong>시계열 예측</strong><br><small>Prophet, ARIMA</small></td><td>다음 달 매출은?</td><td>날짜 컬럼 있어 시계열 분석 가능</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 06: 문제 정의 -->
+<div class="step c-rose" id="s06">
+  <div class="step-top" onclick="toggleStep('s06')">
+    <div class="step-left">
+      <div class="step-num">STEP 04 · 문제 정의와 분석 목적</div>
+      <div class="step-icon">🎯</div>
+      <div class="step-title">시나리오 기반 문제 정의</div>
+      <div class="step-desc">온라인 커머스 전문가 관점 — 실제 비즈니스 문제 + 액션 가능한 분석 목적 7가지</div>
+    </div>
+    <div class="step-toggle" id="s06-t">열기</div>
+  </div>
+  <div class="prompt-wrap">
+    <div class="sub-label">INPUT 프롬프트</div>
+    <div class="prompt-box"><span class="kw">페르소나:</span> 온라인 커머스 고객 데이터 분석 전문가
+고객 거래 내역 데이터를 보고 나올 수 있는
+시나리오 기반의 문제 정의 및 분석 목적을 작성해줘.
+
+<span class="kw">조건:</span> 문제 정의는 구체적인 수치 포함 (전년 대비 x% 감소 형태)
+<span class="kw">조건:</span> 분석 목적은 실제 액션 아이템이 나오는 수준</div>
+  </div>
+  <div class="response-wrap">
+    <div class="sub-label">AI OUTPUT</div>
+    <div class="response-card">
+      <div class="response-header">
+        <div class="ai-avatar">✦</div>
+        <span class="ai-label">AI 분석 결과</span>
+        <span class="ai-badge">시나리오 7개</span>
+      </div>
+      <div class="response-body">
+        <table class="r-table">
+          <tr><th>#</th><th>문제 정의</th><th>분석 목적</th><th>핵심 액션</th></tr>
+          <tr><td>1</td><td>Technology 카테고리 고가 상품군 매출이 전분기 대비 <strong>18% 감소</strong>. 신규 고객 장바구니 진입률 1.9%→0.8%.</td><td>고가 제품 이탈 원인을 세그먼트·가격민감도별로 규명</td><td>고가 전용 할인 정책 / 추천 상품 개선</td></tr>
+          <tr><td>2</td><td>20% 할인 쿠폰 전환율 14.2%→10.4%, 할인 비용 <strong>32% 증가</strong>에도 매출 8% 감소</td><td>세그먼트별 할인 효율 분석 → 비효율 고객군 분리</td><td>고효율 고객에게만 할인 타깃팅</td></tr>
+          <tr><td>3</td><td>재구매율 30.4%→22.1% (-8.3%p), 신규 고객 재방문 <strong>40% 급감</strong></td><td>RFM 기반 이탈 위험 고객 식별 + 리텐션 전략 수립</td><td>개인화 추천 / 리텐션 캠페인 자동화</td></tr>
+          <tr><td>4</td><td>Office Supplies 핵심 SKU 12종 실제 판매 예측 대비 <strong>34% 하회</strong>, 재고 비용 1.8억 증가</td><td>카테고리별 수요 예측 모델로 적정 재고 산출</td><td>SKU 단위 수요 예측 + 발주 최적화</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 07: 예상 원인 계층형 -->
+<div class="step c-cream" id="s07">
+  <div class="step-top" onclick="toggleStep('s07')">
+    <div class="step-left">
+      <div class="step-num">STEP 05 · 지표 계층 구조</div>
+      <div class="step-icon">🌳</div>
+      <div class="step-title">Metric Hierarchy — Output → Driver → Input</div>
+      <div class="step-desc">최종 목표 지표(Output)를 움직이는 Driver와 실행 가능한 Input 지표를 계층으로 정리 — Guardrail 포함</div>
+    </div>
+    <div class="step-toggle" id="s07-t">열기</div>
+  </div>
+  <div class="prompt-wrap">
+    <div class="sub-label">INPUT 프롬프트</div>
+    <div class="prompt-box">분석 목적에 맞는 지표를 계층으로 정리해줘.
+<span class="kw">형식:</span> Output Metric → Driver Metric → Input Metric → Guardrail
+<span class="kw">조건:</span> Output은 최종 사업 목표, Input은 지금 당장 움직일 수 있는 지표
+<span class="kw">조건:</span> 각 지표에 현재 값과 목표 값 함께 작성</div>
+  </div>
+  <div class="response-wrap">
+    <div class="sub-label">AI OUTPUT</div>
+    <div class="response-card">
+      <div class="response-header">
+        <div class="ai-avatar">✦</div>
+        <span class="ai-label">AI 분석 결과</span>
+        <span class="ai-badge">Hierarchy Tree</span>
+      </div>
+      <div class="response-body">
+        <div class="mh-wrap">
+
+          <!-- OUTPUT METRIC -->
+          <div class="mh-tier mh-output">
+            <div class="mh-tier-label">Output Metric — 우리가 최종적으로 높여야 할 숫자</div>
+            <div class="mh-cards">
+              <div class="mh-card">
+                <div class="mh-card-val">$703K</div>
+                <div class="mh-card-name">총 이익</div>
+                <div class="mh-card-note">YoY +9.1%</div>
+              </div>
+              <div class="mh-card">
+                <div class="mh-card-val">30.6%</div>
+                <div class="mh-card-name">전체 마진율</div>
+                <div class="mh-card-note">카테고리 간 3배 격차</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mh-arrow">↓</div>
+
+          <!-- DRIVER METRIC -->
+          <div class="mh-tier mh-driver">
+            <div class="mh-tier-label">Driver Metric — 이익을 움직이는 중간 지표</div>
+            <div class="mh-cards">
+              <div class="mh-card">
+                <div class="mh-card-val">36%</div>
+                <div class="mh-card-name">Technology 집중도</div>
+                <div class="mh-card-note">단일 카테고리 리스크</div>
+              </div>
+              <div class="mh-card">
+                <div class="mh-card-val">12.6%</div>
+                <div class="mh-card-name">전환율 (CVR)</div>
+                <div class="mh-card-note">전체 평균</div>
+              </div>
+              <div class="mh-card">
+                <div class="mh-card-val">$121</div>
+                <div class="mh-card-name">객단가 (AOV)</div>
+                <div class="mh-card-note">Corporate 2.3× Consumer</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mh-arrow">↓</div>
+
+          <!-- INPUT METRIC -->
+          <div class="mh-tier mh-input">
+            <div class="mh-tier-label">Input Metric — 당장 움직일 수 있는 실행 지표</div>
+            <div class="mh-cards">
+              <div class="mh-card">
+                <div class="mh-card-val">17.7%</div>
+                <div class="mh-card-name">Furniture 할인율</div>
+                <div class="mh-card-note">목표: 10% → 마진 +$6~8K</div>
+              </div>
+              <div class="mh-card">
+                <div class="mh-card-val">8.7%</div>
+                <div class="mh-card-name">장바구니 CVR</div>
+                <div class="mh-card-note">상단 20% SKU 집중 개선</div>
+              </div>
+              <div class="mh-card">
+                <div class="mh-card-val">22.1%</div>
+                <div class="mh-card-name">재구매율</div>
+                <div class="mh-card-note">YoY −8.3%p · 목표 30%</div>
+              </div>
+              <div class="mh-card">
+                <div class="mh-card-val">2.3%</div>
+                <div class="mh-card-name">고가 CVR</div>
+                <div class="mh-card-note">할부 옵션 신설 시 목표 4%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mh-arrow">↓</div>
+
+          <!-- GUARDRAIL -->
+          <div class="mh-tier mh-guard">
+            <div class="mh-tier-label">Guardrail — 이것이 나빠지면 전체가 흔들린다</div>
+            <div class="mh-cards">
+              <div class="mh-card">
+                <div class="mh-card-val">32%</div>
+                <div class="mh-card-name">결제 이탈률</div>
+                <div class="mh-card-note">고가 제품 직전 이탈 집중</div>
+              </div>
+              <div class="mh-card">
+                <div class="mh-card-val">36%</div>
+                <div class="mh-card-name">Technology 집중도</div>
+                <div class="mh-card-note">단일 의존 — 변동성 ±38%</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<!-- STEP 08: KPI 설정 -->
+<div class="step c-offwhite" id="s08">
+  <div class="step-top" onclick="toggleStep('s08')">
+    <div class="step-left">
+      <div class="step-num">STEP 06 · 분석 지표 설정</div>
+      <div class="step-icon">📐</div>
+      <div class="step-title">KPI 15개 + 액션 플랜</div>
+      <div class="step-desc">선행 지표 포함 · 파생 지표 생성 · 각 지표별 액션 연결</div>
+    </div>
+    <div class="step-toggle" id="s08-t">열기</div>
+  </div>
+  <div class="prompt-wrap">
+    <div class="sub-label">INPUT 프롬프트</div>
+    <div class="prompt-box">위에서 정의한 문제와 분석 목적을 바탕으로 분석 지표를 설정해줘.
+<span class="kw">조건:</span> 액션 가능한 선행 지표 포함 (광고 클릭률처럼 움직이기 쉬운 지표)
+<span class="kw">조건:</span> 여러 컬럼 조합으로 새 파생 지표 생성
+<span class="kw">조건:</span> 상대적이고 비교 가능한 지표</div>
+  </div>
+  <div class="response-wrap">
+    <div class="sub-label">AI OUTPUT</div>
+    <div class="response-card">
+      <div class="response-header">
+        <div class="ai-avatar">✦</div>
+        <span class="ai-label">AI 분석 결과</span>
+        <span class="ai-badge">KPI 15개 확정</span>
+      </div>
+      <div class="response-body">
+        <table class="r-table">
+          <tr><th>카테고리</th><th>지표명</th><th>계산식</th><th>현재값</th><th>액션</th></tr>
+          <tr><td>매출</td><td><strong>고가 매출 비중</strong></td><td>HighPrice_Sales / Total_Sales</td><td>36%</td><td>하락 시 고가 제품 마케팅 강화</td></tr>
+          <tr><td>전환 <span class="tag-warn">선행</span></td><td><strong>고가 상품 CVR</strong></td><td>Purchase / Product_View</td><td>2.3%</td><td>↓ → 상세페이지 개선, USP 강조</td></tr>
+          <tr><td>장바구니 <span class="tag-warn">선행</span></td><td><strong>Add-to-Cart Rate</strong></td><td>AddToCart / View</td><td>8.7%</td><td>↓ → 구매 고민 중 → 푸시 알림</td></tr>
+          <tr><td>가격</td><td><strong>할인 효율 점수</strong> <span class="tag-ok">파생</span></td><td>(증분 매출 − 할인비용) / 할인비용</td><td>0.82</td><td>&lt;0 → 해당 세그먼트 할인 중단</td></tr>
+          <tr><td>가격 <span class="tag-warn">선행</span></td><td><strong>할인 집중도</strong> <span class="tag-ok">파생</span></td><td>Furniture 할인율 / 전체 평균</td><td>116%</td><td>≥100% → 이상 신호, 즉시 검토</td></tr>
+          <tr><td>UX</td><td><strong>결제 이탈률</strong></td><td>1 − (완료 / 시작)</td><td>32%</td><td>↑ → 결제 단계 간소화</td></tr>
+          <tr><td>재구매</td><td><strong>고가 재구매율</strong></td><td>Repeat / Total HighPrice Buyers</td><td>18%</td><td>↓ → 배송·품질 문제 조사</td></tr>
+          <tr><td>재고</td><td><strong>재고 회전율</strong></td><td>Sales / Avg_Inventory</td><td>4.2x</td><td>↓ → 재고 과잉 → 발주 조정</td></tr>
+        </table>
+        <div class="r-finding" style="margin-top:8px"><div class="r-fn">→</div><div class="r-ft"><strong>'할인 집중도'가 가장 먼저 움직여야 할 선행 지표.</strong> 이 지표가 100% 이하로 내려가면 Furniture 마진이 자동으로 회복됨.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</div><!-- /templateBank -->
+
+<!-- ══ MECE TREE — FULL WIDTH ══ -->
+<div id="meceTreeBlock" style="display:none;margin:32px 0;background:rgba(247,244,239,.97);border-radius:22px;border:1px solid rgba(96,79,67,.14);padding:28px 32px 32px;box-shadow:0 8px 28px rgba(42,30,18,.07)">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(47,43,39,.45);margin-bottom:20px;display:flex;align-items:center;gap:8px">MECE Tree — 문제정의 → 원인 → 해결방안 → 목표지표 → 최종목표<span style="flex:1;height:1px;background:rgba(96,79,67,.12);display:block"></span></div>
+  <div class="mece-wrap">
+    <div class="mece-tree">
+
+      <!-- ROW 1: 문제 정의 -->
+      <div class="mece-row">
+        <div class="mece-row-label ml-prob">문제 정의</div>
+        <div class="mece-cells g1">
+          <div class="mece-cell c-prob">
+            <div class="mece-cell-title">Furniture 마진율 10.7% — 전체 평균(30.6%)의 3분의 1 수준</div>
+            <div class="mece-cell-sub">매출 규모($742K)는 2위이지만 이익 기여는 꼴찌. 할인 구조가 마진을 갉아먹고 있다.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- connector -->
+      <div class="mece-connector" style="margin-left:62px">
+        <svg viewBox="0 0 600 22" preserveAspectRatio="none">
+          <line x1="300" y1="0" x2="100" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="300" y1="0" x2="300" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="300" y1="0" x2="500" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <!-- ROW 2: 원인 -->
+      <div class="mece-row">
+        <div class="mece-row-label ml-cause">원 인</div>
+        <div class="mece-cells g3">
+          <div class="mece-cell c-cause">
+            <div class="mece-cell-title">① 할인율이 경쟁 카테고리의 2.4배</div>
+            <div class="mece-cell-sub">Furniture 17.7% vs Technology 7.5%. 할인 1%p = 마진 −1.3%p.</div>
+          </div>
+          <div class="mece-cell c-cause">
+            <div class="mece-cell-title">② 고가치 고객에게도 무차별 할인</div>
+            <div class="mece-cell-sub">Corporate 객단가 $447, 할인 없어도 구매. 세그먼트 차별화 미비.</div>
+          </div>
+          <div class="mece-cell c-cause">
+            <div class="mece-cell-title">③ 할인 승인 프로세스 없음</div>
+            <div class="mece-cell-sub">영업 담당자 재량으로 15%p+ 할인 가능. 통제 기준 부재.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- connector -->
+      <div class="mece-connector" style="margin-left:62px">
+        <svg viewBox="0 0 600 22" preserveAspectRatio="none">
+          <line x1="100" y1="0" x2="67" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="100" y1="0" x2="133" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="300" y1="0" x2="267" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="300" y1="0" x2="333" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="500" y1="0" x2="467" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="500" y1="0" x2="533" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <!-- ROW 3: 해결 방안 -->
+      <div class="mece-row">
+        <div class="mece-row-label ml-sol">해결 방안</div>
+        <div class="mece-cells g6">
+          <!-- Row 1: User Side × 3 -->
+          <div class="mece-cell c-user">
+            <div class="mece-badge mb-user">User Side</div>
+            <div class="mece-cell-title">할인 없는 가치 소구</div>
+            <div class="mece-cell-sub">품질·내구성 콘텐츠로 지각 가치 ↑. 할인 대신 묶음 혜택 제공.</div>
+          </div>
+          <div class="mece-cell c-user">
+            <div class="mece-badge mb-user">User Side</div>
+            <div class="mece-cell-title">세그먼트별 맞춤 오퍼</div>
+            <div class="mece-cell-sub">Corporate에는 할인 대신 전용 서비스·납품 조건 제공.</div>
+          </div>
+          <div class="mece-cell c-user">
+            <div class="mece-badge mb-user">User Side</div>
+            <div class="mece-cell-title">고가 상품 할부 옵션 신설</div>
+            <div class="mece-cell-sub">$200+ 구간 CVR 0.8% → 할부 시 목표 2.0%. 할인 없이 진입 장벽 해소.</div>
+          </div>
+          <!-- Row 2: Biz Side × 3 -->
+          <div class="mece-cell c-biz">
+            <div class="mece-badge mb-biz">Biz Side</div>
+            <div class="mece-cell-title">15%p+ 할인 승인 프로세스 신설</div>
+            <div class="mece-cell-sub">매니저 승인 없이 고할인 불가. 한도 자동 차단 시스템.</div>
+          </div>
+          <div class="mece-cell c-biz">
+            <div class="mece-badge mb-biz">Biz Side</div>
+            <div class="mece-cell-title">Corporate 무할인 정책 시범 적용</div>
+            <div class="mece-cell-sub">30% 고객군에 할인 제거 → 마진 즉시 회복 검증.</div>
+          </div>
+          <div class="mece-cell c-biz">
+            <div class="mece-badge mb-biz">Biz Side</div>
+            <div class="mece-cell-title">카테고리별 할인 한도 설정</div>
+            <div class="mece-cell-sub">Furniture Max 10%, Technology Max 8%. 초과 거래 자동 플래그.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- connector -->
+      <div class="mece-connector" style="margin-left:62px">
+        <svg viewBox="0 0 600 22" preserveAspectRatio="none">
+          <line x1="100" y1="0" x2="100" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="300" y1="0" x2="300" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="500" y1="0" x2="500" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <!-- ROW 4: 목표 지표 -->
+      <div class="mece-row">
+        <div class="mece-row-label ml-kpi">목표 지표</div>
+        <div class="mece-cells g3">
+          <div class="mece-cell c-kpi">
+            <div class="mece-cell-title">Furniture 할인율 ≤ 10%</div>
+            <div class="mece-cell-sub">현재 17.7% → 목표 10%. 달성 시 이익 +$6~8K (추정). 기간: 2주 내 프로세스 도입.</div>
+          </div>
+          <div class="mece-cell c-kpi">
+            <div class="mece-cell-title">Corporate 세그먼트 할인율 ≤ 5%</div>
+            <div class="mece-cell-sub">현재 12.3% → 목표 5%. 30% 고객군 마진 즉시 개선. 3개월 시범 후 매출 영향 측정.</div>
+          </div>
+          <div class="mece-cell c-kpi">
+            <div class="mece-cell-title">할인 ROI ≥ 1.2</div>
+            <div class="mece-cell-sub">현재 0.82 (손해 구조). 세그먼트 재배분으로 6주 내 달성 가능. 고가 CVR 0.8% → 2.0%.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- connector -->
+      <div class="mece-connector" style="margin-left:62px">
+        <svg viewBox="0 0 600 22" preserveAspectRatio="none">
+          <line x1="100" y1="0" x2="300" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="300" y1="0" x2="300" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+          <line x1="500" y1="0" x2="300" y2="22" stroke="rgba(96,79,67,.2)" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <!-- ROW 5: 최종 목표 -->
+      <div class="mece-row">
+        <div class="mece-row-label ml-goal">최 종 목 표</div>
+        <div class="mece-cells g1">
+          <div class="mece-cell c-goal">
+            <div class="mece-cell-title">전체 마진율 30.6% → 35% 이상 — Furniture 마진 10.7% → 22% 이상</div>
+            <div class="mece-cell-sub">할인 구조 통제 + 세그먼트 차별화 + 고가 전환율 개선 3개 레버 동시 작동 시 6개월 내 달성 가능 (모델 기반 추정)</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── PIPELINE DATA ── */
+const PIPE_ROLES = [
+  {
+    id:'data-ingestion', step:'STEP 01', name:'@data-ingestion', icon:'⊕',
+    cardColor:'pc-offwhite', panelBg:'rgba(247,244,239,0.97)',
+    skill:'direct execution', skillType:'sk-muted',
+    outputs:['dataset_profile.md','sample.csv 확인'],
+    badge:'분석 완료', meta:'24행 · 12컬럼 · 결측치 0건',
+    content:`
+      <div class="pp-text"><strong>이 데이터, 믿고 분석해도 될까요?</strong><br>네. 결측치 0건, 깨진 데이터 없음. 바로 분석 들어가도 됩니다.</div>
+      <div class="pp-find"><div class="pp-fn">✓</div><div class="pp-ft"><strong>12개 컬럼 모두 완전한 데이터입니다.</strong> 따로 빠진 값 채우거나 수정할 필요 없어요.</div></div>
+      <div class="pp-find"><div class="pp-fn">!</div><div class="pp-ft"><strong>딱 하나 체크할 게 있어요.</strong> 가구(Furniture) 할인율이 35%인 거래가 2건 있는데, 나머지 평균(15%)과 너무 차이나요. 영업팀에서 특수 케이스였는지 확인 후 분석에 포함할지 결정하세요.</div></div>
+      <div class="pp-find"><div class="pp-fn">→</div><div class="pp-ft"><strong>지금 바로 할 일:</strong> 할인율 35% 2건의 배경 확인 → 분석 포함/제외 결정 → 이익 컬럼 추가(매출 − 원가)</div></div>`
+  },
+  {
+    id:'eda', step:'STEP 02', name:'@eda', icon:'◇',
+    cardColor:'pc-lavender', panelBg:'rgba(237,231,245,0.96)',
+    skill:'/eda skill', skillType:'sk-green',
+    outputs:['eda_report.md','핵심 질문 3개'],
+    badge:'완료', meta:'Technology 52% 집중 · Furniture 마진 위험',
+    content:`
+      <div class="pp-text"><strong>숫자를 보기 전에, 먼저 물어봐야 할 게 있어요.</strong><br>"우리 매출, 어디서 오고 어디서 새고 있나요?"</div>
+      <div class="pp-find"><div class="pp-fn">1</div><div class="pp-ft"><strong>매출의 절반이 Technology 하나에 쏠려 있어요.</strong> 전체 $397K 중 $207K(52%)가 Technology입니다. 이 카테고리에 문제가 생기면 회사 전체가 흔들릴 수 있어요.</div></div>
+      <div class="pp-find"><div class="pp-fn">2</div><div class="pp-ft"><strong>Furniture는 팔수록 손해에 가까워요.</strong> 마진이 10.7%밖에 안 됩니다. Technology(35%)의 3분의 1 수준이에요. 할인을 너무 많이 해줬기 때문입니다(평균 17.7%).</div></div>
+      <div class="pp-find"><div class="pp-fn">3</div><div class="pp-ft"><strong>3월 매출 급락은 전체 문제가 아니에요.</strong> Technology만 -77% 빠진 거고, 나머지는 오히려 올랐어요. 원인을 Technology로 좁혀서 봐야 합니다.</div></div>`
+  },
+  {
+    id:'problem', step:'STEP 03', name:'@problem', icon:'+',
+    cardColor:'pc-rose', panelBg:'rgba(247,229,235,0.94)',
+    skill:'→ /eda 결과 정제', skillType:'sk-muted',
+    outputs:['problem_definition.md','분석 질문 3개'],
+    badge:'3개 확정', meta:'수익성 / 실험 유의성 / 매출 급락',
+    content:`
+      <div class="pp-text"><strong>분석 전에 질문부터 잡아야 해요.</strong><br>질문 없이 데이터만 보면 답이 없는 분석이 됩니다. 세 가지 핵심 질문을 먼저 확정했어요.</div>
+      <div class="pp-q-list">
+        <div class="pp-q-item"><div class="pp-q-num">Q1</div><div class="pp-q-txt"><strong>Furniture는 왜 이렇게 마진이 낮을까요?</strong> 할인을 너무 많이 해줘서인가요, 아니면 원래 원가가 높은 건가요? → 이게 명확해야 할인 정책을 바꿀지, 공급가를 협상할지 결정할 수 있어요.</div></div>
+        <div class="pp-q-item"><div class="pp-q-num">Q2</div><div class="pp-q-txt"><strong>B 방식이 진짜 더 좋은 건가요?</strong> 전환율이 1.1%p 높게 나왔는데, 이게 우연일 수도 있어요. 진짜인지 검증이 필요합니다. → 결론에 따라 마케팅 정책 전환 여부가 달라져요.</div></div>
+        <div class="pp-q-item"><div class="pp-q-num">Q3</div><div class="pp-q-txt"><strong>3월 매출 급락, 앞으로도 반복될 문제인가요?</strong> 일시적인 건지, 구조적으로 취약한 건지에 따라 대응이 완전히 달라집니다. → 지금 당장 채널 전략을 바꿔야 하는지 판단해야 해요.</div></div>
+      </div>`
+  },
+  {
+    id:'metrics', step:'STEP 04', name:'@metrics', icon:'□',
+    cardColor:'pc-cream', panelBg:'rgba(247,241,226,0.94)',
+    skill:'metric-detective', skillType:'sk-rose',
+    outputs:['kpi_summary.md','벤치마크'],
+    badge:'계산 완료', meta:'매출 $397K · 마진 30.6% · 전환율 12.6%',
+    content:`
+      <div class="sc-tabs">
+        <button class="sc-tab active" onclick="switchScenario(this,'msc',0)">왜 마진이 낮은가?</button>
+        <button class="sc-tab" onclick="switchScenario(this,'msc',1)">재구매율 하락</button>
+        <button class="sc-tab" onclick="switchScenario(this,'msc',2)">할인 ROI</button>
+        <button class="sc-tab" onclick="switchScenario(this,'msc',3)">매출 급락</button>
+      </div>
+      <div class="sc-pane msc active">
+        <div class="sc-q">문제정의 — Furniture 마진 10.7%, 전체 평균의 3분의 1</div>
+        <div class="pp-stat-grid">
+          <div class="pp-stat"><div class="pp-stat-v">10.7%</div><div class="pp-stat-l">Furniture 마진율</div><div class="pp-stat-d dn">↓ vs Tech 35%</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">17.7%</div><div class="pp-stat-l">Furniture 평균 할인율</div><div class="pp-stat-d dn">↑ Tech의 2.4배</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">0.82</div><div class="pp-stat-l">할인 ROI</div><div class="pp-stat-d dn">$1 투입 → $0.82 회수</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">$742K</div><div class="pp-stat-l">Furniture 매출</div><div class="pp-stat-d warn">매출 2위, 이익 꼴찌</div></div>
+        </div>
+        <div class="pp-find"><div class="pp-fn">!</div><div class="pp-ft"><strong>Output:</strong> 총이익 $703K (마진 30.6%) — Furniture만 정상화하면 35%+ 가능</div></div>
+        <div class="pp-find"><div class="pp-fn">→</div><div class="pp-ft"><strong>Driver:</strong> 카테고리별 마진 · 할인 비용 · 세그먼트 AOV</div></div>
+        <div class="pp-find"><div class="pp-fn">▶</div><div class="pp-ft"><strong>Input (지금 바꿀 수 있는 것):</strong> Furniture 할인율 17.7%→10%, Corporate 할인율 12%→5%, 승인 프로세스 2주 내 도입</div></div>
+      </div>
+      <div class="sc-pane msc">
+        <div class="sc-q">문제정의 — 재구매율 22.1%, YoY −8.3%p</div>
+        <div class="pp-stat-grid">
+          <div class="pp-stat"><div class="pp-stat-v">22.1%</div><div class="pp-stat-l">재구매율</div><div class="pp-stat-d dn">↓ 전년 30.4%</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">2,099명</div><div class="pp-stat-l">At-Risk 고객</div><div class="pp-stat-d dn">전체의 21%</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">$2.1K</div><div class="pp-stat-l">At-Risk LTV</div><div class="pp-stat-d warn">Champions의 11%</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">×4.7</div><div class="pp-stat-l">전환 시 LTV 상승</div><div class="pp-stat-d up">↑ Loyal 전환 기준</div></div>
+        </div>
+        <div class="pp-find"><div class="pp-fn">!</div><div class="pp-ft"><strong>Output:</strong> 재구매율 22.1%→30% — At-Risk 2,099명 중 10%만 전환해도 LTV +$33M</div></div>
+        <div class="pp-find"><div class="pp-fn">→</div><div class="pp-ft"><strong>Driver:</strong> 세그먼트별 LTV · 코호트 잔존율 · 첫 재구매 전환율</div></div>
+        <div class="pp-find"><div class="pp-fn">▶</div><div class="pp-ft"><strong>Input:</strong> 7/14/30일 자동 리타겟 트리거 · Champions VIP 채널 분리 · At-Risk 전용 오퍼</div></div>
+      </div>
+      <div class="sc-pane msc">
+        <div class="sc-q">문제정의 — 할인 투입 대비 매출 무반응 (r = −0.03)</div>
+        <div class="pp-stat-grid">
+          <div class="pp-stat"><div class="pp-stat-v">−0.03</div><div class="pp-stat-l">할인↔매출 상관계수</div><div class="pp-stat-d dn">사실상 무관계</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">0.82</div><div class="pp-stat-l">전체 할인 ROI</div><div class="pp-stat-d dn">손해 구조</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">1.24</div><div class="pp-stat-l">At-Risk 할인 ROI</div><div class="pp-stat-d up">↑ 유일하게 효과</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">0.8%</div><div class="pp-stat-l">고가 구간 CVR</div><div class="pp-stat-d dn">저가 9.2%의 9분의 1</div></div>
+        </div>
+        <div class="pp-find"><div class="pp-fn">!</div><div class="pp-ft"><strong>Output:</strong> 할인 ROI 0.82→1.2 이상 — 세그먼트 재배분만으로 달성 가능</div></div>
+        <div class="pp-find"><div class="pp-fn">→</div><div class="pp-ft"><strong>Driver:</strong> 세그먼트별 할인 ROI · 가격 구간별 CVR · 할인 비용 비중</div></div>
+        <div class="pp-find"><div class="pp-fn">▶</div><div class="pp-ft"><strong>Input:</strong> Champions 할인 예산 제거 · At-Risk 타겟 집중 · $200+ 구간 할부 옵션 신설</div></div>
+      </div>
+      <div class="sc-pane msc">
+        <div class="sc-q">문제정의 — 3월 전체 −31% MoM, Technology −77%</div>
+        <div class="pp-stat-grid">
+          <div class="pp-stat"><div class="pp-stat-v">−31%</div><div class="pp-stat-l">3월 전체 MoM</div><div class="pp-stat-d dn">↓ $114K → $79K</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">−77%</div><div class="pp-stat-l">Technology 3월 MoM</div><div class="pp-stat-d dn">$87K → $20K</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">±38%</div><div class="pp-stat-l">Technology 월 변동성</div><div class="pp-stat-d dn">타 카테고리의 3배</div></div>
+          <div class="pp-stat"><div class="pp-stat-v">$198K</div><div class="pp-stat-l">4월 예측 매출</div><div class="pp-stat-d up">↑ +74% 회복 예상</div></div>
+        </div>
+        <div class="pp-find"><div class="pp-fn">!</div><div class="pp-ft"><strong>Output:</strong> 월 매출 예측 오차 ±10% 이내 — Technology 변동성 관리가 핵심</div></div>
+        <div class="pp-find"><div class="pp-fn">→</div><div class="pp-ft"><strong>Driver:</strong> 계절성 지수 · 카테고리 집중도 · 채널별 파이프라인</div></div>
+        <div class="pp-find"><div class="pp-fn">▶</div><div class="pp-ft"><strong>Input:</strong> 4월 Tech $50K 이하 → 즉시 재검토 · 9월 피크 재고 선확보 · Q1 할인 예산 Q4로 이전</div></div>
+      </div>`
+  },
+  {
+    id:'analysis', step:'STEP 05', name:'@analysis', icon:'⌘',
+    cardColor:'pc-mint', panelBg:'rgba(225,241,236,0.96)',
+    skill:'/analyze skill', skillType:'sk-green',
+    outputs:['analysis_report.md','발견 3개'],
+    badge:'완료', meta:'Furniture 할인 축소가 핵심 레버',
+    content:`
+      <div class="sc-tabs">
+        <button class="sc-tab active" onclick="switchScenario(this,'asc',0)">왜 마진이 낮은가?</button>
+        <button class="sc-tab" onclick="switchScenario(this,'asc',1)">재구매율 하락</button>
+        <button class="sc-tab" onclick="switchScenario(this,'asc',2)">할인 ROI</button>
+        <button class="sc-tab" onclick="switchScenario(this,'asc',3)">매출 급락</button>
+      </div>
+
+      <div class="sc-pane asc active">
+        <div class="sc-q">분석 방법론 — Pareto · 카테고리 마진 분해 · 할인 회귀</div>
+        <div class="pp-method-row"><span class="pp-method-tag">Descriptive</span><span class="pp-method-tag">Regression</span><span class="pp-method-tag">Waterfall</span></div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">① 카테고리 마진 분해 — 할인이 62% 소진</div>
+          <div class="pp-insight-body">Furniture 총마진 28.5%에서 할인 17.7%p를 차감하면 순마진 10.7%. 할인 1%p 축소 = 마진 <span class="ng">+1.3%p</span>. 선형 관계 확인 (r=−0.73, p&lt;0.01). <strong>할인 10%p 축소 시 이익 +$6~8K (추정)</strong>.</div>
+        </div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">② Pareto — 상위 20% SKU가 매출 80% 담당</div>
+          <div class="pp-insight-body">고매출 SKU 평균 할인율 <span class="nr">19.2%</span> vs 전체 평균 14.2% — 5%p 초과. 전략 자산인 SKU에 가장 많이 할인하는 역설적 구조. <strong>이 구간 할인 통제가 우선순위 1위.</strong></div>
+        </div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">③ 세그먼트별 할인 ROI — Corporate에 할인은 낭비</div>
+          <div class="pp-insight-body">Corporate 객단가 $447, 할인 없이도 구매. 할인 ROI <span class="nr">0.51</span> (Champions도 동일). At-Risk만 ROI <span class="ng">1.24</span>. <strong>Corporate 할인 예산 → At-Risk 리타겟으로 이전하면 ROI 즉시 개선.</strong></div>
+        </div>
+      </div>
+
+      <div class="sc-pane asc">
+        <div class="sc-q">분석 방법론 — RFM · 코호트 분석 · K-Means Clustering</div>
+        <div class="pp-method-row"><span class="pp-method-tag">RFM Scoring</span><span class="pp-method-tag">Cohort</span><span class="pp-method-tag">K-Means</span></div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">① 코호트 잔존율 — 최근 3개월 코호트 5% 미만</div>
+          <div class="pp-insight-body">2021 코호트 잔존율 18% vs 2023 Q1 코호트 4.7%. 고객 품질 하락이 아닌 <strong>리텐션 프로그램 부재</strong>가 원인. 첫 구매 후 31일 내 접촉 없으면 이탈율 <span class="nr">2.3배</span> 상승.</div>
+        </div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">② RFM 분석 — At-Risk 21%의 특징: 90일+ 미접촉</div>
+          <div class="pp-insight-body">At-Risk 2,099명의 44%가 마지막 구매 후 90일 이상 경과. 1회 구매 고객 비중 <span class="nr">38%</span>. 1→2회 전환율 22% vs 2→3회 전환율 61% — <strong>두 번째 구매 만들기가 핵심 레버.</strong></div>
+        </div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">③ K-Means 군집 — 할인 올려도 At-Risk 잔존 안 됨</div>
+          <div class="pp-insight-body">At-Risk 평균 할인율 <span class="nr">24.3%</span> vs Champions 9.1%. 할인 의존도 높을수록 잔존율 낮음. <strong>할인 증가는 해결책이 아님 — 개인화 오퍼와 타이밍 트리거가 필요.</strong></div>
+        </div>
+      </div>
+
+      <div class="sc-pane asc">
+        <div class="sc-q">분석 방법론 — 가격 탄력성 · 할인 ROI · 세그먼트 회귀</div>
+        <div class="pp-method-row"><span class="pp-method-tag">Elasticity</span><span class="pp-method-tag">ROI Analysis</span><span class="pp-method-tag">Segment Regression</span></div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">① 할인↔매출 무상관 — r = −0.03, 투입 효과 없음</div>
+          <div class="pp-insight-body">할인율 구간별 매출: 0~10%가 최고, 40%+ 오히려 최저. <strong>과도한 할인이 품질 의심 신호로 작용.</strong> 전체 할인 ROI 0.82 = $1 투입 시 $0.82 회수. 구조적 손해.</div>
+        </div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">② 가격 탄력성 — 고가 구간은 할인이 아닌 진입 장벽 문제</div>
+          <div class="pp-insight-body">$200+ 구간 CVR <span class="nr">0.8%</span> vs 저가 9.2% — 11.5배 격차. Technology는 가격 탄력적, Furniture는 비탄력적. <strong>Furniture 고가 상품은 할인보다 분할결제가 효과적.</strong></div>
+        </div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">③ 세그먼트 ROI 차등 — At-Risk만 ROI 플러스</div>
+          <div class="pp-insight-body">At-Risk <span class="ng">1.24</span> · Potential 0.91 · Loyal 0.73 · Champions 0.51. Champions에 집행되는 할인 예산의 절반 이상이 <span class="nr">ROI 마이너스</span>. <strong>예산 재배분만으로 전체 ROI 1.2 달성 가능.</strong></div>
+        </div>
+      </div>
+
+      <div class="sc-pane asc">
+        <div class="sc-q">분석 방법론 — 계절성 분해 · Holt-Winters · 카테고리 변동성</div>
+        <div class="pp-method-row"><span class="pp-method-tag">Time-Series</span><span class="pp-method-tag">Holt-Winters</span><span class="pp-method-tag">Seasonality Decomp</span></div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">① 계절성 분해 — 3월 하락 60%는 계절 외 요인</div>
+          <div class="pp-insight-body">Q1 계절성 지수 0.72 — 예상 하락폭 <span class="ny">−28%</span>. 실제 −77%. 초과 하락분 <span class="nr">49%p</span>는 채널 공백 또는 대형 계약 이탈. <strong>계절 탓으로 돌리면 구조 문제 놓침.</strong></div>
+        </div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">② Holt-Winters 예측 — 4월 $198K, 회복 가능</div>
+          <div class="pp-insight-body">α=0.3, β=0.2. 95% CI: $162K~$234K. RMSE $8.3K, 잔차 정규분포 확인. <strong>Technology 4월 $50K 이하 시 CI 하한 우세 — 채널 전략 즉시 재검토 트리거.</strong></div>
+        </div>
+        <div class="pp-insight">
+          <div class="pp-insight-title">③ 카테고리 변동성 — Technology ±38%, 단일 의존이 위험</div>
+          <div class="pp-insight-body">Tech CV 38% · Furniture 12% · Office 9%. 매출 36% 의존 카테고리가 변동성 최고. <strong>Furniture·Office 비중 확대 시 전체 예측 오차 30% 감소 (추정).</strong></div>
+        </div>
+      </div>`
+  },
+  {
+    id:'report', step:'STEP 06', name:'@report', icon:'≡',
+    cardColor:'pc-sky', panelBg:'rgba(224,237,248,0.96)',
+    skill:'/review skill', skillType:'sk-green',
+    outputs:['executive_report.md','action_plan.md'],
+    badge:'승인 ✅', meta:'P1 Furniture 할인 / P2 A/B 재실험',
+    content:`
+      <div class="pp-act-list">
+        <div class="pp-act-row">
+          <div class="pp-act-top"><div class="pp-act-p">P1 · 즉시</div><div class="pp-act-own">영업팀</div></div>
+          <div class="pp-act-ttl">Furniture 할인 한도 15% — 초과 시 팀장 승인 의무화</div>
+          <div class="pp-act-imp">이익 +$6~8K (모델 추정) · 프로세스 변경 2주 소요</div>
+          <div class="pp-act-why">Furniture 평균 할인 17.7%, 상위 SKU 구간 19.2%. 할인 1%p = 마진 −1.3%p. 통제 기준 부재가 구조적 마진 소진의 직접 원인.</div>
+        </div>
+        <div class="pp-act-row">
+          <div class="pp-act-top"><div class="pp-act-p">P2 · 30일 내</div><div class="pp-act-own">마케팅팀</div></div>
+          <div class="pp-act-ttl">At-Risk 2,099명 — 구매 후 7/14/30일 자동 트리거 캠페인 설계</div>
+          <div class="pp-act-imp">전환 시 LTV ×4.7 · 캠페인 비용 $15K/월 예상</div>
+          <div class="pp-act-why">재구매율 YoY −8.3%p. 1회 구매 후 31일 내 미접촉 시 이탈율 2.3배. 할인 의존(24.3%) 대신 타이밍 트리거가 효과적.</div>
+        </div>
+        <div class="pp-act-row">
+          <div class="pp-act-top"><div class="pp-act-p">P3 · 매주</div><div class="pp-act-own">분석팀</div></div>
+          <div class="pp-act-ttl">Technology 주간 매출 $50K 미달 시 채널 전략 재검토</div>
+          <div class="pp-act-imp">4월 예측 $198K — 미달 시 CI 하한 $162K 우세</div>
+          <div class="pp-act-why">3월 하락 −77%의 60%는 계절 외 요인. 4월 반복 시 단일 카테고리 의존 구조(36%) 자체를 재편해야 함.</div>
+        </div>
+      </div>`
+  }
+];
+
+/* ── RENDER PIPELINE ── */
+const PIPE_TARGETS = [
+  ['s01','s02'],     // data-ingestion
+  ['s03','s04'],     // eda
+  ['s05','s06'],     // problem
+  ['s07','s08'],     // metrics
+  ['ai-analysis'],   // analysis  — AI 기반 분석 (예측·세그먼트·시뮬레이션)
+  ['dashboard-link'], // dashboard — 외부 대시보드 페이지로 이동
+  ['report-plan'],   // report    — 액션 플랜
+];
+
+(function initPipeline() {
+  document.getElementById('pipeRow').innerHTML = PIPE_ROLES.map((r, i) => `
+    <div class="pipe-wrap">
+      <div class="pipe-card ${r.cardColor}" id="ppc-${i}" onclick="selectPipeRole(${i})">
+        <div class="pc-top">
+          <div class="pc-icon">${r.icon}</div>
+          <div class="pc-step">${r.step}</div>
+        </div>
+        <div class="pc-name">${r.name}</div>
+        <div class="pc-skill ${r.skillType}">${r.skill}</div>
+        <div class="pc-divider"></div>
+        <div class="pc-out-label">산출물</div>
+        ${r.outputs.map(o => `<div class="pc-out-item">${o}</div>`).join('')}
+      </div>
+      ${i < PIPE_ROLES.length - 1 ? '<div class="pipe-arrow">→</div>' : ''}
+    </div>
+  `).join('');
+})();
+
+let _pipeActive = -1;
+document.addEventListener('DOMContentLoaded', () => { selectPipeRole(0); });
+
+function switchScenario(btn, group, idx) {
+  const tabsEl = btn.closest('.sc-tabs');
+  tabsEl.querySelectorAll('.sc-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const panesParent = tabsEl.parentElement;
+  const panes = panesParent.querySelectorAll('.' + group);
+  panes.forEach((p, i) => p.classList.toggle('active', i === idx));
+}
+
+function selectPipeRole(idx) {
+  const panelWrap = document.getElementById('pipePanelWrap');
+
+  const meceBlock = document.getElementById('meceTreeBlock');
+
+  // 같은 카드 다시 클릭 → 닫기
+  if (_pipeActive === idx) {
+    _pipeActive = -1;
+    document.querySelectorAll('.pipe-card').forEach(c => c.classList.remove('active'));
+    panelWrap.style.display = 'none';
+    panelWrap.innerHTML = '';
+    if (meceBlock) meceBlock.style.display = 'none';
+    return;
+  }
+
+  _pipeActive = idx;
+  if (meceBlock) meceBlock.style.display = idx === 3 ? 'block' : 'none';
+  document.querySelectorAll('.pipe-card').forEach((c, i) => c.classList.toggle('active', i === idx));
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'pipe-inline-steps';
+
+  const targets = PIPE_TARGETS[idx];
+
+  // 특수 타겟 처리
+  if (targets[0] === 'ai-analysis') {
+    const layout = document.createElement('div');
+    layout.className = 'analysis-layout full-width';
+
+    const sidebar = document.createElement('div');
+    sidebar.className = 'analysis-sidebar';
+    const A_METHODS = [
+      { problem:'왜 마진이 낮은가?', desc:'카테고리별 할인·마진 역비례 원인 규명', tag:'Descriptive' },
+      { problem:'재구매율 8%p 하락의 원인은?', desc:'RFM 기반 이탈 예측 · 고가치 고객 식별', tag:'Diagnostic' },
+      { problem:'할인이 정말 매출을 올리는가?', desc:'할인 ROI 측정 · 가격 장벽 구간 분석', tag:'Diagnostic' },
+      { problem:'3월 급락은 구조적인가, 일시적인가?', desc:'계절성 분해 · 카테고리별 변동성 진단', tag:'Predictive' },
+    ];
+
+    const aiwPane = document.createElement('div');
+    aiwPane.className = 'analysis-dash-pane ai-workbench';
+    aiwPane.innerHTML = buildAiScenario(0);
+
+    A_METHODS.forEach((m, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'analysis-method-btn' + (i === 0 ? ' active' : '');
+      btn.onclick = () => {
+        layout.querySelectorAll('.analysis-method-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        aiwPane.innerHTML = buildAiScenario(i);
+        setTimeout(() => { initAllSims(aiwPane); }, 30);
+      };
+      btn.innerHTML = `<div class="amb-problem">${m.problem}</div><div class="amb-desc">${m.desc}</div><div class="amb-tag">${m.tag}</div>`;
+      sidebar.appendChild(btn);
+    });
+    layout.appendChild(sidebar);
+    layout.appendChild(aiwPane);
+    wrapper.appendChild(layout);
+
+  } else if (targets[0] === 'dashboard-link') {
+    const card = document.createElement('div');
+    card.className = 'full-width';
+    card.innerHTML = `
+      <div style="background:rgba(247,244,239,.97);border-radius:20px;border:1px solid rgba(96,79,67,.14);padding:40px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:16px;">📊</div>
+        <div style="font-family:'Barlow',sans-serif;font-size:22px;font-weight:600;color:#2f2b27;margin-bottom:8px;">대시보드는 별도 페이지에서 확인하세요</div>
+        <div style="font-size:13px;color:#766c63;margin-bottom:28px;line-height:1.7;">마진 분석 · 고객 세그먼테이션 · 할인 효율 · 매출 예측<br>4개 대시보드를 탭으로 전환하며 볼 수 있습니다.</div>
+        <a href="dashboard.html" target="_blank" style="
+          display:inline-flex;align-items:center;gap:10px;
+          background:#218d72;color:#fff;text-decoration:none;
+          padding:14px 32px;border-radius:12px;
+          font-family:'Inter',sans-serif;font-size:14px;font-weight:700;
+          transition:background .15s;
+        " onmouseover="this.style.background='#1a7060'" onmouseout="this.style.background='#218d72'">
+          대시보드 열기 →
+        </a>
+      </div>`;
+    wrapper.appendChild(card);
+
+  } else if (targets[0] === 'report-plan') {
+    // report: 액션 플랜 카드
+    const role = PIPE_ROLES[6];
+    const card = document.createElement('div');
+    card.className = 'report-plan-card full-width';
+    card.innerHTML = `
+      <div class="rpc-head">
+        <div class="rpc-icon">${role.icon}</div>
+        <div>
+          <div class="rpc-title">${role.name} — 최종 액션 플랜</div>
+          <div class="rpc-meta">${role.meta}</div>
+        </div>
+        <div class="rpc-badge">${role.badge}</div>
+      </div>
+      <div class="rpc-body">${role.content}</div>`;
+    wrapper.appendChild(card);
+  } else if (idx === 3) {
+    // metrics: 좌측 문제정의 사이드바 + 우측 s07/s08 카드
+    const layout = document.createElement('div');
+    layout.className = 'analysis-layout full-width';
+
+    const sidebar = document.createElement('div');
+    sidebar.className = 'analysis-sidebar';
+    const M_METHODS = [
+      { problem:'왜 마진이 낮은가?', desc:'카테고리별 할인·마진 역비례 원인 규명', tag:'Descriptive' },
+      { problem:'재구매율 8%p 하락의 원인은?', desc:'RFM 기반 이탈 예측 · 고가치 고객 식별', tag:'Diagnostic' },
+      { problem:'할인이 정말 매출을 올리는가?', desc:'할인 ROI 측정 · 가격 장벽 구간 분석', tag:'Diagnostic' },
+      { problem:'3월 급락은 구조적인가, 일시적인가?', desc:'계절성 분해 · 카테고리별 변동성 진단', tag:'Predictive' },
+    ];
+
+    const contentPane = document.createElement('div');
+    contentPane.className = 'analysis-dash-pane';
+    contentPane.style.cssText = 'overflow-y:auto';
+
+    // Clone s07, s08 into content pane
+    targets.forEach(id => {
+      const orig = document.getElementById(id);
+      if (!orig) return;
+      const clone = orig.cloneNode(true);
+      clone.classList.add('open');
+      clone.removeAttribute('id');
+      const tog = clone.querySelector('.step-toggle');
+      if (tog) tog.style.display = 'none';
+      // Replace static mh-wrap with dynamic hierarchy for scenario 0
+      const mhWrapOld = clone.querySelector('.mh-wrap');
+      if (mhWrapOld) mhWrapOld.outerHTML = buildMetricHierarchy(0);
+      contentPane.appendChild(clone);
+    });
+
+    // Reference to the dynamic mh-wrap container after DOM insertion
+    let mhContainer = null;
+
+    M_METHODS.forEach((m, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'analysis-method-btn' + (i === 0 ? ' active' : '');
+      btn.onclick = () => {
+        layout.querySelectorAll('.analysis-method-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // Update metric hierarchy
+        const mhWrap = contentPane.querySelector('.mh-wrap');
+        if (mhWrap) mhWrap.outerHTML = buildMetricHierarchy(i);
+        // Also switch sc-tabs for KPI section
+        const scTabs = contentPane.querySelectorAll('.sc-tab');
+        if (scTabs[i]) scTabs[i].click();
+      };
+      btn.innerHTML = `<div class="amb-problem">${m.problem}</div><div class="amb-desc">${m.desc}</div><div class="amb-tag">${m.tag}</div>`;
+      sidebar.appendChild(btn);
+    });
+
+    layout.appendChild(sidebar);
+    layout.appendChild(contentPane);
+    wrapper.appendChild(layout);
+
+  } else {
+    // 스텝 카드 클론 (2개면 2열, 1개면 전체 너비)
+    targets.forEach((id, ti) => {
+      const orig = document.getElementById(id);
+      if (!orig) return;
+      const clone = orig.cloneNode(true);
+      clone.classList.add('open');
+      clone.removeAttribute('id');
+      if (targets.length === 1) clone.classList.add('full-width');
+      const tog = clone.querySelector('.step-toggle');
+      if (tog) tog.style.display = 'none';
+      wrapper.appendChild(clone);
+    });
+  }
+
+  panelWrap.innerHTML = '';
+  panelWrap.style.display = 'block';
+  panelWrap.appendChild(wrapper);
+  panelWrap.style.animation = 'panelIn .18s ease';
+  // Init all simulation widgets in cloned content
+  setTimeout(() => { initAllSims(panelWrap); }, 50);
+}
+
+function selectMethodInline(idx) {
+  const panelWrap = document.getElementById('pipePanelWrap');
+  panelWrap.querySelectorAll('.method-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  panelWrap.querySelectorAll('.dash-panel').forEach((dp, i) => dp.classList.toggle('active', i === idx));
+}
+
+function buildMetricHierarchy(idx) {
+  const H = [
+    // 0: 마진 분석
+    { output: { label:'Output Metric — 최종적으로 높여야 할 숫자',
+        cards:[{val:'$703K',name:'총 이익',note:'YoY +9.1%'},{val:'30.6%',name:'전체 마진율',note:'카테고리 간 3.3배 격차'}]},
+      driver: { label:'Driver Metric — 마진을 움직이는 중간 지표',
+        cards:[{val:'10.7%',name:'Furniture 순마진',note:'Technology 35%의 30% 수준'},{val:'−0.73',name:'할인↔마진 상관계수',note:'할인 1%p 상승 → 마진 1.3%p 하락'},{val:'17.7%',name:'Furniture 평균 할인율',note:'전체 카테고리 중 최고'}]},
+      input: { label:'Input Metric — 지금 당장 움직일 수 있는 실행 지표',
+        cards:[{val:'17.7%',name:'Furniture 할인율',note:'목표: 10% → 마진 +$6~8K'},{val:'20%',name:'고마진 SKU 노출 비중',note:'상위 SKU 집중 → CVR 향상'},{val:'62%',name:'매출 내 할인 소진 비율',note:'프로모션 효율화 여지'}]},
+      guard: { label:'Guardrail — 이것이 나빠지면 전체가 흔들린다',
+        cards:[{val:'32%',name:'결제 이탈률',note:'고가 제품 직전 이탈 집중'},{val:'36%',name:'Technology 집중도',note:'단일 의존 — 변동성 ±38%'}]}
+    },
+    // 1: 재구매율 분석
+    { output: { label:'Output Metric — 재구매 기반 매출 지속성',
+        cards:[{val:'22.1%',name:'재구매율',note:'YoY −8.3%p · 목표 30%'},{val:'$891',name:'고가치 고객 LTV',note:'상위 20% 기준'},{val:'38%',name:'재구매 매출 비중',note:'신규 획득보다 5× 저렴'}]},
+      driver: { label:'Driver Metric — 재구매율을 움직이는 중간 지표',
+        cards:[{val:'28%',name:'At-Risk 고객 비중',note:'Champions에서 이탈 전환 중'},{val:'52일',name:'평균 구매 간격',note:'목표: 45일 이내'},{val:'18%',name:'프로모션 재구매 응답률',note:'캠페인 ROI 핵심 지표'},{val:'41%',name:'1회 구매 후 이탈률',note:'온보딩 개선 최우선 대상'}]},
+      input: { label:'Input Metric — 당장 움직일 수 있는 실행 지표',
+        cards:[{val:'30일',name:'첫 구매 후 리텐션 창',note:'2차 구매 유도 골든타임'},{val:'12%',name:'Loyalty 프로그램 등록률',note:'목표: 25% → LTV +$140'},{val:'6%',name:'이탈 고객 윈백 CVR',note:'개인화 오퍼 기준'}]},
+      guard: { label:'Guardrail — 이것이 나빠지면 전체가 흔들린다',
+        cards:[{val:'$48',name:'신규 고객 CAC',note:'재구매 개선 시 총 CAC 절감'},{val:'55%',name:'할인 의존 재구매율',note:'할인 없이 돌아오는 고객 비중'}]}
+    },
+    // 2: 할인 효율 분석
+    { output: { label:'Output Metric — 할인 전후 순매출 성과',
+        cards:[{val:'$2.3M',name:'총 매출',note:'YoY +12.4% · 할인 포함'},{val:'27.2%',name:'할인 조정 순마진율',note:'목표: 32% 이상'},{val:'+$1.1',name:'할인 1%p당 ROI',note:'매출 증분 / 마진 비용'}]},
+      driver: { label:'Driver Metric — 할인 효율을 결정하는 중간 지표',
+        cards:[{val:'−0.68',name:'가격 탄력성 계수',note:'가격 10% 하락 → 수량 6.8% 증가'},{val:'18.3%',name:'할인 15%+ 구간 CVR',note:'전체 평균 12.6%보다 5.7%p 높음'},{val:'4.2%',name:'마진 음수 SKU 비중',note:'할인 과도 적용 제품군'}]},
+      input: { label:'Input Metric — 지금 당장 조정 가능한 실행 지표',
+        cards:[{val:'15%',name:'최대 허용 할인 한도',note:'마진 20% 하한 보장선'},{val:'23%',name:'SKU 선별 할인 적용률',note:'전체 SKU 중 할인 대상 비중'},{val:'8.3%',name:'번들 프로모션 CVR',note:'단순 할인 대비 +2.1%p'}]},
+      guard: { label:'Guardrail — 이것이 나빠지면 전체가 흔들린다',
+        cards:[{val:'20%',name:'마진율 하한선',note:'이 이하 SKU는 할인 대상 제외'},{val:'9.4%',name:'할인 없는 CVR',note:'품질 신뢰도 — 하락 시 경보'}]}
+    },
+    // 3: 시계열 예측
+    { output: { label:'Output Metric — 예측 기반 매출 목표 달성도',
+        cards:[{val:'8.3%',name:'예측 오차율 (MAPE)',note:'목표: 5% 이하'},{val:'$623K',name:'2023 Q2 예측 매출',note:'Holt-Winters 모델 기준'},{val:'0.72',name:'3월 계절 지수',note:'연평균 대비 28% 하락 구간'}]},
+      driver: { label:'Driver Metric — 예측 정확도를 움직이는 중간 지표',
+        cards:[{val:'±38%',name:'Technology 월별 변동성',note:'가장 변동성 큰 카테고리'},{val:'1.42',name:'4Q 계절 지수',note:'Q1 대비 42% 급등 구간'},{val:'91%',name:'연속 성장 구간 확률',note:'YoY 기준 모델 신뢰구간 내'}]},
+      input: { label:'Input Metric — 운영으로 개선 가능한 실행 지표',
+        cards:[{val:'4주',name:'시즌 피크 전 발주 리드타임',note:'Q4 준비 시작 기준점'},{val:'15%',name:'재고 완충 비율',note:'예측 오차 흡수용 안전 재고'},{val:'3건',name:'분기 프로모션 캘린더 정렬',note:'계절 지수 고점과 일치 필요'}]},
+      guard: { label:'Guardrail — 이것이 나빠지면 전체가 흔들린다',
+        cards:[{val:'36%',name:'Technology 집중도',note:'단일 카테고리 급락 시 전체 타격'},{val:'95%',name:'예측 신뢰구간 포함률',note:'실적이 구간 밖이면 모델 재학습 필요'}]}
+    }
+  ];
+  const d = H[idx] || H[0];
+  const tier = (cls, data) => `
+    <div class="mh-tier ${cls}">
+      <div class="mh-tier-label">${data.label}</div>
+      <div class="mh-cards">
+        ${data.cards.map(c=>`<div class="mh-card"><div class="mh-card-val">${c.val}</div><div class="mh-card-name">${c.name}</div><div class="mh-card-note">${c.note}</div></div>`).join('')}
+      </div>
+    </div>`;
+  return `<div class="mh-wrap">
+    ${tier('mh-output', d.output)}
+    <div class="mh-arrow">↓</div>
+    ${tier('mh-driver', d.driver)}
+    <div class="mh-arrow">↓</div>
+    ${tier('mh-input', d.input)}
+    <div class="mh-arrow">↓</div>
+    ${tier('mh-guard', d.guard)}
+  </div>`;
+}
+
+function buildAiScenario(idx) {
+  const scenarios = [
+
+    // ── 0: 왜 마진이 낮은가? ──
+    `<div class="aiw-header">
+      <div class="aiw-title">마진 분석 — <em>Pareto · Margin Decomposition · Discount Regression</em></div>
+      <div class="aiw-subtitle">문제: Furniture 마진 10.7% = Technology(35%)의 30% 수준</div>
+    </div>
+    <div class="aiw-grid">
+      <div class="aiw-card">
+        <div class="aiw-card-head">
+          <div class="aiw-card-icon">📊</div>
+          <div><div class="aiw-card-title">카테고리 마진 분해</div>
+          <div class="aiw-card-sub">총마진에서 할인 비용 차감 → 순마진. Furniture 28.5% − 17.7% = 10.7%</div></div>
+          <div class="aiw-badge">Waterfall</div>
+        </div>
+        <svg viewBox="0 0 520 160" width="100%" style="margin:6px 0 10px">
+          <line x1="30" y1="140" x2="490" y2="140" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <!-- Technology -->
+          <rect x="44" y="23" width="56" height="117" fill="#35c995" rx="4" opacity=".85"/>
+          <text x="72" y="18" font-size="10" fill="#218d72" font-weight="700" text-anchor="middle">35%</text>
+          <text x="72" y="152" font-size="9" fill="var(--mu)" text-anchor="middle">Tech</text>
+          <text x="72" y="161" font-size="8" fill="#218d72" text-anchor="middle">할인 7.5%</text>
+          <!-- Office -->
+          <rect x="120" y="57" width="56" height="83" fill="#5b8ef0" rx="4" opacity=".8"/>
+          <text x="148" y="52" font-size="10" fill="#3b5bbf" font-weight="700" text-anchor="middle">28.4%</text>
+          <text x="148" y="152" font-size="9" fill="var(--mu)" text-anchor="middle">Office</text>
+          <text x="148" y="161" font-size="8" fill="#5b8ef0" text-anchor="middle">할인 15.3%</text>
+          <!-- Furniture gross -->
+          <rect x="210" y="41" width="56" height="99" fill="rgba(239,125,134,.4)" rx="4"/>
+          <text x="238" y="36" font-size="9" fill="#9b2d38" text-anchor="middle">총마진 28.5%</text>
+          <!-- Furniture discount -->
+          <rect x="290" y="41" width="56" height="70" fill="#ef7d86" rx="4" opacity=".85"/>
+          <text x="318" y="36" font-size="10" fill="#9b2d38" font-weight="700" text-anchor="middle">−17.7%</text>
+          <text x="318" y="152" font-size="9" fill="var(--mu)" text-anchor="middle">할인 비용</text>
+          <!-- Arrow -->
+          <text x="280" y="90" font-size="14" fill="rgba(96,79,67,.3)" text-anchor="middle">→</text>
+          <text x="370" y="90" font-size="14" fill="rgba(96,79,67,.3)" text-anchor="middle">→</text>
+          <!-- Furniture net -->
+          <rect x="380" y="108" width="56" height="32" fill="#efb05d" rx="4" opacity=".9"/>
+          <text x="408" y="103" font-size="11" fill="#a0620a" font-weight="700" text-anchor="middle">10.7%</text>
+          <text x="408" y="152" font-size="9" fill="var(--mu)" text-anchor="middle">순마진</text>
+          <text x="275" y="152" font-size="9" fill="var(--mu)" text-anchor="middle">Furniture 구조</text>
+        </svg>
+        <div class="aiw-insights">
+          <div class="aiw-ins"><span class="aiw-ins-label">할인 소진 비율</span><span class="aiw-ins-val">62%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">할인 1%p 축소 효과</span><span class="aiw-ins-val">+1.3%p 마진</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">Tech 대비 격차</span><span class="aiw-ins-val">3.3배</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">할인↔마진 상관</span><span class="aiw-ins-val">r = −0.73</span></div>
+        </div>
+        <div class="aiw-action">Furniture 할인 10%p 축소 → 순마진 24%까지 회복 가능 (추정)</div>
+      </div>
+      <div class="aiw-card">
+        <div class="aiw-card-head">
+          <div class="aiw-card-icon">🎯</div>
+          <div><div class="aiw-card-title">Pareto — 상위 SKU vs 고할인 집중</div>
+          <div class="aiw-card-sub">상위 20% SKU = 매출 80% 담당, 평균 할인율은 전체 평균보다 5%p 높음</div></div>
+          <div class="aiw-badge">Pareto</div>
+        </div>
+        <svg viewBox="0 0 520 160" width="100%" style="margin:6px 0 10px">
+          <line x1="40" y1="20" x2="40" y2="130" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <line x1="40" y1="130" x2="500" y2="130" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <rect x="48" y="28" width="48" height="102" fill="#5b8ef0" rx="3" opacity=".85"/>
+          <rect x="104" y="50" width="48" height="80" fill="#5b8ef0" rx="3" opacity=".75"/>
+          <rect x="160" y="70" width="48" height="60" fill="#5b8ef0" rx="3" opacity=".65"/>
+          <rect x="216" y="88" width="48" height="42" fill="#efb05d" rx="3" opacity=".75"/>
+          <rect x="272" y="100" width="48" height="30" fill="#efb05d" rx="3" opacity=".6"/>
+          <rect x="328" y="108" width="48" height="22" fill="rgba(150,135,120,.4)" rx="3"/>
+          <rect x="384" y="115" width="48" height="15" fill="rgba(150,135,120,.3)" rx="3"/>
+          <!-- cumulative line -->
+          <polyline points="96,75 152,88 208,102 264,114 320,122 376,126 432,129" fill="none" stroke="#ef7d86" stroke-width="2" stroke-dasharray="4,3"/>
+          <!-- 80% line -->
+          <line x1="40" y1="81" x2="500" y2="81" stroke="rgba(239,125,134,.4)" stroke-dasharray="3,3" stroke-width="1"/>
+          <text x="502" y="84" font-size="8" fill="#ef7d86">80%</text>
+          <!-- discount highlight on top SKUs -->
+          <text x="72" y="23" font-size="8" fill="#9b2d38" text-anchor="middle" font-weight="700">19.2%↑</text>
+          <text x="128" y="45" font-size="8" fill="#9b2d38" text-anchor="middle">18.4%</text>
+          <text x="72" y="143" font-size="8" fill="var(--mu)" text-anchor="middle">SKU #1</text>
+          <text x="128" y="143" font-size="8" fill="var(--mu)" text-anchor="middle">SKU #2</text>
+          <text x="184" y="143" font-size="8" fill="var(--mu)" text-anchor="middle">SKU #3</text>
+          <text x="310" y="143" font-size="8" fill="var(--mu)" text-anchor="middle">나머지 80%</text>
+          <text x="44" y="136" font-size="7" fill="var(--mu)">할인율</text>
+        </svg>
+        <div class="aiw-insights">
+          <div class="aiw-ins"><span class="aiw-ins-label">상위 20% SKU 매출 비중</span><span class="aiw-ins-val">80%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">상위 SKU 평균 할인</span><span class="aiw-ins-val">19.2%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">전체 평균 할인</span><span class="aiw-ins-val">14.2%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">초과 할인 갭</span><span class="aiw-ins-val">+5%p</span></div>
+        </div>
+        <div class="aiw-action">전략 자산 SKU에 가장 많이 할인 — 상위 20% SKU 할인 한도 우선 통제 필요</div>
+      </div>
+      <div class="aiw-card" style="grid-column:1/-1">
+        <div class="aiw-card-head">
+          <div class="aiw-card-icon">🎲</div>
+          <div><div class="aiw-card-title">Monte Carlo — 할인율 시나리오별 이익 분포</div>
+          <div class="aiw-card-sub">할인율 변경 시 이익이 어떻게 달라지는지 1,000번 시뮬레이션. 불확실성 포함한 기댓값 비교</div></div>
+          <div class="aiw-badge">Simulation</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:10px 0">
+          <div class="aiw-scenario"><div class="aiw-sc-label">현재 (할인 17.7%)</div>
+            <svg viewBox="0 0 160 80" width="100%">
+              <rect x="10" y="55" width="12" height="18" fill="rgba(239,125,134,.6)" rx="2"/><rect x="24" y="40" width="12" height="33" fill="rgba(239,125,134,.7)" rx="2"/><rect x="38" y="28" width="12" height="45" fill="rgba(239,125,134,.8)" rx="2"/><rect x="52" y="22" width="12" height="51" fill="rgba(239,125,134,.9)" rx="2"/><rect x="66" y="30" width="12" height="43" fill="rgba(239,125,134,.8)" rx="2"/><rect x="80" y="42" width="12" height="31" fill="rgba(239,125,134,.6)" rx="2"/><rect x="94" y="54" width="12" height="19" fill="rgba(239,125,134,.5)" rx="2"/>
+              <line x1="10" y1="73" x2="150" y2="73" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+              <text x="80" y="9" font-size="6.5" fill="#9b2d38" text-anchor="middle" font-weight="700">E[이익] $121K</text>
+              <text x="80" y="17" font-size="6" fill="var(--mu)" text-anchor="middle">σ = $18K</text>
+            </svg></div>
+          <div class="aiw-scenario" style="border-color:rgba(79,183,153,.3);background:rgba(79,183,153,.04)"><div class="aiw-sc-label" style="color:#218d72">할인 10%p 축소</div>
+            <svg viewBox="0 0 160 80" width="100%">
+              <rect x="10" y="52" width="12" height="21" fill="rgba(53,201,149,.5)" rx="2"/><rect x="24" y="35" width="12" height="38" fill="rgba(53,201,149,.65)" rx="2"/><rect x="38" y="18" width="12" height="55" fill="rgba(53,201,149,.8)" rx="2"/><rect x="52" y="12" width="12" height="61" fill="rgba(53,201,149,.9)" rx="2"/><rect x="66" y="20" width="12" height="53" fill="rgba(53,201,149,.8)" rx="2"/><rect x="80" y="36" width="12" height="37" fill="rgba(53,201,149,.6)" rx="2"/><rect x="94" y="52" width="12" height="21" fill="rgba(53,201,149,.45)" rx="2"/>
+              <line x1="10" y1="73" x2="150" y2="73" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+              <text x="80" y="9" font-size="6.5" fill="#218d72" text-anchor="middle" font-weight="700">E[이익] $128K</text>
+              <text x="80" y="17" font-size="6" fill="var(--mu)" text-anchor="middle">+$7K 추정</text>
+            </svg></div>
+          <div class="aiw-scenario"><div class="aiw-sc-label">세그먼트 차별 적용</div>
+            <svg viewBox="0 0 160 80" width="100%">
+              <rect x="10" y="48" width="12" height="25" fill="rgba(91,142,240,.5)" rx="2"/><rect x="24" y="30" width="12" height="43" fill="rgba(91,142,240,.65)" rx="2"/><rect x="38" y="15" width="12" height="58" fill="rgba(91,142,240,.8)" rx="2"/><rect x="52" y="9" width="12" height="64" fill="rgba(91,142,240,.9)" rx="2"/><rect x="66" y="17" width="12" height="56" fill="rgba(91,142,240,.8)" rx="2"/><rect x="80" y="33" width="12" height="40" fill="rgba(91,142,240,.6)" rx="2"/><rect x="94" y="50" width="12" height="23" fill="rgba(91,142,240,.45)" rx="2"/>
+              <line x1="10" y1="73" x2="150" y2="73" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+              <text x="80" y="9" font-size="6.5" fill="#3b5bbf" text-anchor="middle" font-weight="700">E[이익] $133K</text>
+              <text x="80" y="17" font-size="6" fill="var(--mu)" text-anchor="middle">σ = $12K (↓리스크)</text>
+            </svg></div>
+        </div>
+        <div class="aiw-action">세그먼트 차별 적용(시나리오 C)이 기댓값 최고 + 변동성 최저 — 최우선 권장</div>
+      </div>
+    </div>`,
+
+    // ── 1: 재구매율 8%p 하락의 원인은? ──
+    `<div class="aiw-header">
+      <div class="aiw-title">고객 분석 — <em>RFM Scoring · Cohort · K-Means Clustering</em></div>
+      <div class="aiw-subtitle">문제: 재구매율 22.1% (YoY −8.3%p) · At-Risk 2,099명 LTV $2.1K</div>
+    </div>
+    <div class="aiw-grid">
+      <div class="aiw-card">
+        <div class="aiw-card-head">
+          <div class="aiw-card-icon">👥</div>
+          <div><div class="aiw-card-title">K-Means — RFM 고객 군집</div>
+          <div class="aiw-card-sub">구매금액 × 구매빈도로 3개 군집 분류. At-Risk는 저빈도·저금액 집중</div></div>
+          <div class="aiw-badge">K-Means</div>
+        </div>
+        <svg viewBox="0 0 520 160" width="100%" style="margin:6px 0 10px">
+          <line x1="50" y1="20" x2="50" y2="140" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <line x1="50" y1="140" x2="500" y2="140" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <text x="275" y="155" font-size="8" fill="var(--mu)" text-anchor="middle">구매 빈도</text>
+          <text x="14" y="80" font-size="8" fill="var(--mu)" text-anchor="middle" transform="rotate(-90,14,80)">LTV ($)</text>
+          <!-- Champions cluster (high freq, high LTV) -->
+          <circle cx="420" cy="30" r="5" fill="#35c995" opacity=".8"/><circle cx="450" cy="38" r="4" fill="#35c995" opacity=".75"/><circle cx="400" cy="42" r="6" fill="#35c995" opacity=".8"/><circle cx="470" cy="28" r="4" fill="#35c995" opacity=".7"/><circle cx="435" cy="22" r="5" fill="#35c995" opacity=".75"/>
+          <circle cx="435" cy="32" r="11" fill="none" stroke="#35c995" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="435" y="14" font-size="9" fill="#35c995" text-anchor="middle" font-weight="700">Champions 18%</text>
+          <text x="435" y="158" font-size="8" fill="#35c995" text-anchor="middle">LTV $18.2K</text>
+          <!-- Loyal/Potential -->
+          <circle cx="260" cy="78" r="4" fill="#5b8ef0" opacity=".75"/><circle cx="290" cy="70" r="5" fill="#5b8ef0" opacity=".8"/><circle cx="235" cy="88" r="4" fill="#5b8ef0" opacity=".7"/><circle cx="310" cy="82" r="5" fill="#5b8ef0" opacity=".75"/><circle cx="275" cy="95" r="4" fill="#5b8ef0" opacity=".65"/>
+          <circle cx="272" cy="82" r="10" fill="none" stroke="#5b8ef0" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="272" y="62" font-size="9" fill="#5b8ef0" text-anchor="middle" font-weight="700">Loyal 24%</text>
+          <!-- At-Risk (low freq, low LTV) -->
+          <circle cx="95" cy="122" r="4" fill="#ef7d86" opacity=".8"/><circle cx="120" cy="112" r="5" fill="#ef7d86" opacity=".75"/><circle cx="75" cy="130" r="4" fill="#ef7d86" opacity=".8"/><circle cx="145" cy="120" r="4" fill="#ef7d86" opacity=".7"/><circle cx="105" cy="135" r="5" fill="#ef7d86" opacity=".75"/>
+          <circle cx="108" cy="124" r="11" fill="none" stroke="#ef7d86" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="108" y="103" font-size="9" fill="#ef7d86" text-anchor="middle" font-weight="700">At-Risk 21%</text>
+          <text x="108" y="158" font-size="8" fill="#ef7d86" text-anchor="middle">LTV $2.1K</text>
+        </svg>
+        <div class="aiw-insights">
+          <div class="aiw-ins"><span class="aiw-ins-label">Champions LTV</span><span class="aiw-ins-val">$18.2K</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">At-Risk LTV</span><span class="aiw-ins-val">$2.1K</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">전환 시 LTV 상승</span><span class="aiw-ins-val">×4.7</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">At-Risk 90일+ 미접촉</span><span class="aiw-ins-val">44%</span></div>
+        </div>
+        <div class="aiw-action">At-Risk 2,099명 중 10%만 Loyal 전환해도 LTV +$33M — 리타겟 1순위</div>
+      </div>
+      <div class="aiw-card">
+        <div class="aiw-card-head">
+          <div class="aiw-card-icon">📅</div>
+          <div><div class="aiw-card-title">코호트 잔존율 — 최근 코호트일수록 급락</div>
+          <div class="aiw-card-sub">월별 코호트 × 3개월 잔존율. 2023 코호트 4.7% vs 2021 코호트 18%</div></div>
+          <div class="aiw-badge">Cohort</div>
+        </div>
+        <svg viewBox="0 0 520 160" width="100%" style="margin:6px 0 10px">
+          <!-- heatmap grid: 6 cohorts x 3 months -->
+          <text x="30" y="44" font-size="8" fill="var(--mu)" text-anchor="end">2021 Q1</text>
+          <text x="30" y="69" font-size="8" fill="var(--mu)" text-anchor="end">2021 Q3</text>
+          <text x="30" y="94" font-size="8" fill="var(--mu)" text-anchor="end">2022 Q1</text>
+          <text x="30" y="119" font-size="8" fill="var(--mu)" text-anchor="end">2022 Q3</text>
+          <text x="30" y="144" font-size="8" fill="var(--mu)" text-anchor="end">2023 Q1</text>
+          <text x="120" y="18" font-size="8" fill="var(--mu)" text-anchor="middle">Month 1</text>
+          <text x="240" y="18" font-size="8" fill="var(--mu)" text-anchor="middle">Month 2</text>
+          <text x="360" y="18" font-size="8" fill="var(--mu)" text-anchor="middle">Month 3</text>
+          <!-- Row 1: 2021 Q1 (best retention) -->
+          <rect x="40" y="26" width="160" height="24" fill="rgba(53,201,149,.7)" rx="3"/><text x="120" y="42" font-size="9" fill="#1a6b50" text-anchor="middle" font-weight="700">100%</text>
+          <rect x="210" y="26" width="160" height="24" fill="rgba(53,201,149,.45)" rx="3"/><text x="290" y="42" font-size="9" fill="#218d72" text-anchor="middle">32%</text>
+          <rect x="380" y="26" width="120" height="24" fill="rgba(53,201,149,.3)" rx="3"/><text x="440" y="42" font-size="9" fill="#218d72" text-anchor="middle">18%</text>
+          <!-- Row 2 -->
+          <rect x="40" y="56" width="160" height="24" fill="rgba(53,201,149,.7)" rx="3"/><text x="120" y="72" font-size="9" fill="#1a6b50" text-anchor="middle" font-weight="700">100%</text>
+          <rect x="210" y="56" width="160" height="24" fill="rgba(53,201,149,.38)" rx="3"/><text x="290" y="72" font-size="9" fill="#218d72" text-anchor="middle">27%</text>
+          <rect x="380" y="56" width="120" height="24" fill="rgba(53,201,149,.22)" rx="3"/><text x="440" y="72" font-size="9" fill="#218d72" text-anchor="middle">14%</text>
+          <!-- Row 3 -->
+          <rect x="40" y="81" width="160" height="24" fill="rgba(53,201,149,.7)" rx="3"/><text x="120" y="97" font-size="9" fill="#1a6b50" text-anchor="middle" font-weight="700">100%</text>
+          <rect x="210" y="81" width="160" height="24" fill="rgba(239,176,93,.4)" rx="3"/><text x="290" y="97" font-size="9" fill="#8a5c00" text-anchor="middle">21%</text>
+          <rect x="380" y="81" width="120" height="24" fill="rgba(239,176,93,.25)" rx="3"/><text x="440" y="97" font-size="9" fill="#8a5c00" text-anchor="middle">11%</text>
+          <!-- Row 4 -->
+          <rect x="40" y="106" width="160" height="24" fill="rgba(53,201,149,.7)" rx="3"/><text x="120" y="122" font-size="9" fill="#1a6b50" text-anchor="middle" font-weight="700">100%</text>
+          <rect x="210" y="106" width="160" height="24" fill="rgba(239,176,93,.28)" rx="3"/><text x="290" y="122" font-size="9" fill="#8a5c00" text-anchor="middle">16%</text>
+          <rect x="380" y="106" width="120" height="24" fill="rgba(239,125,134,.2)" rx="3"/><text x="440" y="122" font-size="9" fill="#7a2430" text-anchor="middle">8%</text>
+          <!-- Row 5: 2023 Q1 (worst) -->
+          <rect x="40" y="131" width="160" height="24" fill="rgba(53,201,149,.7)" rx="3"/><text x="120" y="147" font-size="9" fill="#1a6b50" text-anchor="middle" font-weight="700">100%</text>
+          <rect x="210" y="131" width="160" height="24" fill="rgba(239,125,134,.3)" rx="3"/><text x="290" y="147" font-size="9" fill="#7a2430" text-anchor="middle">9%</text>
+          <rect x="380" y="131" width="120" height="24" fill="rgba(239,125,134,.45)" rx="3"/><text x="440" y="147" font-size="9" fill="#7a2430" font-weight="700">4.7%</text>
+        </svg>
+        <div class="aiw-insights">
+          <div class="aiw-ins"><span class="aiw-ins-label">2021 Q1 3개월 잔존</span><span class="aiw-ins-val">18%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">2023 Q1 3개월 잔존</span><span class="aiw-ins-val">4.7%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">1→2회 전환율</span><span class="aiw-ins-val">22%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">2→3회 전환율</span><span class="aiw-ins-val">61%</span></div>
+        </div>
+        <div class="aiw-action">첫 재구매가 가장 어렵고 중요 — 첫 구매 후 7일 자동 트리거가 최고 레버</div>
+      </div>
+    </div>`,
+
+    // ── 2: 할인이 정말 매출을 올리는가? ──
+    `<div class="aiw-header">
+      <div class="aiw-title">할인 효율 분석 — <em>Price Elasticity · Discount ROI · Segment Regression</em></div>
+      <div class="aiw-subtitle">문제: 할인↔매출 상관 r = −0.03, 할인 ROI 0.82 (손해 구조)</div>
+    </div>
+    <div class="aiw-grid">
+      <div class="aiw-card">
+        <div class="aiw-card-head">
+          <div class="aiw-card-icon">💹</div>
+          <div><div class="aiw-card-title">가격 탄력성 — 카테고리별 반응 차이</div>
+          <div class="aiw-card-sub">Technology 탄력적, Furniture 비탄력적. 같은 할인율이 다른 효과를 낸다</div></div>
+          <div class="aiw-badge">Elasticity</div>
+        </div>
+        <svg viewBox="0 0 520 160" width="100%" style="margin:6px 0 10px">
+          <line x1="50" y1="20" x2="50" y2="140" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <line x1="50" y1="140" x2="490" y2="140" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <text x="270" y="155" font-size="8" fill="var(--mu)" text-anchor="middle">할인율 (%)</text>
+          <text x="16" y="80" font-size="8" fill="var(--mu)" text-anchor="middle" transform="rotate(-90,16,80)">수요 변화율</text>
+          <!-- x axis labels -->
+          <text x="50" y="148" font-size="8" fill="var(--mu)" text-anchor="middle">0%</text>
+          <text x="140" y="148" font-size="8" fill="var(--mu)" text-anchor="middle">10%</text>
+          <text x="230" y="148" font-size="8" fill="var(--mu)" text-anchor="middle">20%</text>
+          <text x="320" y="148" font-size="8" fill="var(--mu)" text-anchor="middle">30%</text>
+          <text x="410" y="148" font-size="8" fill="var(--mu)" text-anchor="middle">40%</text>
+          <!-- baseline -->
+          <line x1="50" y1="80" x2="490" y2="80" stroke="rgba(96,79,67,.1)" stroke-dasharray="3,3" stroke-width="1"/>
+          <text x="492" y="83" font-size="7" fill="var(--mu)">0</text>
+          <!-- Technology: elastic (steep curve) -->
+          <polyline points="50,80 140,62 230,48 320,60 410,78 490,92" fill="none" stroke="#35c995" stroke-width="2.5"/>
+          <text x="230" y="42" font-size="9" fill="#218d72" text-anchor="middle" font-weight="700">Technology</text>
+          <text x="230" y="52" font-size="8" fill="#218d72" text-anchor="middle">탄력적 (ε=−1.4)</text>
+          <!-- Furniture: inelastic (flat) -->
+          <polyline points="50,80 140,76 230,74 320,78 410,84 490,92" fill="none" stroke="#ef7d86" stroke-width="2.5"/>
+          <text x="400" y="70" font-size="9" fill="#9b2d38" text-anchor="middle" font-weight="700">Furniture</text>
+          <text x="400" y="80" font-size="8" fill="#9b2d38" text-anchor="middle">비탄력적 (ε=−0.3)</text>
+          <!-- Office: medium -->
+          <polyline points="50,80 140,72 230,65 320,68 410,76 490,85" fill="none" stroke="#5b8ef0" stroke-width="2"/>
+          <text x="140" y="62" font-size="8" fill="#5b8ef0" text-anchor="middle">Office (ε=−0.8)</text>
+        </svg>
+        <div class="aiw-insights">
+          <div class="aiw-ins"><span class="aiw-ins-label">Technology 탄력성</span><span class="aiw-ins-val">ε = −1.4</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">Furniture 탄력성</span><span class="aiw-ins-val">ε = −0.3</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">고가 구간 CVR</span><span class="aiw-ins-val">0.8%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">저가 구간 CVR</span><span class="aiw-ins-val">9.2%</span></div>
+        </div>
+        <div class="aiw-action">Furniture 할인은 수요 반응 없음 — 할부 옵션이 할인보다 효과적</div>
+      </div>
+      <div class="aiw-card">
+        <div class="aiw-card-head">
+          <div class="aiw-card-icon">📊</div>
+          <div><div class="aiw-card-title">세그먼트별 할인 ROI — At-Risk만 플러스</div>
+          <div class="aiw-card-sub">할인 $1 투입 시 증분 매출. Champions·Loyal에 집행되는 예산이 ROI 마이너스</div></div>
+          <div class="aiw-badge">ROI Analysis</div>
+        </div>
+        <svg viewBox="0 0 520 160" width="100%" style="margin:6px 0 10px">
+          <line x1="50" y1="20" x2="50" y2="130" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <line x1="50" y1="130" x2="490" y2="130" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <!-- ROI=1.0 baseline -->
+          <line x1="50" y1="75" x2="490" y2="75" stroke="rgba(96,79,67,.3)" stroke-dasharray="4,3" stroke-width="1.5"/>
+          <text x="492" y="78" font-size="8" fill="var(--mu)">ROI 1.0</text>
+          <!-- bars -->
+          <rect x="68" y="96" width="60" height="34" fill="#ef7d86" rx="4" opacity=".8"/>
+          <text x="98" y="91" font-size="10" fill="#9b2d38" text-anchor="middle" font-weight="700">0.51</text>
+          <text x="98" y="143" font-size="9" fill="var(--mu)" text-anchor="middle">Champions</text>
+          <rect x="158" y="88" width="60" height="42" fill="#ef7d86" rx="4" opacity=".65"/>
+          <text x="188" y="83" font-size="10" fill="#9b2d38" text-anchor="middle" font-weight="700">0.73</text>
+          <text x="188" y="143" font-size="9" fill="var(--mu)" text-anchor="middle">Loyal</text>
+          <rect x="248" y="80" width="60" height="50" fill="#efb05d" rx="4" opacity=".8"/>
+          <text x="278" y="75" font-size="10" fill="#a0620a" text-anchor="middle" font-weight="700">0.91</text>
+          <text x="278" y="143" font-size="9" fill="var(--mu)" text-anchor="middle">Potential</text>
+          <rect x="338" y="42" width="60" height="33" fill="#35c995" rx="4" opacity=".85"/>
+          <text x="368" y="37" font-size="10" fill="#218d72" text-anchor="middle" font-weight="700">1.24</text>
+          <text x="368" y="143" font-size="9" fill="#218d72" text-anchor="middle" font-weight="700">At-Risk ✓</text>
+          <rect x="428" y="90" width="60" height="40" fill="rgba(150,135,120,.45)" rx="4"/>
+          <text x="458" y="85" font-size="10" fill="var(--mu)" text-anchor="middle">0.68</text>
+          <text x="458" y="143" font-size="9" fill="var(--mu)" text-anchor="middle">New</text>
+        </svg>
+        <div class="aiw-insights">
+          <div class="aiw-ins"><span class="aiw-ins-label">At-Risk ROI</span><span class="aiw-ins-val">1.24 ✓</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">Champions ROI</span><span class="aiw-ins-val">0.51 ✗</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">전체 평균 ROI</span><span class="aiw-ins-val">0.82</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">할인↔매출 r</span><span class="aiw-ins-val">−0.03</span></div>
+        </div>
+        <div class="aiw-action">Champions 할인 예산 → At-Risk 이전 시 전체 ROI 1.2 달성 가능 (6주 목표)</div>
+      </div>
+    </div>`,
+
+    // ── 3: 3월 급락은 구조적인가, 일시적인가? ──
+    `<div class="aiw-header">
+      <div class="aiw-title">매출 예측 — <em>Holt-Winters · Seasonality Decomp · Volatility</em></div>
+      <div class="aiw-subtitle">문제: 3월 −31% MoM · Technology −77% · 계절 외 요인 60% 이상</div>
+    </div>
+    <div class="aiw-grid">
+      <div class="aiw-card" style="grid-column:1/-1">
+        <div class="aiw-card-head">
+          <div class="aiw-card-icon">📈</div>
+          <div><div class="aiw-card-title">Holt-Winters 예측 + 계절성 분해</div>
+          <div class="aiw-card-sub">α=0.3(수준), β=0.2(추세). 95% CI: $162K~$234K. 3월 하락의 40%는 계절, 60%는 구조적 원인</div></div>
+          <div class="aiw-badge">Time-Series</div>
+        </div>
+        <svg viewBox="0 0 900 180" width="100%" style="margin:6px 0 10px">
+          <line x1="50" y1="20" x2="50" y2="155" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <line x1="50" y1="155" x2="860" y2="155" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <line x1="50" y1="110" x2="860" y2="110" stroke="rgba(96,79,67,.06)" stroke-dasharray="4,4" stroke-width="1"/>
+          <line x1="50" y1="65"  x2="860" y2="65"  stroke="rgba(96,79,67,.06)" stroke-dasharray="4,4" stroke-width="1"/>
+          <text x="40" y="158" font-size="7" fill="var(--mu)" text-anchor="end">$0</text>
+          <text x="40" y="113" font-size="7" fill="var(--mu)" text-anchor="end">$50K</text>
+          <text x="40" y="68"  font-size="7" fill="var(--mu)" text-anchor="end">$100K</text>
+          <!-- actual 12 months -->
+          <polyline points="80,118 148,105 216,125 284,95 352,88 420,102 488,80 556,92 624,72 692,62 760,40 828,88"
+            fill="none" stroke="var(--dk)" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- highlight march drop -->
+          <circle cx="216" cy="125" r="6" fill="none" stroke="#ef7d86" stroke-width="2"/>
+          <text x="216" y="138" font-size="8" fill="#9b2d38" text-anchor="middle" font-weight="700">3월 −77%</text>
+          <!-- forecast CI band -->
+          <polygon points="828,88 864,72 900,58 900,42 864,52 828,76" fill="rgba(79,183,153,.1)"/>
+          <!-- forecast line -->
+          <polyline points="828,88 864,68 900,52" fill="none" stroke="#35c995" stroke-width="2.5" stroke-dasharray="7,4"/>
+          <circle cx="864" cy="68" r="4" fill="#35c995"/>
+          <circle cx="900" cy="52" r="4" fill="#35c995"/>
+          <text x="900" y="46" font-size="9" fill="#218d72" text-anchor="middle" font-weight="700">$198K</text>
+          <!-- forecast divider -->
+          <line x1="828" y1="20" x2="828" y2="155" stroke="rgba(96,79,67,.2)" stroke-dasharray="3,3" stroke-width="1"/>
+          <text x="832" y="32" font-size="8" fill="var(--mu)">예측 →</text>
+          <!-- x labels -->
+          <text x="80"  y="168" font-size="8" fill="var(--mu)" text-anchor="middle">1월</text>
+          <text x="216" y="168" font-size="8" fill="#9b2d38" text-anchor="middle" font-weight="700">3월</text>
+          <text x="420" y="168" font-size="8" fill="var(--mu)" text-anchor="middle">5월</text>
+          <text x="624" y="168" font-size="8" fill="var(--mu)" text-anchor="middle">7월</text>
+          <text x="828" y="168" font-size="8" fill="var(--mu)" text-anchor="middle">현재</text>
+          <!-- legend -->
+          <line x1="54" y1="28" x2="74" y2="28" stroke="var(--dk)" stroke-width="2"/>
+          <text x="77" y="31" font-size="8" fill="var(--dk)">실제</text>
+          <line x1="120" y1="28" x2="140" y2="28" stroke="#35c995" stroke-width="2" stroke-dasharray="5,3"/>
+          <text x="143" y="31" font-size="8" fill="#35c995">Holt-Winters 예측</text>
+        </svg>
+        <div class="aiw-insights">
+          <div class="aiw-ins"><span class="aiw-ins-label">4월 예측</span><span class="aiw-ins-val">$198K (+74%)</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">95% CI</span><span class="aiw-ins-val">$162K~$234K</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">모델 RMSE</span><span class="aiw-ins-val">$8.3K</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">3월 계절 기대 하락</span><span class="aiw-ins-val">−28%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">실제 하락</span><span class="aiw-ins-val">−77%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">초과 하락 (구조적)</span><span class="aiw-ins-val">−49%p</span></div>
+        </div>
+        <div class="aiw-action">4월 Technology $50K 미달 시 채널 전략 즉시 재검토 — 단일 카테고리 의존(36%) 분산 필요</div>
+      </div>
+      <div class="aiw-card">
+        <div class="aiw-card-head">
+          <div class="aiw-card-icon">📊</div>
+          <div><div class="aiw-card-title">계절성 지수 — Q4 집중, Q1 최저</div>
+          <div class="aiw-card-sub">월별 계절성 지수. 12월 ×1.89, Q1 평균 0.72. 3월 실제 하락은 계절 기대치의 2.8배</div></div>
+          <div class="aiw-badge">Seasonality</div>
+        </div>
+        <svg viewBox="0 0 520 160" width="100%" style="margin:6px 0 10px">
+          <line x1="40" y1="20" x2="40" y2="130" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <line x1="40" y1="130" x2="490" y2="130" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <line x1="40" y1="80" x2="490" y2="80" stroke="rgba(96,79,67,.2)" stroke-dasharray="4,3" stroke-width="1.5"/>
+          <text x="492" y="83" font-size="7" fill="var(--mu)">1.0</text>
+          <!-- 12 monthly bars -->
+          <rect x="46"  y="95" width="32" height="35" fill="#efb05d" rx="2" opacity=".8"/>
+          <rect x="82"  y="88" width="32" height="42" fill="#efb05d" rx="2" opacity=".75"/>
+          <rect x="118" y="93" width="32" height="37" fill="#ef7d86" rx="2" opacity=".85"/>
+          <rect x="154" y="82" width="32" height="48" fill="rgba(150,135,120,.5)" rx="2"/>
+          <rect x="190" y="78" width="32" height="52" fill="rgba(150,135,120,.5)" rx="2"/>
+          <rect x="226" y="75" width="32" height="55" fill="#5b8ef0" rx="2" opacity=".7"/>
+          <rect x="262" y="72" width="32" height="58" fill="#5b8ef0" rx="2" opacity=".75"/>
+          <rect x="298" y="68" width="32" height="62" fill="#5b8ef0" rx="2" opacity=".8"/>
+          <rect x="334" y="62" width="32" height="68" fill="#35c995" rx="2" opacity=".75"/>
+          <rect x="370" y="55" width="32" height="75" fill="#35c995" rx="2" opacity=".85"/>
+          <rect x="406" y="48" width="32" height="82" fill="#35c995" rx="2" opacity=".9"/>
+          <rect x="442" y="28" width="32" height="102" fill="#35c995" rx="2" opacity=".95"/>
+          <!-- values -->
+          <text x="62"  y="92" font-size="7.5" fill="#8a5c00" text-anchor="middle">0.72</text>
+          <text x="134" y="90" font-size="7.5" fill="#9b2d38" text-anchor="middle" font-weight="700">0.68</text>
+          <text x="458" y="24" font-size="7.5" fill="#218d72" text-anchor="middle" font-weight="700">1.89</text>
+          <!-- month labels -->
+          <text x="62"  y="142" font-size="7" fill="var(--mu)" text-anchor="middle">1</text>
+          <text x="134" y="142" font-size="7" fill="#9b2d38" text-anchor="middle" font-weight="700">3</text>
+          <text x="242" y="142" font-size="7" fill="var(--mu)" text-anchor="middle">6</text>
+          <text x="314" y="142" font-size="7" fill="var(--mu)" text-anchor="middle">8</text>
+          <text x="422" y="142" font-size="7" fill="var(--mu)" text-anchor="middle">11</text>
+          <text x="458" y="142" font-size="7" fill="#218d72" text-anchor="middle" font-weight="700">12</text>
+        </svg>
+        <div class="aiw-insights">
+          <div class="aiw-ins"><span class="aiw-ins-label">12월 지수</span><span class="aiw-ins-val">×1.89</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">Q1 평균 지수</span><span class="aiw-ins-val">0.72</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">Q4 vs Q1 격차</span><span class="aiw-ins-val">2.4배</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">9월 재고 선확보 필요</span><span class="aiw-ins-val">피크 −3개월</span></div>
+        </div>
+        <div class="aiw-action">9월까지 12월 피크 재고 확보 미완료 시 기회손실 $50K+ (추정)</div>
+      </div>
+      <div class="aiw-card">
+        <div class="aiw-card-head">
+          <div class="aiw-card-icon">⚡</div>
+          <div><div class="aiw-card-title">카테고리 변동성 — Technology ±38%</div>
+          <div class="aiw-card-sub">월별 매출 변동계수(CV). Technology가 Furniture의 3배. 단일 의존이 전체 예측 불안정화</div></div>
+          <div class="aiw-badge">Volatility</div>
+        </div>
+        <svg viewBox="0 0 520 160" width="100%" style="margin:6px 0 10px">
+          <line x1="50" y1="20" x2="50" y2="130" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <line x1="50" y1="130" x2="490" y2="130" stroke="rgba(96,79,67,.12)" stroke-width="1"/>
+          <!-- Tech: highly volatile -->
+          <polyline points="80,85 130,55 180,100 230,40 280,95 330,30 380,88 430,45 480,78"
+            fill="none" stroke="#ef7d86" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- Furniture: stable -->
+          <polyline points="80,88 130,82 180,90 230,78 280,85 330,80 380,86 430,79 480,84"
+            fill="none" stroke="#5b8ef0" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- Office: stable -->
+          <polyline points="80,95 130,90 180,93 230,88 280,91 330,87 380,92 430,88 480,90"
+            fill="none" stroke="rgba(150,135,120,.6)" stroke-width="2" stroke-linejoin="round"/>
+          <!-- CV annotations -->
+          <text x="330" y="24" font-size="10" fill="#9b2d38" font-weight="700">Technology CV ±38%</text>
+          <text x="340" y="110" font-size="9" fill="#3b5bbf">Furniture CV ±12%</text>
+          <text x="340" y="125" font-size="9" fill="var(--mu)">Office CV ±9%</text>
+          <!-- legend -->
+          <line x1="54" y1="28" x2="74" y2="28" stroke="#ef7d86" stroke-width="2"/>
+          <text x="77" y="32" font-size="8" fill="#ef7d86">Technology</text>
+          <line x1="150" y1="28" x2="170" y2="28" stroke="#5b8ef0" stroke-width="2"/>
+          <text x="173" y="32" font-size="8" fill="#5b8ef0">Furniture</text>
+        </svg>
+        <div class="aiw-insights">
+          <div class="aiw-ins"><span class="aiw-ins-label">Technology CV</span><span class="aiw-ins-val">±38%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">Furniture CV</span><span class="aiw-ins-val">±12%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">Office CV</span><span class="aiw-ins-val">±9%</span></div>
+          <div class="aiw-ins"><span class="aiw-ins-label">Tech 매출 비중</span><span class="aiw-ins-val">36%</span></div>
+        </div>
+        <div class="aiw-action">Furniture·Office 비중 확대 시 전체 예측 오차 30% 감소 — 포트폴리오 다변화 6개월 목표</div>
+      </div>
+    </div>`,
+
+  ];
+  return scenarios[idx] || scenarios[0];
+}
+
+/* ── Range slider progress fill ── */
+function updateRangeFill(input) {
+  const min = parseFloat(input.min) || 0;
+  const max = parseFloat(input.max) || 100;
+  const pct = ((parseFloat(input.value) - min) / (max - min)) * 100;
+  input.style.background = `linear-gradient(to right, #4fb799 ${pct}%, rgba(96,79,67,.15) ${pct}%)`;
+}
+
+/* ── SIMULATION FUNCTIONS ── */
+
+function runSim(inputEl) {
+  // Support being called as oninput handler or as bulk init
+  const widgets = inputEl
+    ? [inputEl.closest('.sim-widget')]
+    : document.querySelectorAll('.sim-widget');
+  widgets.forEach(container => {
+    if (!container) return;
+    const input = container.querySelector('.sim-input');
+    if (!input) return;
+    const d = Math.max(0, Math.min(30, parseFloat(input.value) || 0));
+    const baseDiscount = 17.7;
+    const baseMargin = 10.7;
+    const marginDelta = (baseDiscount - d) * 1.3;
+    const newMargin = Math.max(0, baseMargin + marginDelta).toFixed(1);
+    const profitDelta = Math.round((baseDiscount - d) * 700);
+    const sign = profitDelta >= 0 ? '+' : '';
+    const vals = container.querySelectorAll('.sim-res-val');
+    if (vals[0]) vals[0].textContent = newMargin + '%';
+    if (vals[1]) vals[1].textContent = sign + '$' + Math.abs(profitDelta / 1000).toFixed(1) + 'K';
+    if (vals[2]) vals[2].textContent = sign + marginDelta.toFixed(1) + '%p';
+  });
+}
+
+/* ── dp0: Pareto SKU ── */
+function runParetoSim(inputEl) {
+  const w = inputEl.closest('.sim-pareto');
+  const x = Math.max(5, Math.min(50, parseFloat(inputEl.value) || 20));
+  const pts = [[5,55],[10,65],[15,72],[20,80],[25,85],[30,88],[40,92],[50,95]];
+  let cov = 95;
+  for (let i = 0; i < pts.length - 1; i++) {
+    if (x >= pts[i][0] && x <= pts[i+1][0]) {
+      const t = (x - pts[i][0]) / (pts[i+1][0] - pts[i][0]);
+      cov = Math.round(pts[i][1] + t * (pts[i+1][1] - pts[i][1]));
+      break;
+    }
+  }
+  if (x < 5) cov = 55;
+  const skuCount = Math.round(x / 100 * 3500);
+  const efficiency = (cov / x).toFixed(1);
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = cov + '%';
+  if (vals[1]) vals[1].textContent = skuCount + '개';
+  if (vals[2]) vals[2].textContent = efficiency + '×';
+}
+
+/* ── dp0: Category Mix ── */
+function runMixSim(inputEl) {
+  updateRangeFill(inputEl);
+  const w = inputEl.closest('.sim-mix');
+  const techInput  = w.querySelector('[data-key="tech"]');
+  const officeInput = w.querySelector('[data-key="office"]');
+  const tech   = Math.min(60, parseFloat(techInput.value) || 36);
+  const office = Math.min(50, parseFloat(officeInput.value) || 31);
+  const furn   = Math.max(0, 100 - tech - office);
+  w.querySelector('.tech-val').textContent   = tech + '%';
+  w.querySelector('.office-val').textContent = office + '%';
+  const furnNote = w.querySelector('.furn-note');
+  if (furnNote) furnNote.innerHTML = 'Furniture(마진 10.7%)는 자동으로 나머지: <strong>' + furn + '%</strong>';
+  const margin = ((tech/100)*35 + (furn/100)*10.7 + (office/100)*25).toFixed(1);
+  const profit = Math.round(2300 * parseFloat(margin) / 100);
+  const risk   = tech > 45 ? '높음 ⚠' : tech > 30 ? '보통' : '낮음 ✓';
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = margin + '%';
+  if (vals[1]) vals[1].textContent = '$' + profit + 'K';
+  if (vals[2]) vals[2].textContent = risk;
+}
+
+/* ── dp1: At-Risk Conversion ── */
+function runAtRiskSim(inputEl) {
+  const w = inputEl.closest('.sim-atrisk');
+  const n = Math.max(0, Math.min(2099, parseFloat(inputEl.value) || 500));
+  const ltvGain  = n * 7700;
+  const profitEst = Math.round(ltvGain * 0.3);
+  const pct = Math.round(n / 2099 * 100);
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = '+$' + (ltvGain / 1000).toFixed(0) + 'K';
+  if (vals[1]) vals[1].textContent = '+$' + (profitEst / 1000).toFixed(0) + 'K';
+  if (vals[2]) vals[2].textContent = pct + '%';
+}
+
+/* ── dp1: Campaign ROI ── */
+function runCampaignROI(inputEl) {
+  const w = inputEl.closest('.sim-campaign');
+  const budget = Math.max(100, Math.min(50000, parseFloat(inputEl.value) || 3000));
+  const converted  = Math.round(budget / 15);
+  const ltvReturn  = converted * 7700;
+  const roi = Math.round(ltvReturn / budget);
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = converted + '명';
+  if (vals[1]) vals[1].textContent = '+$' + (ltvReturn / 1000).toFixed(0) + 'K';
+  if (vals[2]) vals[2].textContent = roi + '×';
+}
+
+/* ── dp2: Segment Discount ── */
+function runSegDiscountSim(inputEl) {
+  updateRangeFill(inputEl);
+  const w = inputEl.closest('.sim-segdiscount');
+  w.querySelectorAll('.seg-val').forEach(el => {
+    const seg   = el.dataset.seg;
+    const input = w.querySelector('[data-seg="' + seg + '"]');
+    if (input) el.textContent = input.value + '%';
+  });
+  const champD  = parseFloat(w.querySelector('[data-seg="champ"]').value);
+  const atRiskD = parseFloat(w.querySelector('[data-seg="atrisk"]').value);
+  const newD    = parseFloat(w.querySelector('[data-seg="new"]').value);
+  const discCost = Math.round(920000 * champD/100 + 690000 * atRiskD/100 + 690000 * newD/100);
+  const revBoost = Math.round(920000*(champD/100)*0.1 + 690000*(atRiskD/100)*1.24 + 690000*(newD/100)*0.8);
+  const roi = discCost > 0 ? (revBoost / discCost).toFixed(2) : '∞';
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = '$' + (discCost / 1000).toFixed(0) + 'K';
+  if (vals[1]) vals[1].textContent = '+$' + (revBoost / 1000).toFixed(0) + 'K';
+  if (vals[2]) vals[2].textContent = roi + '×';
+}
+
+/* ── dp2: Price Elasticity ── */
+function runElasticitySim(inputEl) {
+  const w = inputEl.closest('.sim-elasticity');
+  const priceUp = Math.max(0, Math.min(30, parseFloat(inputEl.value) || 5));
+  const demandChange  = (-0.3 * priceUp).toFixed(1);
+  const revenueChange = (((1 + priceUp/100) * (1 + (-0.3 * priceUp)/100)) - 1) * 100;
+  const marginChange  = (priceUp * 0.9).toFixed(1);
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = demandChange + '%';
+  if (vals[1]) vals[1].textContent = (revenueChange >= 0 ? '+' : '') + revenueChange.toFixed(1) + '%';
+  if (vals[2]) vals[2].textContent = '+' + marginChange + '%p';
+}
+
+/* ── dp3: Holt-Winters ── */
+function runHoltSim(inputEl) {
+  updateRangeFill(inputEl);
+  const w = inputEl.closest('.sim-holt');
+  const alphaInput = w.querySelector('[data-param="alpha"]');
+  const betaInput  = w.querySelector('[data-param="beta"]');
+  w.querySelectorAll('.param-val').forEach(el => {
+    const p = el.dataset.param;
+    const i = w.querySelector('[data-param="' + p + '"]');
+    if (i) el.textContent = i.value;
+  });
+  const alpha = parseFloat(alphaInput.value);
+  const beta  = parseFloat(betaInput.value);
+  const forecast   = Math.round(198 * (1 + (beta - 0.2) * 2.5) * (1 + (alpha - 0.3) * 0.3));
+  const volatility = Math.round(38 * (1 + (alpha - 0.3) * 0.6));
+  const stability  = alpha < 0.3 ? '안정적 (장기 추세)' : alpha > 0.6 ? '민감 (최근 반응)' : '균형';
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = '$' + forecast + 'K';
+  if (vals[1]) vals[1].textContent = '±' + volatility + '%';
+  if (vals[2]) vals[2].textContent = stability;
+}
+
+/* ── dp3: Technology Dependency ── */
+function runTechDependSim(inputEl) {
+  updateRangeFill(inputEl);
+  const w = inputEl.closest('.sim-techdep');
+  const techPct = Math.max(15, Math.min(60, parseFloat(inputEl.value) || 36));
+  const valEl = w.querySelector('.tech-dep-val');
+  if (valEl) valEl.textContent = techPct + '%';
+  const newVol = Math.round(38 * techPct / 36);
+  const marginDelta = ((techPct - 36) * -0.08).toFixed(1);
+  const risk = techPct > 45 ? '위험 ⚠' : techPct > 35 ? '주의' : '안전 ✓';
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = '±' + newVol + '%';
+  if (vals[1]) vals[1].textContent = (parseFloat(marginDelta) >= 0 ? '+' : '') + marginDelta + '%p';
+  if (vals[2]) vals[2].textContent = risk;
+}
+
+/* ── dp3: Scenario Toggle ── */
+function selectScenario(btn) {
+  const w = btn.closest('.sim-scenario');
+  w.querySelectorAll('.sim-scenario-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const s = btn.dataset.scenario;
+  const data = {
+    opt:  { q:['$215K','$228K','$241K'], note:'Tech 회복 + 계절성 피크 조기 도래', color:'#218d72' },
+    base: { q:['$198K','$204K','$211K'], note:'현재 추세 유지, MAPE 87.3%',          color:'#5b8ef0' },
+    pess: { q:['$168K','$155K','$148K'], note:'Tech 의존 리스크 현실화 + 재고 부족', color:'#9b2d38' },
+  };
+  const d = data[s];
+  const vals = w.querySelectorAll('.sim-res-val');
+  d.q.forEach((v, i) => { if (vals[i]) { vals[i].textContent = v; vals[i].style.color = d.color; } });
+  const noteEl = w.querySelector('.scenario-note');
+  if (noteEl) { noteEl.textContent = d.note; noteEl.style.color = d.color; }
+}
+
+/* ── Init all sims on load & after clone ── */
+function initAllSims(root) {
+  const r = root || document;
+  r.querySelectorAll('.sim-pareto .sim-input').forEach(el => runParetoSim(el));
+  r.querySelectorAll('.sim-mix [data-key="tech"]').forEach(el => runMixSim(el));
+  r.querySelectorAll('.sim-atrisk .sim-input').forEach(el => runAtRiskSim(el));
+  r.querySelectorAll('.sim-campaign .sim-input').forEach(el => runCampaignROI(el));
+  r.querySelectorAll('.sim-segdiscount [data-seg="champ"]').forEach(el => runSegDiscountSim(el));
+  r.querySelectorAll('.sim-elasticity .sim-input').forEach(el => runElasticitySim(el));
+  r.querySelectorAll('.sim-holt [data-param="alpha"]').forEach(el => runHoltSim(el));
+  r.querySelectorAll('.sim-techdep input[type="range"]').forEach(el => runTechDependSim(el));
+  // Fill all remaining range sliders not handled above
+  r.querySelectorAll('.sim-range').forEach(el => updateRangeFill(el));
+  runSim();
+}
+document.addEventListener('DOMContentLoaded', () => initAllSims());
+
+function toggleStep(id) {
+  const el = document.getElementById(id);
+  const tog = document.getElementById(id + '-t');
+  el.classList.toggle('open');
+  tog.textContent = el.classList.contains('open') ? '접기' : '열기';
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,2513 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 분석 대시보드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --bd: rgba(110,93,80,0.16);
+      --bds: rgba(96,79,67,0.24);
+      --offwhite: rgba(247,244,239,0.97);
+      --lavender: rgba(237,231,245,0.96);
+      --mint: rgba(225,241,236,0.96);
+      --rose: rgba(247,229,235,0.96);
+      --cream: rgba(247,241,226,0.96);
+      --beige: rgba(239,232,223,0.97);
+      --acc: #4fb799;
+      --dk: #2f2b27;
+      --mu: #766c63;
+      --so: #9a9086;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #000; color: #fff; padding: 36px 40px 80px; }
+
+    /* HEADER */
+    .hdr { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 56px; padding-bottom: 32px; border-bottom: 1px solid var(--bd); }
+    .hdr-eye { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.7); margin-bottom: 12px; }
+    .hdr-title { font-family: 'Barlow', sans-serif; font-size: 44px; font-weight: 400; line-height: 1.15; letter-spacing: -.02em; }
+    .hdr-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: rgba(255,255,255,.85); }
+    .hdr-meta { font-size: 13px; color: rgba(255,255,255,.38); text-align: right; line-height: 1.8; }
+
+    /* SECTION DIVIDER */
+    .sec-hdr { display: flex; align-items: center; gap: 16px; margin: 56px 0 28px; }
+    .sec-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: rgba(255,255,255,.28); letter-spacing: .14em; text-transform: uppercase; }
+    .sec-title { font-family: 'Barlow', sans-serif; font-size: 22px; font-weight: 600; color: rgba(255,255,255,.9); letter-spacing: -.01em; }
+    .sec-line { flex: 1; height: 1px; background: var(--bd); }
+
+    /* STEP CARD */
+    .step { border-radius: 22px; border: 1px solid var(--bd); overflow: hidden; margin-bottom: 20px; box-shadow: 0 8px 28px rgba(42,30,18,.08); }
+    .step.c-offwhite { background: var(--offwhite); }
+    .step.c-lavender  { background: var(--lavender); }
+    .step.c-rose      { background: var(--rose); }
+    .step.c-cream     { background: var(--cream); }
+    .step.c-mint      { background: var(--mint); }
+    .step.c-beige     { background: var(--beige); }
+
+    .step-top { padding: 26px 28px 22px; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; transition: background .15s; }
+    .step-top:hover { background: rgba(47,43,39,.04); }
+    .step-left { flex: 1; }
+    .step-num { display: none; }
+    .step-icon { width: 44px; height: 44px; border-radius: 13px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 14px; }
+    .step-title { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--dk); margin-bottom: 7px; line-height: 1.3; letter-spacing: -.01em; }
+    .step-desc { font-size: 13px; color: var(--mu); line-height: 1.65; }
+    .step-toggle { font-size: 11px; color: var(--so); flex-shrink: 0; padding: 5px 12px; background: rgba(47,43,39,.07); border-radius: 8px; font-family: 'JetBrains Mono', monospace; transition: background .15s; }
+    .step.open .step-toggle { background: rgba(79,183,153,.15); color: #218d72; }
+
+    /* PROMPT AREA */
+    .prompt-wrap { display: none !important; }
+    .sub-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--so); margin-bottom: 9px; }
+    .prompt-box { background: rgba(18,14,10,.88); border: 1px solid rgba(96,79,67,.22); border-radius: 12px; padding: 16px 18px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.75; color: rgba(255,255,255,.75); white-space: pre-wrap; word-break: break-word; }
+    .prompt-box .kw { color: #9dd8c7; }
+
+    /* RESPONSE AREA */
+    .response-wrap { padding: 0 28px 26px; display: none; }
+    .step.open .response-wrap { display: block; }
+    .response-card { background: rgba(255,252,247,.94); border: 1px solid rgba(96,79,67,.12); border-radius: 16px; overflow: hidden; }
+    .response-header { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid rgba(96,79,67,.1); }
+    .ai-avatar { width: 30px; height: 30px; border-radius: 9px; background: rgba(79,183,153,.2); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .ai-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--dk); }
+    .ai-badge { margin-left: auto; font-size: 10px; padding: 3px 10px; background: rgba(79,183,153,.15); color: #218d72; border: 1px solid rgba(79,183,153,.2); border-radius: 99px; font-weight: 700; }
+    .response-body { padding: 20px 22px 22px; }
+
+    /* RESPONSE CONTENT STYLES */
+    .r-text { font-size: 14px; color: var(--dk); line-height: 1.75; margin-bottom: 14px; }
+    .r-text strong { font-weight: 700; }
+    .r-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
+    .r-table th { background: rgba(47,43,39,.09); color: var(--dk); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; padding: 9px 12px; text-align: left; }
+    .r-table td { padding: 9px 12px; color: var(--dk); border-top: 1px solid rgba(96,79,67,.08); vertical-align: top; line-height: 1.6; }
+    .r-table tr:nth-child(even) td { background: rgba(47,43,39,.02); }
+    .tag-ok  { display: inline-block; background: rgba(53,201,149,.18); color: #0d7a5c; border-radius: 5px; padding: 1px 7px; font-size: 10px; font-weight: 700; }
+    .tag-warn { display: inline-block; background: rgba(239,176,93,.2); color: #a0620a; border-radius: 5px; padding: 1px 7px; font-size: 10px; font-weight: 700; }
+    .tag-bad { display: inline-block; background: rgba(239,125,134,.2); color: #9b2d38; border-radius: 5px; padding: 1px 7px; font-size: 10px; font-weight: 700; }
+    .r-finding { display: flex; gap: 10px; align-items: flex-start; background: rgba(47,43,39,.05); border: 1px solid rgba(96,79,67,.1); border-radius: 10px; padding: 12px 14px; margin-bottom: 9px; }
+    .r-fn { width: 22px; height: 22px; border-radius: 50%; background: rgba(79,183,153,.15); color: #218d72; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+    .r-ft { font-size: 13px; color: var(--dk); line-height: 1.65; }
+    .r-ft strong { font-weight: 700; }
+    .r-code { background: rgba(18,14,10,.06); border: 1px solid rgba(96,79,67,.1); border-radius: 8px; padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--dk); line-height: 1.75; margin-bottom: 12px; white-space: pre; }
+    .r-section { margin-bottom: 16px; }
+    .r-sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--so); margin-bottom: 10px; }
+    .r-hierarchy { border-left: 2px solid var(--bds); padding-left: 16px; margin-bottom: 14px; }
+    .h-p { font-size: 14px; font-weight: 700; color: var(--dk); margin-bottom: 9px; }
+    .h-c1 { font-size: 13px; color: var(--dk); margin: 7px 0 3px; padding-left: 13px; border-left: 1px solid rgba(96,79,67,.2); }
+    .h-c1::before { content: "↳ "; color: var(--mu); }
+    .h-c2 { font-size: 12.5px; color: var(--mu); margin: 3px 0; padding-left: 28px; }
+    .h-c2::before { content: "· "; }
+    .h-action { display: inline-flex; align-items: center; gap: 5px; background: rgba(79,183,153,.12); border: 1px solid rgba(79,183,153,.2); border-radius: 7px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: #218d72; margin: 3px 0 3px 28px; }
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-bottom: 14px; }
+    .kpi-box { background: rgba(47,43,39,.06); border: 1px solid rgba(96,79,67,.09); border-radius: 10px; padding: 12px; text-align: center; }
+    .kpi-v { font-family: 'Barlow', sans-serif; font-size: 20px; font-weight: 600; color: var(--dk); margin-bottom: 4px; }
+    .kpi-l { font-size: 10px; color: var(--mu); text-transform: uppercase; letter-spacing: .06em; }
+
+    /* METHODOLOGY SELECTOR */
+    .method-section { background: rgba(14,12,10,.6); border: 1px solid var(--bds); border-radius: 22px; padding: 28px; margin-bottom: 28px; }
+    .method-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--acc); margin-bottom: 18px; }
+    .method-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 0; }
+    .method-btn { border-radius: 16px; border: 1px solid rgba(255,255,255,.1); padding: 18px 16px; cursor: pointer; transition: transform .2s, border-color .2s, background .2s; text-align: left; background: rgba(255,255,255,.04); }
+    .method-btn:hover { border-color: rgba(79,183,153,.3); background: rgba(79,183,153,.07); transform: translateY(-2px); }
+    .method-btn.active { border-color: var(--acc); background: rgba(79,183,153,.1); }
+    .mb-icon { font-size: 24px; margin-bottom: 10px; }
+    .mb-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(255,255,255,.35); margin-bottom: 5px; letter-spacing: .08em; }
+    .mb-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.85); margin-bottom: 6px; line-height: 1.35; }
+    .mb-desc { font-size: 11px; color: rgba(255,255,255,.45); line-height: 1.55; }
+    .mb-tag { display: inline-block; padding: 2px 7px; background: rgba(79,183,153,.12); border-radius: 5px; font-size: 10px; color: var(--acc); font-weight: 600; margin-top: 8px; }
+
+    /* DASHBOARD PANELS */
+    .dash-panel { display: none; }
+    .dash-panel.active { display: block; }
+    .dash { background: rgba(250,246,240,.97); border-radius: 20px; border: 1px solid var(--bds); overflow: hidden; box-shadow: 0 16px 48px rgba(42,30,18,.12); }
+    .dash-topbar { background: #111; padding: 18px 26px; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+    .dash-topbar-title { font-family: 'Barlow', sans-serif; font-size: 22px; font-weight: 600; color: #fff; letter-spacing: -.02em; line-height: 1.2; }
+    .dash-topbar-meta { font-size: 11px; color: rgba(255,255,255,.35); white-space: nowrap; flex-shrink: 0; }
+    .dash-body { padding: 22px; }
+    .dash-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .dk-box { background: #fff; border: 1px solid rgba(96,79,67,.1); border-radius: 14px; padding: 16px; }
+    .dk-val { font-family: 'Barlow', sans-serif; font-size: 26px; font-weight: 600; color: #0a0a0a; margin-bottom: 4px; }
+    .dk-lbl { font-size: 11px; color: var(--mu); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 7px; }
+    .dk-delta { font-size: 12px; font-weight: 600; }
+    .dk-delta.up { color: #218d72; }
+    .dk-delta.dn { color: #9b2d38; }
+    .dk-delta.warn { color: #a0620a; }
+    .dash-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; min-width: 0; align-items: stretch; }
+    .dash-charts > * { min-width: 0; overflow: hidden; }
+    .dash-charts.three { grid-template-columns: 1.6fr 1fr 1fr; }
+    .dash-charts.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .dash-charts.full { grid-template-columns: 1fr; }
+    .dash-charts.three-eq { grid-template-columns: 1fr 1fr 1fr; }
+    .chart-card { background: #fff; border: 1px solid rgba(96,79,67,.1); border-radius: 14px; padding: 18px; overflow: hidden; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; }
+    .chart-card svg { display: block; width: 100%; height: auto; max-height: 260px; }
+    .dash-charts.full .chart-card svg { max-height: 300px; }
+    .dash-charts:not(.full) .chart-card { min-height: 240px; }
+    .dash-charts.full .chart-card { min-height: 200px; }
+    .cc-title { font-size: 13px; font-weight: 700; color: var(--dk); margin-bottom: 5px; line-height: 1.4; }
+    .cc-desc { font-size: 12px; color: var(--mu); margin-bottom: 14px; line-height: 1.6; }
+    .dash-actions { background: transparent; border-radius: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .da-item { background: rgba(247,244,239,.97); border: 1px solid rgba(96,79,67,.12); border-radius: 12px; padding: 13px 14px; }
+    .da-p { font-size: 10px; font-weight: 700; color: rgba(47,43,39,.45); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+    .da-title { font-size: 13px; font-weight: 700; color: var(--dk); margin-bottom: 5px; line-height: 1.4; }
+    .da-why { font-size: 12px; color: rgba(47,43,39,.55); line-height: 1.6; }
+
+    /* METRIC TREE */
+    .metric-tree { background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.12); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+    .metric-tree-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--so); margin-bottom: 12px; }
+
+    /* AI BADGE INLINE */
+    .ai-badge-inline { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 7px; background: rgba(91,142,240,.12); border: 1px solid rgba(91,142,240,.25); border-radius: 5px; color: #3b5bbf; margin-left: 6px; vertical-align: middle; }
+
+    /* DATA STORY BLOCK */
+    /* ── Story Flow Block ── */
+    .story-block { background: transparent; border: none; border-bottom: 1px solid rgba(96,79,67,.12); padding: 0 0 18px; margin-bottom: 20px; }
+    .story-flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+    .sf-cell { padding: 12px 14px; position: relative; }
+    .sf-cell + .sf-cell::before { content: '→'; position: absolute; left: -7px; top: 50%; transform: translateY(-50%); font-size: 12px; color: rgba(96,79,67,.3); font-family: 'JetBrains Mono', monospace; }
+    .sf-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; padding: 2px 7px; border-radius: 5px; display: inline-block; }
+    .sf-label.lbl-now  { background: rgba(47,43,39,.07); color: rgba(47,43,39,.5); }
+    .sf-label.lbl-why  { background: rgba(239,176,93,.15); color: #8a5c00; }
+    .sf-label.lbl-so   { background: rgba(239,125,134,.13); color: #7a2430; }
+    .sf-label.lbl-act  { background: rgba(53,201,149,.14); color: #1a6b50; }
+    .sf-label.lbl-risk { background: rgba(239,125,134,.13); color: #7a2430; }
+    .sf-val  { font-family: 'Barlow', sans-serif; font-size: 16px; font-weight: 700; color: var(--dk); line-height: 1.3; margin-bottom: 4px; }
+    .sf-desc { font-size: 12px; color: rgba(47,43,39,.55); line-height: 1.6; }
+    .sf-desc strong { color: var(--dk); font-weight: 700; }
+    .sf-desc .num-red  { color: #9b2d38; font-weight: 700; }
+    .sf-desc .num-grn  { color: #1a6b50; font-weight: 700; }
+    .sf-desc .num-yel  { color: #8a5c00; font-weight: 700; }
+
+    /* DATA STORYTELLING LESSON CARD */
+    .lesson-card { background: rgba(247,244,239,.97); border-radius: 18px; border: 1px solid rgba(96,79,67,.14); padding: 28px 32px 26px; margin-bottom: 16px; }
+    .lesson-title { font-family: 'Barlow', sans-serif; font-size: 22px; font-weight: 600; color: #2f2b27; margin-bottom: 8px; letter-spacing: -.01em; }
+    .lesson-body { font-size: 14px; color: #766c63; line-height: 1.8; margin-bottom: 16px; }
+    .lesson-body strong { color: #2f2b27; }
+    .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .ba-card { border-radius: 12px; border: 1px solid rgba(96,79,67,.12); padding: 16px; }
+    .ba-before { background: rgba(239,125,134,.06); }
+    .ba-after  { background: rgba(53,201,149,.06); }
+    .ba-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
+    .ba-before .ba-label { color: #9b2d38; }
+    .ba-after  .ba-label { color: #0d7a5c; }
+    .ba-text { font-size: 13px; color: #2f2b27; line-height: 1.65; }
+    .principle-list { display: flex; flex-direction: column; gap: 8px; }
+    .principle-item { display: flex; gap: 10px; align-items: flex-start; background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 10px 12px; }
+    .pi-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #2f2b27; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
+    .pi-text { font-size: 13px; color: #2f2b27; line-height: 1.65; }
+    .pi-text strong { font-weight: 700; }
+
+    /* ── 대시보드 내부 폰트 통일 (Inter) ── */
+    .dash .dk-val, .dash .dk-lbl, .dash .dk-delta,
+    .dash .cc-title, .dash .cc-desc,
+    .dash .da-p, .dash .da-title, .dash .da-why,
+    .dash .sf-val, .dash .sf-desc, .dash .sf-label,
+    .dash .r-sec-title, .dash .r-ft, .dash .r-fn,
+    .dash svg text { font-family: 'Inter', -apple-system, sans-serif; font-style: normal; }
+
+    /* ── 대시보드 상단바 — analysis 제목 디자인 ── */
+    .dash-topbar { background: #000; padding: 20px 26px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+    .dash-topbar-left { flex: 1; }
+    .dash-topbar-title { font-family: 'Barlow', sans-serif; font-size: 24px; font-weight: 600; color: #fff; letter-spacing: -.02em; line-height: 1.25; }
+    .dash-topbar-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: rgba(255,255,255,.65); font-weight: 400; }
+    .dash-topbar-problem { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,.38); margin-top: 5px; letter-spacing: .03em; }
+
+    /* ══ PIPELINE BAR ══ */
+    .pipe-bar { margin-bottom: 36px; padding-bottom: 28px; border-bottom: 1px solid rgba(110,93,80,0.16); }
+    .pipe-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 400; letter-spacing: 0;
+      text-transform: none; color: rgba(255,255,255,.38);
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .pipe-eyebrow::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.07); }
+    .pipe-row {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; position: relative;
+    }
+    .pipe-row::before {
+      content: ''; position: absolute; top: 38px;
+      left: calc(100% / 14); right: calc(100% / 14);
+      height: 1px;
+      background: linear-gradient(90deg, rgba(96,79,67,0) 0%, rgba(96,79,67,.22) 8%, rgba(96,79,67,.22) 92%, rgba(96,79,67,0) 100%);
+      pointer-events: none; z-index: 0;
+    }
+    .pipe-wrap { padding: 0 5px; position: relative; z-index: 1; }
+    .pipe-card {
+      border-radius: 16px; border: 1px solid rgba(96,79,67,.14);
+      padding: 13px 12px 12px; cursor: pointer;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+      box-shadow: 0 6px 18px rgba(42,30,18,.09);
+      display: flex; flex-direction: column;
+    }
+    .pipe-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(42,30,18,.14); border-color: rgba(96,79,67,.26); }
+    .pipe-card.active { transform: translateY(-4px); border-color: rgba(79,183,153,.55); box-shadow: 0 0 0 2px rgba(79,183,153,.18), 0 16px 32px rgba(42,30,18,.14); }
+    .pc-offwhite { background: rgba(247,244,239,0.97); }
+    .pc-lavender  { background: rgba(237,231,245,0.96); }
+    .pc-rose      { background: rgba(247,229,235,0.94); }
+    .pc-cream     { background: rgba(247,241,226,0.94); }
+    .pc-mint      { background: rgba(225,241,236,0.96); }
+    .pc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 9px; }
+    .pc-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #1a1a1a; flex-shrink: 0; }
+    .pc-step { display: none; }
+    .pc-name { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #2f2b27; margin-bottom: 8px; line-height: 1.35; letter-spacing: -.01em; }
+    .pc-skill {
+      display: inline-flex; align-items: center;
+      font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600;
+      padding: 3px 8px; border-radius: 5px; margin-bottom: 9px; align-self: flex-start;
+    }
+    .sk-green  { color: #2a7a5e; background: rgba(79,183,153,.14); border: 1px solid rgba(79,183,153,.2); }
+    .sk-muted  { color: rgba(47,43,39,.5); background: rgba(47,43,39,.06); border: 1px solid rgba(47,43,39,.08); }
+    .sk-rose   { color: #8a3552; background: rgba(219,39,119,.08); border: 1px solid rgba(219,39,119,.14); }
+    .pc-divider { height: 1px; background: rgba(96,79,67,.1); margin-bottom: 8px; }
+    .pc-out-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #9a9086; margin-bottom: 5px; }
+    .pc-out-item { display: flex; align-items: center; gap: 5px; font-size: 9.5px; color: #766c63; margin-bottom: 4px; line-height: 1.3; }
+    .pc-out-item::before { content: ''; width: 3px; height: 3px; border-radius: 50%; background: #9a9086; flex-shrink: 0; }
+    .pipe-arrow { position: absolute; right: -3px; top: 36px; z-index: 2; color: rgba(96,79,67,.35); font-size: 10px; pointer-events: none; }
+    .pipe-wrap:last-child .pipe-arrow { display: none; }
+
+    /* ══ PIPELINE INLINE PANEL ══ */
+    .pipe-panel-wrap { margin-top: 14px; display: none; }
+    @keyframes panelIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .pipe-inline-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pipe-inline-steps > * { min-width: 0; }
+    .pipe-inline-steps > .full-width { grid-column: 1 / -1; }
+    .pipe-inline-steps .step { display: block !important; margin: 0; background: rgba(247,244,239,.97) !important; }
+    .pipe-inline-steps .method-section { display: block !important; margin: 0; }
+    .pipe-inline-steps .dash-panel { display: none !important; }
+    .pipe-inline-steps .dash-panel.active { display: block !important; }
+
+    /* ══ AI WORKBENCH ══ */
+    .ai-workbench { font-family: 'Inter', sans-serif; }
+    .aiw-header { margin-bottom: 18px; }
+    .aiw-title { font-family: 'Barlow', sans-serif; font-size: 24px; font-weight: 500; color: #fff; line-height: 1.25; letter-spacing: -.01em; }
+    .aiw-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: rgba(255,255,255,.75); }
+    .aiw-subtitle { font-size: 12px; color: rgba(255,255,255,.38); margin-top: 6px; font-family: 'JetBrains Mono', monospace; letter-spacing: .03em; }
+    .aiw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .aiw-card { background: rgba(247,244,239,.97); border-radius: 18px; border: 1px solid rgba(96,79,67,.14); padding: 18px 20px 16px; }
+    .aiw-card-head { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 12px; }
+    .aiw-card-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .aiw-card-title { font-size: 14px; font-weight: 700; color: var(--dk); margin-bottom: 3px; }
+    .aiw-card-sub { font-size: 11px; color: var(--mu); font-family: 'JetBrains Mono', monospace; line-height: 1.5; }
+    .aiw-badge { margin-left: auto; font-size: 9px; font-weight: 700; padding: 3px 9px; background: rgba(91,142,240,.12); border: 1px solid rgba(91,142,240,.22); border-radius: 99px; color: #3b5bbf; white-space: nowrap; }
+    .aiw-insights { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+    .aiw-ins { background: rgba(47,43,39,.05); border: 1px solid rgba(96,79,67,.1); border-radius: 8px; padding: 7px 10px; display: flex; justify-content: space-between; align-items: center; }
+    .aiw-ins-label { font-size: 11px; color: var(--mu); }
+    .aiw-ins-val { font-size: 13px; font-weight: 700; color: var(--dk); }
+    .aiw-seg-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .aiw-seg { border-radius: 10px; border: 1px solid rgba(96,79,67,.12); padding: 10px 12px; }
+    .aiw-seg-name { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+    .aiw-seg-stat { font-size: 10px; color: var(--mu); margin-bottom: 4px; }
+    .aiw-seg-act { font-size: 10px; color: var(--dk); font-weight: 600; }
+    .aiw-action { font-size: 12px; font-weight: 700; color: #218d72; background: rgba(79,183,153,.1); border: 1px solid rgba(79,183,153,.2); border-radius: 8px; padding: 10px 13px; }
+    .aiw-scenario { background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 12px; padding: 12px 14px; }
+    .aiw-sc-label { font-size: 10px; font-weight: 700; color: var(--dk); margin-bottom: 6px; }
+
+    /* analysis sidebar layout */
+    .analysis-layout { display: flex; flex-direction: column; gap: 14px; }
+    .analysis-sidebar { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    .analysis-method-btn {
+      background: rgba(247,244,239,0.97); border: 1px solid rgba(96,79,67,.14);
+      border-radius: 14px; padding: 11px 16px; cursor: pointer;
+      transition: transform .18s, border-color .2s, box-shadow .2s;
+      text-align: left; flex: 1; min-width: 180px; max-width: 280px;
+    }
+    .analysis-method-btn:hover { transform: translateY(-2px); border-color: rgba(96,79,67,.26); box-shadow: 0 8px 20px rgba(42,30,18,.1); }
+    .analysis-method-btn.active { border-color: rgba(79,183,153,.55); box-shadow: 0 0 0 2px rgba(79,183,153,.18); }
+    .amb-icon { display: none; }
+    .amb-title { font-size: 12px; font-weight: 700; color: var(--dk); margin-bottom: 3px; line-height: 1.3; }
+    .amb-problem { font-size: 13px; font-weight: 700; color: var(--dk); margin-bottom: 5px; line-height: 1.4; }
+    .amb-desc { font-size: 11px; color: var(--mu); line-height: 1.5; }
+    .amb-tag { display: inline-block; margin-top: 7px; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 5px; background: rgba(47,43,39,.07); color: rgba(47,43,39,.5); border: 1px solid rgba(96,79,67,.14); }
+    .analysis-dash-pane { min-width: 0; }
+    .analysis-dash-pane .dash-panel { display: none; }
+    .analysis-dash-pane .dash-panel.active { display: block; }
+
+    /* ── Dashboard side-layout (left sidebar) ── */
+    .analysis-layout.side-layout { flex-direction: row; align-items: flex-start; gap: 16px; }
+    .analysis-layout.side-layout .analysis-sidebar { flex-direction: column; width: 210px; flex-shrink: 0; flex-wrap: nowrap; gap: 6px; }
+    .analysis-layout.side-layout .analysis-method-btn { flex: unset; min-width: unset; max-width: unset; width: 100%; box-sizing: border-box; }
+    .analysis-sidebar .analysis-method-btn { box-sizing: border-box; }
+
+    /* ── Active problem button color ── */
+    .analysis-method-btn.active { border-color: rgba(79,183,153,.6) !important; box-shadow: 0 0 0 2px rgba(79,183,153,.18) !important; background: #218d72 !important; }
+    .analysis-method-btn.active .amb-problem { color: #fff; }
+    .analysis-method-btn.active .amb-desc { color: rgba(255,255,255,.7); }
+    .analysis-method-btn.active .amb-tag { background: rgba(255,255,255,.15); color: rgba(255,255,255,.85); border-color: rgba(255,255,255,.2); }
+
+    /* report plan card */
+    .report-plan-card { background: rgba(247,244,239,.97); border-radius: 18px; border: 1px solid rgba(96,79,67,.14); overflow: hidden; }
+    .rpc-head { display: flex; align-items: center; gap: 12px; padding: 18px 22px 14px; border-bottom: 1px solid rgba(96,79,67,.1); }
+    .rpc-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+    .rpc-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--dk); margin-bottom: 2px; }
+    .rpc-meta { font-size: 11px; color: var(--mu); }
+    .rpc-badge { margin-left: auto; font-size: 10px; padding: 4px 11px; background: rgba(79,183,153,.14); border: 1px solid rgba(79,183,153,.22); border-radius: 99px; font-weight: 700; color: #218d72; white-space: nowrap; }
+    .rpc-body { padding: 18px 22px 20px; }
+
+    .ppanel-inner {
+      border-radius: 18px;
+      border: 1px solid rgba(96,79,67,.18);
+      overflow: hidden;
+    }
+    .ppanel-head {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 22px;
+      border-bottom: 1px solid rgba(96,79,67,.1);
+    }
+    .ppanel-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .ppanel-step { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--so); margin-bottom: 2px; }
+    .ppanel-name { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: var(--dk); }
+    .ppanel-meta { font-size: 12px; color: var(--mu); margin-top: 2px; }
+    .ppanel-badge { margin-left: auto; font-size: 10px; padding: 4px 11px; background: rgba(79,183,153,.14); border: 1px solid rgba(79,183,153,.22); border-radius: 99px; font-weight: 700; color: #218d72; white-space: nowrap; }
+    .ppanel-body { padding: 18px 22px 20px; }
+    .ppanel-ai-hdr { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
+    .ppanel-ai-ava { width: 22px; height: 22px; border-radius: 6px; background: rgba(79,183,153,.18); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--dk); }
+    .ppanel-ai-nm { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: var(--dk); }
+
+    /* panel content atoms */
+    .pp-text { font-size: 13px; color: var(--dk); line-height: 1.75; margin-bottom: 12px; }
+    .pp-find { display: flex; gap: 10px; align-items: flex-start; background: rgba(47,43,39,.05); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 11px 13px; margin-bottom: 8px; }
+    .pp-fn { width: 22px; height: 22px; border-radius: 50%; background: rgba(79,183,153,.14); color: #218d72; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+    .pp-ft { font-size: 13px; color: var(--dk); line-height: 1.65; }
+    .pp-ft strong { font-weight: 700; }
+    .pp-box { background: rgba(47,43,39,.05); border: 1px solid rgba(96,79,67,.1); border-radius: 10px; padding: 11px 14px; margin-bottom: 10px; }
+    .pp-box-lbl { font-size: 9px; font-weight: 700; color: var(--so); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+    .pp-tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 12px; }
+    .pp-tbl th { background: rgba(47,43,39,.09); color: var(--dk); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; padding: 8px 11px; text-align: left; }
+    .pp-tbl td { padding: 8px 11px; color: var(--dk); border-top: 1px solid rgba(96,79,67,.08); vertical-align: top; line-height: 1.6; }
+    .pp-kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px; margin-bottom: 10px; }
+    .pp-kpi-box { background: rgba(47,43,39,.06); border: 1px solid rgba(96,79,67,.08); border-radius: 10px; padding: 10px; text-align: center; }
+    .pp-kpi-v { font-family: 'Barlow', sans-serif; font-size: 20px; font-weight: 600; color: var(--dk); margin-bottom: 4px; }
+    .pp-kpi-l { font-size: 10px; color: var(--mu); text-transform: uppercase; letter-spacing: .06em; }
+    .pp-q-list { display: flex; flex-direction: column; gap: 7px; }
+    .pp-q-item { display: flex; gap: 10px; align-items: flex-start; background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 10px; }
+    .pp-q-num { width: 22px; height: 22px; background: var(--rose); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #A13D5C; flex-shrink: 0; }
+    .pp-q-txt { font-size: 13px; color: #5d534b; line-height: 1.6; }
+    .pp-sec-list { display: flex; flex-direction: column; gap: 7px; }
+    .pp-sec-row { padding: 9px 11px; border-radius: 9px; border: 1px solid rgba(96,79,67,.1); background: rgba(47,43,39,.04); }
+    .pp-sec-h { font-size: 9px; font-weight: 700; color: var(--dk); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+    .pp-sec-b { font-size: 13px; color: #5d534b; line-height: 1.65; }
+    .pp-act-list { display: flex; flex-direction: column; gap: 7px; }
+    .pp-act-row { background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 11px; }
+    .pp-act-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .pp-act-p { font-size: 9px; font-weight: 700; color: #0D9488; text-transform: uppercase; letter-spacing: .08em; }
+    .pp-act-own { font-size: 10px; color: var(--mu); }
+    .pp-act-ttl { font-size: 13px; font-weight: 700; color: var(--dk); margin-bottom: 5px; line-height: 1.4; }
+    .pp-act-imp { font-size: 11.5px; color: #4a9f87; margin-bottom: 5px; }
+    .pp-act-why { font-size: 12px; color: #5d534b; line-height: 1.65; }
+    .pp-tag-ok   { display:inline-block; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:700; background:rgba(53,201,149,.14); color:#1a7a5a; border:1px solid rgba(53,201,149,.2); }
+    .pp-tag-warn { display:inline-block; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:700; background:rgba(239,176,93,.14); color:#8a5e1e; border:1px solid rgba(239,176,93,.2); }
+    .pp-tag-bad  { display:inline-block; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:700; background:rgba(239,125,134,.14); color:#8a2233; border:1px solid rgba(239,125,134,.2); }
+
+    /* dashboard embed in panel */
+    .pp-dash-embed { margin-top: 4px; }
+    .pp-dash-embed .dash { box-shadow: none; border-radius: 14px; }
+
+    /* ══ DASHBOARD STEP HEADERS ══ */
+    .dash-step-hdr {
+      display: flex; align-items: center; gap: 10px;
+      margin: 22px 0 10px;
+    }
+    .dash-step-hdr:first-child { margin-top: 0; }
+    .dash-step-hdr-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: #fff; background: rgba(47,43,39,.7);
+      padding: 3px 9px; border-radius: 6px; white-space: nowrap;
+    }
+    .dash-step-hdr-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 600; color: rgba(47,43,39,.55);
+      white-space: nowrap;
+    }
+    .dash-step-hdr::after { content: ''; flex: 1; height: 1px; background: rgba(96,79,67,.12); }
+
+    /* ══ EDA CHARTS ══ */
+    .eda-row { display: grid; grid-template-columns: 1fr 180px; gap: 10px; align-items: center; margin-bottom: 8px; }
+    .eda-mini-chart { background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
+    .eda-chart-label { font-size: 9px; font-weight: 700; color: var(--so); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+    .eda-multi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; margin-top: 8px; }
+    @media (max-width: 900px) {
+      .eda-row { grid-template-columns: 1fr; }
+      .eda-multi-row { grid-template-columns: 1fr; }
+    }
+
+    /* ══ METRIC HIERARCHY (s07) ══ */
+    .mh-wrap { padding: 4px 0; }
+    .mh-tier { margin-bottom: 14px; }
+    .mh-tier-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 7px;
+    }
+    .mh-tier-label::after { content: ''; flex:1; height:1px; background:rgba(96,79,67,.12); }
+    .mh-output .mh-tier-label { color: #218d72; }
+    .mh-driver .mh-tier-label { color: #5b6bbf; }
+    .mh-input  .mh-tier-label { color: #a0620a; }
+    .mh-guard  .mh-tier-label { color: #9b2d38; }
+    .mh-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+    .mh-card {
+      border-radius: 11px; border: 1px solid rgba(96,79,67,.14);
+      padding: 9px 12px; min-width: 100px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .mh-output .mh-card { background: rgba(225,241,236,.85); border-color: rgba(79,183,153,.25); }
+    .mh-driver .mh-card { background: rgba(237,231,245,.85); border-color: rgba(91,107,191,.2); }
+    .mh-input  .mh-card { background: rgba(247,241,226,.85); border-color: rgba(239,176,93,.25); }
+    .mh-guard  .mh-card { background: rgba(247,229,235,.85); border-color: rgba(239,125,134,.25); }
+    .mh-card-val { font-family: 'Barlow', sans-serif; font-size: 19px; font-weight: 600; color: var(--dk); }
+    .mh-card-name { font-size: 11px; font-weight: 600; color: var(--dk); }
+    .mh-card-note { font-size: 10px; color: var(--mu); line-height: 1.5; }
+    .mh-arrow { width: 100%; display: flex; justify-content: center; margin: 2px 0; color: rgba(96,79,67,.3); font-size: 12px; }
+
+    /* ══ MECE TREE ══ */
+    .mece-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 4px 0 8px; }
+    .mece-tree { display: flex; flex-direction: column; gap: 0; min-width: 760px; font-family: 'Inter', sans-serif; }
+    .mece-row { display: flex; align-items: stretch; gap: 0; }
+    .mece-row-label {
+      width: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase; writing-mode: vertical-rl;
+      padding: 8px 0; border-radius: 8px; margin-right: 10px;
+    }
+    .mece-row-label.ml-prob  { background: rgba(47,43,39,.07); color: rgba(47,43,39,.5); }
+    .mece-row-label.ml-cause { background: rgba(239,176,93,.15); color: #8a5c00; }
+    .mece-row-label.ml-sol   { background: rgba(53,201,149,.12); color: #1a6b50; }
+    .mece-row-label.ml-kpi   { background: rgba(91,107,191,.12); color: #3d4fa0; }
+    .mece-row-label.ml-goal  { background: rgba(47,43,39,.07); color: rgba(47,43,39,.5); }
+    .mece-cells { flex: 1; display: grid; gap: 8px; }
+    .mece-cells.g1 { grid-template-columns: 1fr; }
+    .mece-cells.g3 { grid-template-columns: repeat(3, 1fr); }
+    .mece-cells.g6 { grid-template-columns: repeat(3, 1fr); row-gap: 4px; }
+    .mece-cell {
+      border-radius: 11px; border: 1px solid rgba(96,79,67,.14);
+      padding: 10px 12px; background: rgba(247,244,239,.97);
+      font-size: 11px; color: var(--dk); line-height: 1.45; position: relative;
+    }
+    .mece-cell-title { font-weight: 700; color: var(--dk); font-size: 11.5px; margin-bottom: 3px; }
+    .mece-cell-sub { font-size: 10px; color: var(--mu); line-height: 1.4; }
+    .mece-cell.c-prob { background: rgba(47,43,39,.04); border-color: rgba(47,43,39,.15); text-align: center; }
+    .mece-cell.c-prob .mece-cell-title { font-size: 13px; color: var(--dk); }
+    .mece-cell.c-cause { background: rgba(247,241,226,.9); border-color: rgba(239,176,93,.25); }
+    .mece-cell.c-user { background: rgba(247,241,226,.7); border-color: rgba(239,176,93,.2); }
+    .mece-cell.c-biz { background: rgba(225,241,236,.8); border-color: rgba(79,183,153,.22); }
+    .mece-cell.c-kpi { background: rgba(237,231,245,.8); border-color: rgba(91,107,191,.2); }
+    .mece-cell.c-goal { background: rgba(47,43,39,.04); border-color: rgba(47,43,39,.15); text-align: center; }
+    .mece-cell.c-goal .mece-cell-title { font-size: 13px; }
+    .mece-badge { display: inline-block; font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-bottom: 5px; }
+    .mb-user { background: rgba(239,176,93,.18); color: #8a5c00; }
+    .mb-biz  { background: rgba(79,183,153,.16); color: #1a6b50; }
+    .mece-connector { display: flex; justify-content: center; align-items: center; height: 22px; flex-shrink: 0; }
+    .mece-connector svg { width: 100%; height: 22px; }
+
+
+    /* ══ SCENARIO TABS (metrics / analysis) ══ */
+    .sc-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .sc-tab { padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(96,79,67,.15); font-size: 10.5px; font-weight: 700; cursor: pointer; background: rgba(47,43,39,.04); color: rgba(47,43,39,.55); transition: all .15s; font-family: 'Inter', sans-serif; white-space: nowrap; }
+    .sc-tab:hover { border-color: rgba(96,79,67,.28); color: var(--dk); }
+    .sc-tab.active { background: rgba(79,183,153,.14); border-color: rgba(79,183,153,.45); color: #1a6b50; }
+    .sc-pane { display: none; }
+    .sc-pane.active { display: block; }
+    .sc-q { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(47,43,39,.4); margin-bottom: 10px; }
+    .pp-method-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .pp-method-tag { background: rgba(91,107,191,.1); border: 1px solid rgba(91,107,191,.2); border-radius: 6px; padding: 3px 9px; font-size: 10px; font-weight: 700; color: #3d4fa0; font-family: 'JetBrains Mono', monospace; }
+    .pp-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin: 10px 0; }
+    .pp-stat { background: rgba(247,244,239,.97); border: 1px solid rgba(96,79,67,.12); border-radius: 10px; padding: 10px 12px; }
+    .pp-stat-v { font-family: 'Barlow', sans-serif; font-size: 20px; font-weight: 600; color: var(--dk); }
+    .pp-stat-l { font-size: 10px; color: var(--mu); margin-top: 2px; }
+    .pp-stat-d { font-size: 10px; font-weight: 700; margin-top: 4px; }
+    .pp-stat-d.up { color: #1a6b50; }
+    .pp-stat-d.dn { color: #7a2430; }
+    .pp-stat-d.warn { color: #8a5c00; }
+    .pp-insight { background: rgba(247,244,239,.97); border: 1px solid rgba(96,79,67,.12); border-radius: 10px; padding: 13px 15px; margin-bottom: 9px; }
+    .pp-insight-title { font-size: 13px; font-weight: 700; color: var(--dk); margin-bottom: 5px; }
+    .pp-insight-body { font-size: 12px; color: rgba(47,43,39,.65); line-height: 1.65; }
+    .pp-insight-body strong { color: var(--dk); }
+    .pp-insight-body .nr { color: #7a2430; font-weight: 700; }
+    .pp-insight-body .ng { color: #1a6b50; font-weight: 700; }
+    .pp-insight-body .ny { color: #8a5c00; font-weight: 700; }
+    /* Simulation widget */
+    .sim-widget {
+      background: rgba(247,241,226,.7); border: 1px solid rgba(239,176,93,.3);
+      border-radius: 14px; padding: 14px 16px; margin-top: 12px;
+    }
+    .sim-title { font-size: 12px; font-weight: 700; color: var(--dk); margin-bottom: 8px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; line-height: 1.5; }
+    .sim-badge { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 5px; background: rgba(239,176,93,.2); color: #8a5c00; border: 1px solid rgba(239,176,93,.3); white-space: nowrap; }
+    .sim-note { font-size: 12px; color: var(--mu); line-height: 1.65; margin-bottom: 12px; }
+    .sim-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .sim-label { font-size: 11px; color: var(--mu); white-space: nowrap; }
+    .sim-input { width: 80px; font-size: 13px; font-weight: 700; color: var(--dk); background: #fff; border: 1px solid rgba(96,79,67,.2); border-radius: 8px; padding: 5px 8px; text-align: center; font-family: 'Barlow', sans-serif; }
+    .sim-slider-group { margin-bottom: 10px; }
+    .sim-slider-row { margin-bottom: 10px; }
+    .sim-slider-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    /* ── custom range slider ── */
+    .sim-range {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 5px; border-radius: 99px; outline: none; cursor: pointer;
+      background: linear-gradient(to right, #4fb799 50%, rgba(96,79,67,.15) 50%);
+      transition: background .1s;
+    }
+    .sim-range::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; border: 2px solid #4fb799;
+      box-shadow: 0 2px 8px rgba(42,30,18,.18);
+      cursor: pointer; transition: transform .15s, box-shadow .15s;
+    }
+    .sim-range::-webkit-slider-thumb:hover { transform: scale(1.2); box-shadow: 0 3px 12px rgba(42,30,18,.24); }
+    .sim-range::-moz-range-thumb {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; border: 2px solid #4fb799;
+      box-shadow: 0 2px 8px rgba(42,30,18,.18); cursor: pointer;
+    }
+    .sim-range::-moz-range-track { height: 5px; border-radius: 99px; background: rgba(96,79,67,.15); }
+    .sim-range-val { font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 700; color: #4fb799; }
+    .sim-scenario-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .sim-scenario-btn { flex: 1; padding: 10px 6px; border-radius: 12px; border: 1px solid rgba(96,79,67,.15); font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s; background: rgba(47,43,39,.05); color: var(--dk); text-align: center; line-height: 1.5; font-family: 'Inter', sans-serif; }
+    .sim-scenario-btn:hover { border-color: rgba(96,79,67,.28); transform: translateY(-2px); }
+    .sim-scenario-btn.active { background: rgba(79,183,153,.14); border-color: rgba(79,183,153,.4); color: #218d72; }
+    .scenario-note { font-size: 11px; margin-top: 8px; }
+    .sim-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .sim-res { background: #fff; border: 1px solid rgba(96,79,67,.12); border-radius: 9px; padding: 8px 10px; text-align: center; }
+    .sim-res-val { font-family: 'Barlow', sans-serif; font-size: 16px; font-weight: 600; color: var(--dk); }
+    .sim-res-lbl { font-size: 9px; color: var(--mu); margin-top: 2px; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1100px) {
+      .method-grid { grid-template-columns: repeat(3, 1fr) !important; }
+      .dash-charts { grid-template-columns: 1fr; }
+      .dash-charts.three { grid-template-columns: 1fr; }
+      .dash-charts.three-eq { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 800px) {
+      body { padding: 20px 16px 60px; }
+      .dash-kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .dash-actions { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <style>
+    body { background: #000; padding: 0; margin: 0; }
+    .dash-panel { display: none; }
+    .dash-panel.active { display: block; }
+
+    /* 상단 네비 바 */
+    .dash-nav {
+      background: #000;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .dash-nav-back {
+      display: flex; align-items: center; gap: 7px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,.35);
+      text-decoration: none; letter-spacing: .06em;
+      padding: 5px 12px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.1);
+      transition: all .15s;
+    }
+    .dash-nav-back:hover { color: rgba(255,255,255,.7); border-color: rgba(255,255,255,.2); }
+    .dash-nav-divider { width: 1px; height: 20px; background: rgba(255,255,255,.1); }
+    .dash-nav-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 6px 14px; border-radius: 9px; cursor: pointer; font-size: 12px; font-weight: 600;
+      border: 1px solid rgba(96,79,67,.2); background: rgba(247,244,239,.04); color: rgba(255,255,255,.45);
+      font-family: 'Inter', sans-serif; transition: all .15s; white-space: nowrap;
+    }
+    .tab-btn:hover { background: rgba(247,244,239,.09); color: rgba(255,255,255,.75); }
+    .tab-btn.active { background: rgba(79,183,153,.15); border-color: rgba(79,183,153,.5); color: #35c995; }
+
+    .dash-content { padding: 32px 40px 80px; }
+  </style>
+</head>
+<body>
+
+  <nav class="dash-nav">
+    <a class="dash-nav-back" href="webinar-guide.html">← 가이드로 돌아가기</a>
+    <div class="dash-nav-divider"></div>
+    <div class="dash-nav-tabs">
+      <div class="tab-btn active" onclick="switchTab(0)">📊 마진 분석</div>
+      <div class="tab-btn" onclick="switchTab(1)">👥 고객 세그먼테이션</div>
+      <div class="tab-btn" onclick="switchTab(2)">💹 할인 효율</div>
+      <div class="tab-btn" onclick="switchTab(3)">📈 매출 예측</div>
+    </div>
+  </nav>
+
+  <div class="dash-content">
+<div class="dash-panel active" id="dp0">
+  <div class="dash">
+    <div class="dash-topbar">
+      <div class="dash-topbar-left">
+        <div class="dash-topbar-title">매출 분석 — <em>Pareto · Margin Decomposition · KPI Breakdown</em></div>
+        <div class="dash-topbar-problem">문제: 왜 Furniture 마진이 Technology의 30% 수준인가?</div>
+      </div>
+      <span class="dash-topbar-meta">KPI Dashboard Dataset · 2019–2022 · 9,994 rows</span>
+    </div>
+    <div class="dash-body">
+
+      <!-- Data Story Block -->
+      <div class="story-block">
+        <div class="story-flow">
+          <div class="sf-cell">
+            <div class="sf-label lbl-now">현황</div>
+            <div class="sf-val">Furniture 마진 10.7%</div>
+            <div class="sf-desc">Technology 35% · Office 17%<br>카테고리 간 <span class="num-red">마진 3배 격차</span></div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-why">원인</div>
+            <div class="sf-val">할인율 17.7%</div>
+            <div class="sf-desc">Technology(7.5%)의 <strong>2.4배</strong><br>세그먼트 구분 없는 일괄 할인</div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-so">결과</div>
+            <div class="sf-val">할인 $1 → 이익 $0.82</div>
+            <div class="sf-desc">투입할수록 <span class="num-red">손해 구조</span><br>상위 20% SKU = 매출 80% 담당</div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-act">기회</div>
+            <div class="sf-val">+$6~8K (추정)</div>
+            <div class="sf-desc">할인 10%p 축소 시<br>기간 <strong>즉시</strong> · 승인 프로세스 2주</div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 1</span><span class="dash-step-hdr-label">현황 파악 — 지금 어디 있지?</span></div>
+      <!-- KPI row -->
+      <div class="dash-kpi-row">
+        <div class="dk-box">
+          <div class="dk-lbl">총 매출</div>
+          <div class="dk-val">$2.30M</div>
+          <div class="dk-delta up">↑ +12.3% YoY</div>
+        </div>
+        <div class="dk-box">
+          <div class="dk-lbl">총 이익</div>
+          <div class="dk-val">$703K</div>
+          <div class="dk-delta up">↑ +9.1% YoY</div>
+        </div>
+        <div class="dk-box">
+          <div class="dk-lbl">전체 마진율</div>
+          <div class="dk-val">30.6%</div>
+          <div class="dk-delta warn">⚠ 카테고리 간 3배 격차</div>
+        </div>
+        <div class="dk-box" style="border-color:rgba(239,176,93,.3)">
+          <div class="dk-lbl">Technology 집중도</div>
+          <div class="dk-val">36%</div>
+          <div class="dk-delta dn">단일 카테고리 의존 위험</div>
+        </div>
+      </div>
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 2</span><span class="dash-step-hdr-label">원인 확인 — 왜 이렇게 됐지?</span></div>
+      <!-- Row 1: Category revenue + dual bar discount/margin + monthly trend -->
+      <div class="dash-charts three-eq">
+        <div class="chart-card">
+          <div class="cc-title">Technology 1위, 하지만 Furniture 마진이 3배 낮다</div>
+          <div class="cc-desc">Tech $836K(마진 35%) · Furn $742K(마진 10.7%) · Office $719K(마진 28.4%). 매출 격차 14%, 마진 격차 3.3배</div>
+          <svg viewBox="0 0 320 190" width="100%" height="auto">
+            <defs>
+              <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#35c995" stop-opacity=".9"/><stop offset="100%" stop-color="#35c995" stop-opacity=".6"/></linearGradient>
+              <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ef7d86" stop-opacity=".9"/><stop offset="100%" stop-color="#ef7d86" stop-opacity=".6"/></linearGradient>
+              <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5b8ef0" stop-opacity=".9"/><stop offset="100%" stop-color="#5b8ef0" stop-opacity=".6"/></linearGradient>
+            </defs>
+            <line x1="40" y1="10" x2="40" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="148" x2="300" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="40" x2="300" y2="40" stroke="rgba(96,79,67,.07)" stroke-width="1" stroke-dasharray="4,3"/>
+            <line x1="40" y1="80" x2="300" y2="80" stroke="rgba(96,79,67,.07)" stroke-width="1" stroke-dasharray="4,3"/>
+            <line x1="40" y1="120" x2="300" y2="120" stroke="rgba(96,79,67,.07)" stroke-width="1" stroke-dasharray="4,3"/>
+            <!-- bars -->
+            <rect x="60" y="18" width="60" height="130" fill="url(#bg1)" rx="5"/>
+            <text x="90" y="14" text-anchor="middle" font-size="11" fill="#218d72" font-weight="700">$836K</text>
+            <text x="90" y="11" text-anchor="middle" font-size="9" fill="var(--so)"></text>
+            <rect x="140" y="34" width="60" height="114" fill="url(#bg2)" rx="5"/>
+            <text x="170" y="30" text-anchor="middle" font-size="11" fill="#9b2d38" font-weight="700">$742K</text>
+            <rect x="220" y="38" width="60" height="110" fill="url(#bg3)" rx="5"/>
+            <text x="250" y="34" text-anchor="middle" font-size="11" fill="#3b5bbf" font-weight="700">$719K</text>
+            <text x="90" y="163" text-anchor="middle" font-size="10" fill="var(--mu)">Technology</text>
+            <text x="170" y="163" text-anchor="middle" font-size="10" fill="var(--mu)">Furniture</text>
+            <text x="250" y="163" text-anchor="middle" font-size="10" fill="var(--mu)">Office Sup.</text>
+            <text x="90" y="173" text-anchor="middle" font-size="9" fill="#218d72">마진 35%</text>
+            <text x="170" y="173" text-anchor="middle" font-size="9" fill="#ef7d86" font-weight="700">마진 10.7%</text>
+            <text x="250" y="173" text-anchor="middle" font-size="9" fill="#5b8ef0">마진 28.4%</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">Furniture 할인 17.7% = Tech의 2.4배 — 마진 역비례 패턴 확인됨</div>
+          <div class="cc-desc">Tech 할인 7.5%→마진 35% / Furniture 할인 17.7%→마진 10.7%. 할인 1%p 차이가 마진 1.3%p를 결정함</div>
+          <svg viewBox="0 0 320 200" width="100%" height="auto">
+            <line x1="40" y1="10" x2="40" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="155" x2="300" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Technology: discount 8.2%, margin 35% -->
+            <rect x="52" y="115" width="26" height="40" fill="#5b8ef0" rx="3" opacity=".8"/>
+            <text x="65" y="110" text-anchor="middle" font-size="9" fill="#3b5bbf">8.2%</text>
+            <rect x="82" y="38" width="26" height="117" fill="#35c995" rx="3" opacity=".75"/>
+            <text x="95" y="33" text-anchor="middle" font-size="9" fill="#218d72" font-weight="700">35%</text>
+            <!-- Furniture: discount 17.7%, margin 10.7% -->
+            <rect x="128" y="88" width="26" height="67" fill="#ef7d86" rx="3" opacity=".8"/>
+            <text x="141" y="83" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">17.7%</text>
+            <rect x="158" y="128" width="26" height="27" fill="#ef7d86" rx="3" opacity=".5"/>
+            <text x="171" y="123" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">10.7%</text>
+            <!-- Office: discount 15.3%, margin 28.4% -->
+            <rect x="204" y="100" width="26" height="55" fill="#efb05d" rx="3" opacity=".8"/>
+            <text x="217" y="95" text-anchor="middle" font-size="9" fill="#a0620a">15.3%</text>
+            <rect x="234" y="60" width="26" height="95" fill="#35c995" rx="3" opacity=".6"/>
+            <text x="247" y="55" text-anchor="middle" font-size="9" fill="#218d72">28.4%</text>
+            <text x="78" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">Tech</text>
+            <text x="150" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">Furniture</text>
+            <text x="228" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">Office</text>
+            <rect x="40" y="178" width="8" height="7" fill="#5b8ef0" rx="2" opacity=".8"/>
+            <text x="51" y="184" font-size="8" fill="var(--mu)">할인율</text>
+            <rect x="100" y="178" width="8" height="7" fill="#35c995" rx="2" opacity=".8"/>
+            <text x="111" y="184" font-size="8" fill="var(--mu)">마진율</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">Q1 비수기 + Furniture 계절 무관 — 마진 문제는 연중 구조적</div>
+          <div class="cc-desc">12월 지수 ×1.89(피크) · Q1 지수 0.72(최저). 단 Furniture 마진 10%대는 성수기에도 동일 → 계절이 아닌 할인 구조 문제</div>
+          <svg viewBox="0 0 320 190" width="100%" height="auto">
+            <defs>
+              <linearGradient id="tg1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#35c995" stop-opacity=".3"/>
+                <stop offset="100%" stop-color="#35c995" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <line x1="30" y1="155" x2="300" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="10" x2="30" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <polyline points="30,138 52,142 75,122 97,131 120,110 142,115 165,107 187,100 210,84 232,90 255,60 277,28"
+              fill="none" stroke="#35c995" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <polygon points="30,138 52,142 75,122 97,131 120,110 142,115 165,107 187,100 210,84 232,90 255,60 277,28 277,155 30,155"
+              fill="url(#tg1)"/>
+            <circle cx="277" cy="28" r="4" fill="#35c995"/>
+            <text x="277" y="22" text-anchor="middle" font-size="9" fill="#218d72" font-weight="700">$142K</text>
+            <circle cx="52" cy="142" r="3" fill="#ef7d86"/>
+            <text x="30" y="170" font-size="8" fill="var(--so)">1월</text>
+            <text x="120" y="170" font-size="8" fill="var(--so)">5월</text>
+            <text x="210" y="170" font-size="8" fill="var(--so)">9월</text>
+            <text x="270" y="170" font-size="8" fill="var(--so)">12</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 2: Pareto + Regional + Segment vs ARPU -->
+      <div class="dash-charts three-eq">
+        <div class="chart-card">
+          <div class="cc-title">상위 20% SKU = 매출 80% — 이 구간에 고할인이 집중됐다</div>
+          <div class="cc-desc">상위 3개 SKU 매출 비중 43%. 고매출 SKU 평균 할인율 19.2% vs 전체 평균 14.2% — 5%p 초과</div>
+          <svg viewBox="0 0 360 200" width="100%" height="auto">
+            <line x1="40" y1="10" x2="40" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="155" x2="340" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="50" x2="340" y2="50" stroke="rgba(96,79,67,.07)" stroke-dasharray="3,3" stroke-width="1"/>
+            <!-- bars decreasing -->
+            <rect x="48" y="22" width="32" height="133" fill="#5b8ef0" rx="3" opacity=".85"/>
+            <rect x="88" y="52" width="32" height="103" fill="#5b8ef0" rx="3" opacity=".75"/>
+            <rect x="128" y="78" width="32" height="77" fill="#5b8ef0" rx="3" opacity=".65"/>
+            <rect x="168" y="98" width="32" height="57" fill="#efb05d" rx="3" opacity=".75"/>
+            <rect x="208" y="114" width="32" height="41" fill="#efb05d" rx="3" opacity=".65"/>
+            <rect x="248" y="124" width="32" height="31" fill="rgba(150,135,120,.4)" rx="3"/>
+            <rect x="288" y="132" width="32" height="23" fill="rgba(150,135,120,.3)" rx="3"/>
+            <!-- cumulative line (right axis: 0-100%) -->
+            <polyline points="80,62 120,80 160,104 200,122 240,133 280,141 320,148"
+              fill="none" stroke="#ef7d86" stroke-width="2" stroke-dasharray="5,3"/>
+            <!-- 80% line -->
+            <line x1="40" y1="88" x2="340" y2="88" stroke="rgba(239,125,134,.4)" stroke-dasharray="3,3" stroke-width="1"/>
+            <text x="342" y="91" font-size="8" fill="#ef7d86">80%</text>
+            <!-- annotation -->
+            <text x="120" y="170" text-anchor="middle" font-size="8" fill="var(--mu)">상위 20% SKU</text>
+            <text x="275" y="170" text-anchor="middle" font-size="8" fill="var(--mu)">나머지 80%</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">West·East 매출 62% 주도 — 지역별 할인 정책 차이 없음이 문제</div>
+          <div class="cc-desc">West $725K · East $678K · Central $501K · South $392K. 지역별 마진 격차 ±2%p 미만 → 지역 문제 아님</div>
+          <svg viewBox="0 0 260 180" width="100%" height="auto">
+            <line x1="70" y1="10" x2="70" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- horizontal bars -->
+            <rect x="72" y="22" width="145" height="24" fill="#35c995" rx="4" opacity=".85"/>
+            <text x="220" y="37" font-size="10" fill="#218d72" font-weight="700">$725K</text>
+            <rect x="72" y="54" width="135" height="24" fill="#5b8ef0" rx="4" opacity=".8"/>
+            <text x="210" y="69" font-size="10" fill="#3b5bbf" font-weight="700">$678K</text>
+            <rect x="72" y="86" width="100" height="24" fill="#efb05d" rx="4" opacity=".8"/>
+            <text x="175" y="101" font-size="10" fill="#a0620a" font-weight="700">$501K</text>
+            <rect x="72" y="118" width="78" height="24" fill="rgba(150,135,120,.45)" rx="4"/>
+            <text x="153" y="133" font-size="10" fill="var(--mu)" font-weight="700">$392K</text>
+            <!-- labels -->
+            <text x="66" y="37" text-anchor="end" font-size="10" fill="var(--mu)">West</text>
+            <text x="66" y="69" text-anchor="end" font-size="10" fill="var(--mu)">East</text>
+            <text x="66" y="101" text-anchor="end" font-size="10" fill="var(--mu)">Central</text>
+            <text x="66" y="133" text-anchor="end" font-size="10" fill="var(--mu)">South</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">Corporate 객단가 $447 = Consumer의 2.3배 — 가격 덜 민감한 고객에 할인 낭비</div>
+          <div class="cc-desc">Consumer $195 · Corporate $447 · Home Office $242. Corporate는 할인 없이도 구매 — 세그먼트 할인 차별화 미비</div>
+          <svg viewBox="0 0 320 200" width="100%" height="auto">
+            <line x1="40" y1="10" x2="40" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="155" x2="300" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Consumer: 52% sales, $195 ARPU -->
+            <rect x="52" y="40" width="32" height="115" fill="#35c995" rx="3" opacity=".8"/>
+            <text x="68" y="35" text-anchor="middle" font-size="9" fill="#218d72" font-weight="700">$1.20M</text>
+            <rect x="88" y="90" width="32" height="65" fill="#35c995" rx="3" opacity=".45"/>
+            <text x="104" y="85" text-anchor="middle" font-size="9" fill="#218d72">$195</text>
+            <!-- Corporate: 30% sales, $447 ARPU -->
+            <rect x="136" y="65" width="32" height="90" fill="#5b8ef0" rx="3" opacity=".8"/>
+            <text x="152" y="60" text-anchor="middle" font-size="9" fill="#3b5bbf" font-weight="700">$693K</text>
+            <rect x="172" y="25" width="32" height="130" fill="#5b8ef0" rx="3" opacity=".45"/>
+            <text x="188" y="20" text-anchor="middle" font-size="9" fill="#3b5bbf" font-weight="700">$447</text>
+            <!-- Home Office: 18% sales, $242 ARPU -->
+            <rect x="220" y="98" width="32" height="57" fill="#efb05d" rx="3" opacity=".8"/>
+            <text x="236" y="93" text-anchor="middle" font-size="9" fill="#a0620a" font-weight="700">$414K</text>
+            <rect x="256" y="82" width="32" height="73" fill="#efb05d" rx="3" opacity=".45"/>
+            <text x="272" y="77" text-anchor="middle" font-size="9" fill="#a0620a">$242</text>
+            <text x="82" y="168" text-anchor="middle" font-size="8" fill="var(--mu)">Consumer</text>
+            <text x="160" y="168" text-anchor="middle" font-size="8" fill="var(--mu)">Corporate</text>
+            <text x="246" y="168" text-anchor="middle" font-size="8" fill="var(--mu)">Home Off.</text>
+            <rect x="40" y="178" width="8" height="6" fill="rgba(100,100,100,.6)" rx="1"/>
+            <text x="51" y="184" font-size="8" fill="var(--mu)">총매출</text>
+            <rect x="100" y="178" width="8" height="6" fill="rgba(100,100,100,.35)" rx="1"/>
+            <text x="111" y="184" font-size="8" fill="var(--mu)">주문당 단가</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 3: Tech vs Others stacked + Furniture margin waterfall -->
+      <div class="dash-charts">
+        <div class="chart-card">
+          <div class="cc-title">3월 급락 원인: Technology 단독 −77% — Furniture·Office는 증가</div>
+          <div class="cc-desc">Tech 3월 $20K vs 2월 $87K (−$67K). Furniture +$3K, Office +$2K → 전사 문제 아닌 채널 문제</div>
+          <svg viewBox="0 0 340 200" width="100%" height="auto">
+            <line x1="40" y1="10" x2="40" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="155" x2="320" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Jan -->
+            <rect x="68" y="65" width="56" height="60" fill="#35c995" rx="0" opacity=".8"/>
+            <rect x="68" y="44" width="56" height="21" fill="#5b8ef0" rx="0" opacity=".7"/>
+            <rect x="68" y="42" width="56" height="2" rx="0" fill="#fff" opacity=".3"/>
+            <text x="96" y="38" text-anchor="middle" font-size="10" fill="#218d72" font-weight="700">$74K</text>
+            <!-- Feb -->
+            <rect x="144" y="70" width="56" height="55" fill="#35c995" rx="0" opacity=".8"/>
+            <rect x="144" y="48" width="56" height="22" fill="#5b8ef0" rx="0" opacity=".7"/>
+            <text x="172" y="43" text-anchor="middle" font-size="10" fill="#218d72" font-weight="700">$72K</text>
+            <!-- Mar -->
+            <rect x="220" y="94" width="56" height="61" fill="#35c995" rx="0" opacity=".8"/>
+            <rect x="220" y="80" width="56" height="14" fill="#ef7d86" rx="0" opacity=".8"/>
+            <text x="248" y="75" text-anchor="middle" font-size="10" fill="#9b2d38" font-weight="700">$51K</text>
+            <text x="96" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">1월</text>
+            <text x="172" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">2월</text>
+            <text x="248" y="168" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">3월 ▼</text>
+            <rect x="42" y="178" width="8" height="6" fill="#5b8ef0" rx="1" opacity=".8"/>
+            <text x="53" y="184" font-size="8" fill="var(--mu)">Technology</text>
+            <rect x="120" y="178" width="8" height="6" fill="#35c995" rx="1" opacity=".8"/>
+            <text x="131" y="184" font-size="8" fill="var(--mu)">기타</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">Furniture 순마진 10.7% = 총마진 28.5%에서 할인이 17.7%p를 가져간 결과</div>
+          <div class="cc-desc">총마진 28.5% − 할인 17.7% = 순마진 10.7%. 할인이 마진의 62%를 소진 — 이 관계는 선형적으로 통제 가능</div>
+          <svg viewBox="0 0 340 200" width="100%" height="auto">
+            <line x1="30" y1="155" x2="310" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Gross margin bar -->
+            <rect x="48" y="28" width="56" height="127" fill="#35c995" rx="4" opacity=".85"/>
+            <text x="76" y="23" text-anchor="middle" font-size="11" fill="#218d72" font-weight="700">28.5%</text>
+            <text x="76" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">총마진</text>
+            <!-- arrow -->
+            <text x="118" y="98" text-anchor="middle" font-size="16" fill="rgba(96,79,67,.4)">→</text>
+            <!-- discount cost bar (going down) -->
+            <rect x="138" y="28" width="56" height="80" fill="#ef7d86" rx="4" opacity=".8"/>
+            <text x="166" y="23" text-anchor="middle" font-size="11" fill="#9b2d38" font-weight="700">−17.7%</text>
+            <text x="166" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">할인 비용</text>
+            <!-- arrow -->
+            <text x="208" y="98" text-anchor="middle" font-size="16" fill="rgba(96,79,67,.4)">→</text>
+            <!-- net margin -->
+            <rect x="228" y="108" width="56" height="47" fill="#efb05d" rx="4" opacity=".85"/>
+            <text x="256" y="103" text-anchor="middle" font-size="11" fill="#a0620a" font-weight="700">10.7%</text>
+            <text x="256" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">순마진</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 4: AI Forecast — full width -->
+      <div class="dash-charts full">
+        <div class="chart-card">
+          <div class="cc-title">AI 예측: 다음 분기 $198K (+5.2% MoM)<span class="ai-badge-inline">AI 추정</span></div>
+          <div class="cc-desc">실선 = 실제 3개월, 점선 = Holt 이중지수평활 예측, 음영 = 신뢰구간</div>
+          <svg viewBox="0 0 700 200" width="100%" height="auto">
+            <defs>
+              <linearGradient id="ci1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#35c995" stop-opacity=".15"/>
+                <stop offset="100%" stop-color="#35c995" stop-opacity=".03"/>
+              </linearGradient>
+            </defs>
+            <line x1="40" y1="155" x2="680" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="10" x2="40" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- actual line (Jan-Mar) -->
+            <polyline points="40,118 220,110 400,104" fill="none" stroke="#2f2b27" stroke-width="2.5" stroke-linejoin="round"/>
+            <!-- CI band for forecast -->
+            <polygon points="400,104 520,86 640,70 640,56 520,72 400,96" fill="url(#ci1)"/>
+            <!-- forecast dashed -->
+            <polyline points="400,104 520,84 640,68" fill="none" stroke="#35c995" stroke-width="2.5" stroke-dasharray="8,5"/>
+            <!-- divider -->
+            <line x1="400" y1="20" x2="400" y2="155" stroke="rgba(96,79,67,.2)" stroke-dasharray="3,3" stroke-width="1"/>
+            <text x="404" y="18" font-size="9" fill="var(--mu)">예측 →</text>
+            <!-- dots -->
+            <circle cx="220" cy="110" r="4" fill="#2f2b27"/>
+            <circle cx="400" cy="104" r="4" fill="#2f2b27"/>
+            <circle cx="640" cy="68" r="6" fill="#35c995" stroke="#fff" stroke-width="2"/>
+            <text x="640" y="60" text-anchor="middle" font-size="11" fill="#218d72" font-weight="700">$198K</text>
+            <text x="40" y="168" font-size="9" fill="var(--so)">Jan</text>
+            <text x="220" y="168" font-size="9" fill="var(--so)">Feb</text>
+            <text x="400" y="168" font-size="9" fill="var(--so)">Mar</text>
+            <text x="520" y="168" font-size="9" fill="#35c995">Apr</text>
+            <text x="640" y="168" font-size="9" fill="#35c995">May</text>
+            <!-- legend -->
+            <line x1="460" y1="28" x2="490" y2="28" stroke="#2f2b27" stroke-width="2"/>
+            <text x="494" y="31" font-size="9" fill="var(--dk)">실제 매출</text>
+            <line x1="460" y1="44" x2="490" y2="44" stroke="#35c995" stroke-width="2" stroke-dasharray="6,3"/>
+            <text x="494" y="47" font-size="9" fill="#218d72">AI 예측 (Holt)</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 3</span><span class="dash-step-hdr-label">액션 아이템 — 그래서 뭘 해야 해?</span></div>
+
+      <!-- Simulation Widget -->
+      <div class="sim-widget">
+        <div class="sim-title">💡 할인율 시뮬레이션 <span class="sim-badge">인터랙티브</span></div>
+        <div class="sim-row">
+          <span class="sim-label">Furniture 할인율을</span>
+          <input class="sim-input" type="number" value="10" min="0" max="30" step="1" oninput="runSim(this)">
+          <span class="sim-label">%로 낮추면?</span>
+        </div>
+        <div class="sim-results">
+          <div class="sim-res">
+            <div class="sim-res-val">—</div>
+            <div class="sim-res-lbl">마진율 예측</div>
+          </div>
+          <div class="sim-res">
+            <div class="sim-res-val">—</div>
+            <div class="sim-res-lbl">이익 증분 추정</div>
+          </div>
+          <div class="sim-res">
+            <div class="sim-res-val">—</div>
+            <div class="sim-res-lbl">현재 대비 변화</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pareto SKU Sim -->
+      <div class="sim-widget sim-pareto" style="background:rgba(247,241,226,.7);border-color:rgba(239,176,93,.3)">
+        <div class="sim-title">🎯 어떤 상품 몇 %에만 집중해도 매출 대부분을 지킬 수 있을까? <span class="sim-badge">Pareto 분석</span></div>
+        <div class="sim-note">전체 상품 중 일부에만 집중하면 재고·마케팅 비용을 대폭 줄일 수 있어요. 상위 몇 %에 집중할지 바꿔보세요.</div>
+        <div class="sim-row">
+          <span class="sim-label">상위</span>
+          <input class="sim-input" type="number" value="20" min="5" max="50" step="5" oninput="runParetoSim(this)">
+          <span class="sim-label">% 상품에만 집중한다면?</span>
+        </div>
+        <div class="sim-results">
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">커버하는 매출 비중</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">관리할 SKU 수</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">집중 효율 (커버/노력)</div></div>
+        </div>
+      </div>
+
+      <!-- Category Mix Sim -->
+      <div class="sim-widget sim-mix" style="background:rgba(237,231,245,.7);border-color:rgba(91,107,191,.25)">
+        <div class="sim-title">⚖️ Technology 의존도를 줄이면 마진이 올라갈까? <span class="sim-badge" style="background:rgba(91,107,191,.12);color:#3b5bbf;border-color:rgba(91,107,191,.2)">카테고리 믹스</span></div>
+        <div class="sim-note">세 카테고리의 매출 비중을 바꿔보세요. Furniture(마진 10.7%)는 자동으로 계산됩니다. Technology(35%)를 줄이고 Office(25%)를 늘리면 전체 마진이 어떻게 바뀌는지 확인하세요.</div>
+        <div class="sim-slider-group">
+          <div class="sim-slider-row">
+            <div class="sim-slider-label"><span class="sim-label">Technology (마진 35%)</span><span class="sim-range-val tech-val">36%</span></div>
+            <input type="range" class="sim-range" data-key="tech" min="10" max="60" value="36" oninput="runMixSim(this)">
+          </div>
+          <div class="sim-slider-row">
+            <div class="sim-slider-label"><span class="sim-label">Office Supplies (마진 25%)</span><span class="sim-range-val office-val">31%</span></div>
+            <input type="range" class="sim-range" data-key="office" min="10" max="50" value="31" oninput="runMixSim(this)">
+          </div>
+          <div class="sim-note furn-note" style="margin-bottom:0">Furniture(마진 10.7%)는 자동으로 나머지: <strong>33%</strong></div>
+        </div>
+        <div class="sim-results">
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">예상 전체 마진율</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">연간 예상 이익</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">집중 리스크</div></div>
+        </div>
+      </div>
+
+      <!-- Action Board -->
+      <div class="dash-actions">
+        <div class="da-item">
+          <div class="da-p">P1 즉시</div>
+          <div class="da-title">Furniture 할인 15%p 이상 거래 승인 프로세스 신설</div>
+          <div class="da-why">전체 매출 32%인 Furniture 마진이 10.7% — 할인 구조 개선 시 분기 +$50K 이익 추정</div>
+        </div>
+        <div class="da-item">
+          <div class="da-p">P2 2주 내</div>
+          <div class="da-title">Top 20% SKU (Pareto) 집중 재고 확보 + 상세페이지 강화</div>
+          <div class="da-why">상위 20% 상품이 전체 매출의 80% 담당 — 이 구간 전환율 1%p 개선 = $23K 매출 증가</div>
+        </div>
+        <div class="da-item">
+          <div class="da-p">P3 월 모니터링</div>
+          <div class="da-title">12월 피크 시즌 대비 Technology 재고 3개월 전 확보</div>
+          <div class="da-why">12월 매출 $142K = 연간 최고. Technology 단일 카테고리 36% 집중 — 재고 공백 시 치명적</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     DASHBOARD 2: 고객 세그먼테이션
+═══════════════════════════════════════════════════════ -->
+<div class="dash-panel" id="dp1">
+  <div class="dash">
+    <div class="dash-topbar">
+      <div class="dash-topbar-left">
+        <div class="dash-topbar-title">고객 분석 — <em>RFM Scoring · K-Means Clustering · Cohort</em></div>
+        <div class="dash-topbar-problem">문제: 재구매율 8%p 하락 — 어떤 고객이, 언제 이탈하는가?</div>
+      </div>
+      <span class="dash-topbar-meta">고객 9,994명 분석 · RFM Score 기반 5단계 분류</span>
+    </div>
+    <div class="dash-body">
+
+      <!-- Data Story Block -->
+      <div class="story-block">
+        <div class="story-flow">
+          <div class="sf-cell">
+            <div class="sf-label lbl-now">현황</div>
+            <div class="sf-val">재구매율 22.1%</div>
+            <div class="sf-desc">전년 30.4% → <span class="num-red">−8.3%p YoY</span><br>At-Risk 2,099명 (전체 21%)</div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-why">원인</div>
+            <div class="sf-val">첫 구매 후 방치</div>
+            <div class="sf-desc">7일 내 후속 접촉 없음<br>리텐션 캠페인 <strong>미운영</strong></div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-so">결과</div>
+            <div class="sf-val">LTV 손실 $4.4M</div>
+            <div class="sf-desc">At-Risk LTV $2.1K<br>= Champions <span class="num-red">11% 수준</span></div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-act">기회</div>
+            <div class="sf-val">LTV ×4.7 (전환 시)</div>
+            <div class="sf-desc">리타겟 캠페인 $15K/월<br>기간 <strong>3개월</strong> · ROI 흑자 전환</div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 1</span><span class="dash-step-hdr-label">현황 파악 — 지금 어디 있지?</span></div>
+      <!-- KPI row -->
+      <div class="dash-kpi-row">
+        <div class="dk-box" style="border-color:rgba(53,201,149,.3)">
+          <div class="dk-lbl">VIP (Champions)</div>
+          <div class="dk-val">1,799명</div>
+          <div class="dk-delta up">전체의 18%</div>
+        </div>
+        <div class="dk-box" style="border-color:rgba(239,125,134,.3)">
+          <div class="dk-lbl">At-Risk 고객</div>
+          <div class="dk-val">2,099명</div>
+          <div class="dk-delta dn">↑ 21% — 요주의</div>
+        </div>
+        <div class="dk-box">
+          <div class="dk-lbl">평균 LTV</div>
+          <div class="dk-val">$4,590</div>
+          <div class="dk-delta up">↑ +8.2% QoQ</div>
+        </div>
+        <div class="dk-box">
+          <div class="dk-lbl">신규→재구매 CVR</div>
+          <div class="dk-val">22.1%</div>
+          <div class="dk-delta dn">↓ −8.3%p YoY</div>
+        </div>
+      </div>
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 2</span><span class="dash-step-hdr-label">원인 확인 — 왜 이렇게 됐지?</span></div>
+      <!-- Row 1: RFM segment dist + LTV bar -->
+      <div class="dash-charts">
+        <div class="chart-card">
+          <div class="cc-title">At-Risk 21% vs Champions 18% — 이탈 위험과 우량이 거의 같은 비중</div>
+          <div class="cc-desc">Champions 18% · Loyal 24% · At-Risk 21% · Potential 20% · New 17%. 우량층 감소 추세 중</div>
+          <svg viewBox="0 0 360 200" width="100%" height="auto">
+            <line x1="30" y1="10" x2="30" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="148" x2="280" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- horizontal stacked proportional bar -->
+            <rect x="32" y="60" width="50" height="30" fill="#35c995" rx="0" opacity=".9"/>
+            <rect x="32" y="92" width="66" height="30" fill="#4fb799" rx="0" opacity=".85"/>
+            <rect x="32" y="124" width="47" height="20" fill="#efb05d" rx="0" opacity=".8"/>
+            <!-- labels left -->
+            <text x="27" y="78" text-anchor="end" font-size="9" fill="#218d72" font-weight="700">18%</text>
+            <text x="27" y="110" text-anchor="end" font-size="9" fill="#218d72" font-weight="700">24%</text>
+            <text x="27" y="137" text-anchor="end" font-size="9" fill="#a0620a" font-weight="700">17%</text>
+
+            <!-- At-Risk and Others bars on right side -->
+            <rect x="32" y="20" width="59" height="30" fill="#ef7d86" rx="0" opacity=".85"/>
+            <text x="27" y="38" text-anchor="end" font-size="9" fill="#9b2d38" font-weight="700">21%</text>
+            <text x="95" y="38" font-size="9" fill="#9b2d38" font-weight="700">At-Risk</text>
+            <text x="85" y="78" font-size="9" fill="#218d72">Champions</text>
+            <text x="101" y="110" font-size="9" fill="#218d72">Loyal</text>
+            <text x="82" y="137" font-size="9" fill="#a0620a">Promising</text>
+
+            <!-- Others -->
+            <rect x="32" y="146" width="55" height="0" fill="rgba(150,135,120,.4)" rx="0"/>
+
+            <!-- Pie-like proportional segments at bottom -->
+            <text x="160" y="75" text-anchor="middle" font-size="9" fill="var(--mu)">Others 20%</text>
+            <rect x="140" y="80" width="55" height="20" fill="rgba(150,135,120,.35)" rx="3"/>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">At-Risk LTV $2.1K = Champions의 11% — 전환하면 9배 가치</div>
+          <div class="cc-desc">Champions $18.2K · Loyal $7.4K · At-Risk $2.1K. At-Risk 2,099명 전환 시 추가 LTV $33M 이상 (추정)</div>
+          <svg viewBox="0 0 360 200" width="100%" height="auto">
+            <line x1="40" y1="10" x2="40" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="155" x2="320" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <rect x="54" y="20" width="44" height="135" fill="#35c995" rx="4" opacity=".85"/>
+            <text x="76" y="16" text-anchor="middle" font-size="11" fill="#218d72" font-weight="700">$18.2K</text>
+            <rect x="116" y="55" width="44" height="100" fill="#4fb799" rx="4" opacity=".8"/>
+            <text x="138" y="51" text-anchor="middle" font-size="11" fill="#218d72" font-weight="700">$9.8K</text>
+            <rect x="178" y="103" width="44" height="52" fill="#efb05d" rx="4" opacity=".8"/>
+            <text x="200" y="99" text-anchor="middle" font-size="11" fill="#a0620a" font-weight="700">$5.2K</text>
+            <rect x="240" y="135" width="44" height="20" fill="#ef7d86" rx="4" opacity=".8"/>
+            <text x="262" y="131" text-anchor="middle" font-size="11" fill="#9b2d38" font-weight="700">$2.1K</text>
+            <text x="76" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">Champ.</text>
+            <text x="138" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">Loyal</text>
+            <text x="200" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">Promising</text>
+            <text x="262" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">At-Risk</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 2: Recency / Frequency / Cohort histograms -->
+      <div class="dash-charts three-eq">
+        <div class="chart-card">
+          <div class="cc-title">At-Risk 44%가 90일 이상 미접촉 — 자연 회복 불가 수준</div>
+          <div class="cc-desc">90일+ 미구매: At-Risk 44%, Potential 18%. 첫 구매 후 31일 내 후속 접촉 없으면 이탈율 2.3배 상승</div>
+          <svg viewBox="0 0 220 170" width="100%" height="auto">
+            <line x1="25" y1="10" x2="25" y2="130" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="25" y1="130" x2="210" y2="130" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- histogram bins: 0-30, 30-60, 60-90, 90-180, 180+ -->
+            <rect x="30" y="42" width="32" height="88" fill="#35c995" rx="2" opacity=".8"/>
+            <text x="46" y="38" text-anchor="middle" font-size="9" fill="#218d72" font-weight="700">26%</text>
+            <rect x="66" y="55" width="32" height="75" fill="#35c995" rx="2" opacity=".7"/>
+            <text x="82" y="51" text-anchor="middle" font-size="9" fill="#218d72">22%</text>
+            <rect x="102" y="67" width="32" height="63" fill="#efb05d" rx="2" opacity=".8"/>
+            <text x="118" y="63" text-anchor="middle" font-size="9" fill="#a0620a">20%</text>
+            <rect x="138" y="74" width="32" height="56" fill="#ef7d86" rx="2" opacity=".8"/>
+            <text x="154" y="70" text-anchor="middle" font-size="9" fill="#9b2d38">18%</text>
+            <rect x="174" y="86" width="32" height="44" fill="#ef7d86" rx="2" opacity=".6"/>
+            <text x="190" y="82" text-anchor="middle" font-size="9" fill="#9b2d38">14%</text>
+            <text x="46" y="143" text-anchor="middle" font-size="8" fill="var(--mu)">0-30일</text>
+            <text x="82" y="143" text-anchor="middle" font-size="8" fill="var(--mu)">30-60</text>
+            <text x="118" y="143" text-anchor="middle" font-size="8" fill="var(--mu)">60-90</text>
+            <text x="154" y="143" text-anchor="middle" font-size="8" fill="var(--mu)">90-180</text>
+            <text x="190" y="143" text-anchor="middle" font-size="8" fill="var(--mu)">180+</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">1회 구매 고객 38% — 두 번째 구매 만들기가 재구매율의 핵심</div>
+          <div class="cc-desc">1회 42% · 2회 28% · 3회+ 30%. 1→2회 전환율 22% vs 2→3회 61% — 첫 재구매가 가장 어렵고 중요</div>
+          <svg viewBox="0 0 220 170" width="100%" height="auto">
+            <line x1="25" y1="130" x2="210" y2="130" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="25" y1="10" x2="25" y2="130" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <rect x="30" y="24" width="32" height="106" fill="#ef7d86" rx="2" opacity=".8"/>
+            <text x="46" y="20" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">49%</text>
+            <rect x="66" y="57" width="32" height="73" fill="#efb05d" rx="2" opacity=".8"/>
+            <text x="82" y="53" text-anchor="middle" font-size="9" fill="#a0620a">24%</text>
+            <rect x="102" y="79" width="32" height="51" fill="#efb05d" rx="2" opacity=".7"/>
+            <text x="118" y="75" text-anchor="middle" font-size="9" fill="#a0620a">15%</text>
+            <rect x="138" y="99" width="32" height="31" fill="#35c995" rx="2" opacity=".8"/>
+            <text x="154" y="95" text-anchor="middle" font-size="9" fill="#218d72">8%</text>
+            <rect x="174" y="110" width="32" height="20" fill="#35c995" rx="2" opacity=".8"/>
+            <text x="190" y="106" text-anchor="middle" font-size="9" fill="#218d72">4%</text>
+            <text x="46" y="143" text-anchor="middle" font-size="8" fill="var(--mu)">1회</text>
+            <text x="82" y="143" text-anchor="middle" font-size="8" fill="var(--mu)">2회</text>
+            <text x="118" y="143" text-anchor="middle" font-size="8" fill="var(--mu)">3회</text>
+            <text x="154" y="143" text-anchor="middle" font-size="8" fill="var(--mu)">4-5회</text>
+            <text x="190" y="143" text-anchor="middle" font-size="8" fill="var(--mu)">6회+</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">최근 3개월 코호트 잔존율 5% 미만 — 리텐션 하락은 시스템 문제</div>
+          <div class="cc-desc">오래된 코호트 잔존 18% vs 최근 코호트 4.7%. 고객 품질이 아닌 잔존 프로그램 부재가 원인</div>
+          <svg viewBox="0 0 280 180" width="100%" height="auto">
+            <!-- Grid heatmap 6 rows × 3 cols -->
+            <!-- Header -->
+            <text x="80" y="18" text-anchor="middle" font-size="9" fill="var(--so)">M0</text>
+            <text x="140" y="18" text-anchor="middle" font-size="9" fill="var(--so)">M1</text>
+            <text x="200" y="18" text-anchor="middle" font-size="9" fill="var(--so)">M2</text>
+            <!-- Row 1: Oct -->
+            <text x="48" y="38" text-anchor="middle" font-size="9" fill="var(--mu)">10월</text>
+            <rect x="60" y="24" width="40" height="22" fill="#35c995" rx="3" opacity=".9"/>
+            <text x="80" y="38" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">100%</text>
+            <rect x="120" y="24" width="40" height="22" fill="#35c995" rx="3" opacity=".55"/>
+            <text x="140" y="38" text-anchor="middle" font-size="9" fill="var(--dk)">34%</text>
+            <rect x="180" y="24" width="40" height="22" fill="#35c995" rx="3" opacity=".35"/>
+            <text x="200" y="38" text-anchor="middle" font-size="9" fill="var(--dk)">22%</text>
+            <!-- Row 2: Nov -->
+            <text x="48" y="62" text-anchor="middle" font-size="9" fill="var(--mu)">11월</text>
+            <rect x="60" y="48" width="40" height="22" fill="#35c995" rx="3" opacity=".9"/>
+            <text x="80" y="62" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">100%</text>
+            <rect x="120" y="48" width="40" height="22" fill="#35c995" rx="3" opacity=".62"/>
+            <text x="140" y="62" text-anchor="middle" font-size="9" fill="var(--dk)">38%</text>
+            <rect x="180" y="48" width="40" height="22" fill="#35c995" rx="3" opacity=".42"/>
+            <text x="200" y="62" text-anchor="middle" font-size="9" fill="var(--dk)">26%</text>
+            <!-- Row 3: Dec -->
+            <text x="48" y="86" text-anchor="middle" font-size="9" fill="var(--mu)">12월</text>
+            <rect x="60" y="72" width="40" height="22" fill="#35c995" rx="3" opacity=".9"/>
+            <text x="80" y="86" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">100%</text>
+            <rect x="120" y="72" width="40" height="22" fill="#efb05d" rx="3" opacity=".7"/>
+            <text x="140" y="86" text-anchor="middle" font-size="9" fill="var(--dk)">29%</text>
+            <rect x="180" y="72" width="40" height="22" fill="#ef7d86" rx="3" opacity=".6"/>
+            <text x="200" y="86" text-anchor="middle" font-size="9" fill="var(--dk)">18%</text>
+            <!-- Row 4: Jan -->
+            <text x="48" y="110" text-anchor="middle" font-size="9" fill="var(--mu)">1월</text>
+            <rect x="60" y="96" width="40" height="22" fill="#35c995" rx="3" opacity=".9"/>
+            <text x="80" y="110" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">100%</text>
+            <rect x="120" y="96" width="40" height="22" fill="#efb05d" rx="3" opacity=".6"/>
+            <text x="140" y="110" text-anchor="middle" font-size="9" fill="var(--dk)">27%</text>
+            <rect x="180" y="96" width="40" height="22" fill="#ef7d86" rx="3" opacity=".55"/>
+            <text x="200" y="110" text-anchor="middle" font-size="9" fill="var(--dk)">16%</text>
+            <!-- Row 5: Feb -->
+            <text x="48" y="134" text-anchor="middle" font-size="9" fill="var(--mu)">2월</text>
+            <rect x="60" y="120" width="40" height="22" fill="#35c995" rx="3" opacity=".9"/>
+            <text x="80" y="134" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">100%</text>
+            <rect x="120" y="120" width="40" height="22" fill="#35c995" rx="3" opacity=".72"/>
+            <text x="140" y="134" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">42%</text>
+            <rect x="180" y="120" width="40" height="22" fill="#35c995" rx="3" opacity=".55"/>
+            <text x="200" y="134" text-anchor="middle" font-size="9" fill="var(--dk)">31%</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 3: Category pref stacked + At-Risk discount dependency -->
+      <div class="dash-charts">
+        <div class="chart-card">
+          <div class="cc-title">At-Risk는 Office 편중(61%) — Furniture·Tech 확장 유도가 LTV 상승 열쇠</div>
+          <div class="cc-desc">At-Risk Office 비중 61% vs Champions 29%. 카테고리 다양화 = LTV 상승의 핵심 레버</div>
+          <svg viewBox="0 0 380 200" width="100%" height="auto">
+            <line x1="30" y1="10" x2="30" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="148" x2="370" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Champions: Tech 48%, Furn 22%, Office 30% -->
+            <rect x="38" y="62" width="52" height="86" fill="#35c995" rx="0" opacity=".85"/>
+            <rect x="38" y="40" width="52" height="22" fill="#efb05d" rx="0" opacity=".8"/>
+            <rect x="38" y="10" width="52" height="30" fill="#5b8ef0" rx="0" opacity=".8"/>
+            <text x="64" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">Champions</text>
+            <!-- Loyal: Tech 38%, Furn 32%, Office 30% -->
+            <rect x="102" y="70" width="52" height="78" fill="#35c995" rx="0" opacity=".75"/>
+            <rect x="102" y="44" width="52" height="26" fill="#efb05d" rx="0" opacity=".8"/>
+            <rect x="102" y="18" width="52" height="26" fill="#5b8ef0" rx="0" opacity=".8"/>
+            <text x="128" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">Loyal</text>
+            <!-- Promising: Tech 34%, Furn 30%, Office 36% -->
+            <rect x="166" y="78" width="52" height="70" fill="#35c995" rx="0" opacity=".65"/>
+            <rect x="166" y="48" width="52" height="30" fill="#efb05d" rx="0" opacity=".8"/>
+            <rect x="166" y="12" width="52" height="36" fill="#5b8ef0" rx="0" opacity=".8"/>
+            <text x="192" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">Promising</text>
+            <!-- At-Risk: Tech 25%, Furn 28%, Office 47% -->
+            <rect x="230" y="100" width="52" height="48" fill="#35c995" rx="0" opacity=".55"/>
+            <rect x="230" y="68" width="52" height="32" fill="#efb05d" rx="0" opacity=".8"/>
+            <rect x="230" y="22" width="52" height="46" fill="#5b8ef0" rx="0" opacity=".8"/>
+            <text x="256" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">At-Risk</text>
+            <!-- Legend -->
+            <rect x="32" y="170" width="8" height="6" fill="#5b8ef0" rx="1" opacity=".8"/>
+            <text x="43" y="176" font-size="8" fill="var(--mu)">Technology</text>
+            <rect x="98" y="170" width="8" height="6" fill="#efb05d" rx="1" opacity=".8"/>
+            <text x="109" y="176" font-size="8" fill="var(--mu)">Furniture</text>
+            <rect x="155" y="170" width="8" height="6" fill="#35c995" rx="1" opacity=".8"/>
+            <text x="166" y="176" font-size="8" fill="var(--mu)">Office</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">At-Risk 할인율 24.3% — 할인이 있어도 이탈, 할인이 로열티를 대체 못함<span class="ai-badge-inline">K-Means</span></div>
+          <div class="cc-desc">At-Risk 24.3% vs Champions 9.1%. 할인 의존도↑이면서 잔존율↓ — 할인 증가는 해결책이 아님</div>
+          <svg viewBox="0 0 380 200" width="100%" height="auto">
+            <line x1="40" y1="10" x2="40" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="155" x2="360" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <rect x="52" y="118" width="44" height="37" fill="#35c995" rx="4" opacity=".85"/>
+            <text x="74" y="113" text-anchor="middle" font-size="10" fill="#218d72" font-weight="700">9.1%</text>
+            <rect x="112" y="98" width="44" height="57" fill="#4fb799" rx="4" opacity=".8"/>
+            <text x="134" y="93" text-anchor="middle" font-size="10" fill="#218d72">12.4%</text>
+            <rect x="172" y="85" width="44" height="70" fill="#efb05d" rx="4" opacity=".8"/>
+            <text x="194" y="80" text-anchor="middle" font-size="10" fill="#a0620a">15.6%</text>
+            <rect x="232" y="52" width="44" height="103" fill="#ef7d86" rx="4" opacity=".85"/>
+            <text x="254" y="47" text-anchor="middle" font-size="10" fill="#9b2d38" font-weight="700">24.3%</text>
+            <rect x="292" y="70" width="44" height="85" fill="rgba(150,135,120,.45)" rx="4"/>
+            <text x="314" y="65" text-anchor="middle" font-size="10" fill="var(--mu)">19.8%</text>
+            <text x="74" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">Champ.</text>
+            <text x="134" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">Loyal</text>
+            <text x="194" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">Promis.</text>
+            <text x="254" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">At-Risk</text>
+            <text x="314" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">Others</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 4: AI K-Means Cluster — full width -->
+      <div class="dash-charts full">
+        <div class="chart-card">
+          <div class="cc-title">3개 군집 확인: 고가치(18%) / 고빈도·저마진(41%) / 저관여(41%) — 동일 전략 적용이 비효율 원인<span class="ai-badge-inline">AI 추정</span></div>
+          <div class="cc-desc">K-Means k=3. 군집 A(Champions): 매출↑마진↑ / 군집 B: 할인↑빈도↑마진↓ / 군집 C: 저관여. 단일 캠페인 적용 불가</div>
+          <svg viewBox="0 0 640 240" width="100%" height="auto">
+            <line x1="50" y1="10" x2="50" y2="195" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="50" y1="195" x2="620" y2="195" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <text x="28" y="100" text-anchor="middle" font-size="9" fill="var(--so)" transform="rotate(-90,28,100)">마진율 →</text>
+            <text x="335" y="215" text-anchor="middle" font-size="9" fill="var(--so)">매출 →</text>
+            <!-- Cluster 1: low sales, variable margin (left zone) -->
+            <circle cx="100" cy="140" r="6" fill="#5b8ef0" opacity=".6"/>
+            <circle cx="125" cy="158" r="9" fill="#5b8ef0" opacity=".55"/>
+            <circle cx="85" cy="168" r="5" fill="#5b8ef0" opacity=".6"/>
+            <circle cx="145" cy="130" r="7" fill="#5b8ef0" opacity=".5"/>
+            <circle cx="110" cy="115" r="8" fill="#5b8ef0" opacity=".55"/>
+            <circle cx="70" cy="148" r="5" fill="#5b8ef0" opacity=".5"/>
+            <circle cx="160" cy="162" r="6" fill="#5b8ef0" opacity=".55"/>
+            <circle cx="90" cy="178" r="4" fill="#5b8ef0" opacity=".5"/>
+            <text x="115" y="192" text-anchor="middle" font-size="9" fill="#3b5bbf" font-weight="700">C1: 소액·다빈도</text>
+            <!-- Cluster 2: mid sales, mid margin (center zone) -->
+            <circle cx="280" cy="100" r="10" fill="#35c995" opacity=".65"/>
+            <circle cx="310" cy="85" r="7" fill="#35c995" opacity=".6"/>
+            <circle cx="255" cy="115" r="9" fill="#35c995" opacity=".6"/>
+            <circle cx="335" cy="92" r="11" fill="#35c995" opacity=".55"/>
+            <circle cx="290" cy="72" r="6" fill="#35c995" opacity=".65"/>
+            <circle cx="230" cy="90" r="8" fill="#35c995" opacity=".55"/>
+            <circle cx="350" cy="108" r="7" fill="#35c995" opacity=".6"/>
+            <text x="295" y="140" text-anchor="middle" font-size="9" fill="#218d72" font-weight="700">C2: 중간·균형</text>
+            <!-- Cluster 3: high sales, low margin (right zone) -->
+            <circle cx="460" cy="172" r="12" fill="#ef7d86" opacity=".65"/>
+            <circle cx="505" cy="160" r="10" fill="#ef7d86" opacity=".6"/>
+            <circle cx="480" cy="148" r="9" fill="#ef7d86" opacity=".55"/>
+            <circle cx="535" cy="140" r="11" fill="#ef7d86" opacity=".5"/>
+            <circle cx="445" cy="158" r="8" fill="#ef7d86" opacity=".6"/>
+            <circle cx="555" cy="152" r="7" fill="#ef7d86" opacity=".55"/>
+            <text x="495" y="192" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">C3: 고액·저마진</text>
+            <!-- legend -->
+            <circle cx="510" cy="28" r="6" fill="#5b8ef0" opacity=".6"/>
+            <text x="520" y="32" font-size="9" fill="#3b5bbf">소액·다빈도</text>
+            <circle cx="510" cy="46" r="6" fill="#35c995" opacity=".65"/>
+            <text x="520" y="50" font-size="9" fill="#218d72">중간·균형</text>
+            <circle cx="510" cy="64" r="6" fill="#ef7d86" opacity=".65"/>
+            <text x="520" y="68" font-size="9" fill="#9b2d38">고액·저마진</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 3</span><span class="dash-step-hdr-label">액션 아이템 — 그래서 뭘 해야 해?</span></div>
+
+      <!-- At-Risk Conversion Sim -->
+      <div class="sim-widget sim-atrisk" style="background:rgba(247,229,235,.7);border-color:rgba(239,125,134,.25)">
+        <div class="sim-title">👥 이탈 위험 고객을 되찾으면 얼마를 벌 수 있을까? <span class="sim-badge" style="background:rgba(239,125,134,.12);color:#8a2233;border-color:rgba(239,125,134,.2)">LTV 시뮬레이션</span></div>
+        <div class="sim-note">지금 At-Risk 고객은 2,099명입니다. 이들이 다시 구매하는 충성 고객이 되면 1인당 LTV가 $2,100 → $9,800로 4.7배 올라갑니다. 몇 명만 돌려세워도 큰 차이가 납니다.</div>
+        <div class="sim-row">
+          <span class="sim-label">이 중</span>
+          <input class="sim-input" type="number" value="500" min="100" max="2099" step="100" oninput="runAtRiskSim(this)">
+          <span class="sim-label">명을 충성 고객으로 전환한다면?</span>
+        </div>
+        <div class="sim-results">
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">LTV 증분</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">이익 기여 추정 (30%)</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">전환 목표 비율</div></div>
+        </div>
+      </div>
+
+      <!-- Campaign ROI Sim -->
+      <div class="sim-widget sim-campaign" style="background:rgba(225,241,236,.7);border-color:rgba(79,183,153,.25)">
+        <div class="sim-title">💰 리텐션 캠페인에 얼마를 쓰면 남는 장사일까? <span class="sim-badge" style="background:rgba(79,183,153,.12);color:#218d72;border-color:rgba(79,183,153,.2)">ROI 계산기</span></div>
+        <div class="sim-note">캠페인 1인당 평균 비용 $15. 되찾은 고객 1명의 LTV는 $9,800입니다. 예산을 얼마로 설정하면 몇 명을 되찾을 수 있는지, ROI가 몇 배인지 확인하세요.</div>
+        <div class="sim-row">
+          <span class="sim-label">캠페인 예산 $</span>
+          <input class="sim-input" type="number" value="3000" min="500" max="50000" step="500" oninput="runCampaignROI(this)">
+          <span class="sim-label">를 투자한다면?</span>
+        </div>
+        <div class="sim-results">
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">되찾는 고객 수</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">LTV 회수 추정</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">캠페인 ROI</div></div>
+        </div>
+      </div>
+
+      <!-- Action Board -->
+      <div class="dash-actions">
+        <div class="da-item">
+          <div class="da-p">P1 즉시</div>
+          <div class="da-title">At-Risk 2,099명 개인화 Win-back 캠페인</div>
+          <div class="da-why">이 그룹이 Loyal로 전환 시 LTV $2.1K → $9.8K. 캠페인 ROI 4.7×</div>
+        </div>
+        <div class="da-item">
+          <div class="da-p">P2 2주</div>
+          <div class="da-title">Champions VIP 프로그램 + 첫 구매 7/14/30일 트리거 이메일</div>
+          <div class="da-why">재구매 전환율 22.1% → 30% 목표. 1회 구매자 49% → 2회 전환 자동화</div>
+        </div>
+        <div class="da-item">
+          <div class="da-p">P3 모니터링</div>
+          <div class="da-title">신규→재구매 CVR 22.1% 회복 추적 — 목표 30.4%</div>
+          <div class="da-why">전년 30.4% 대비 −8.3%p. 코호트별 M1/M2 리텐션 추적 필수</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     DASHBOARD 3: 가격·할인 효율
+═══════════════════════════════════════════════════════ -->
+<div class="dash-panel" id="dp2">
+  <div class="dash">
+    <div class="dash-topbar">
+      <div class="dash-topbar-left">
+        <div class="dash-topbar-title">할인 효율 분석 — <em>Price Elasticity · Discount ROI · Segment</em></div>
+        <div class="dash-topbar-problem">문제: 할인이 정말 매출을 올리는가, 아니면 마진만 갉아먹는가?</div>
+      </div>
+      <span class="dash-topbar-meta">할인율 분석 · Price Bucket · Discount 효율 진단</span>
+    </div>
+    <div class="dash-body">
+
+      <!-- Data Story Block -->
+      <div class="story-block">
+        <div class="story-flow">
+          <div class="sf-cell">
+            <div class="sf-label lbl-now">현황</div>
+            <div class="sf-val">할인 효율 0.82</div>
+            <div class="sf-desc">할인↔매출 상관 <span class="num-red">r = −0.03</span><br>할인을 올려도 매출 무반응</div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-why">원인</div>
+            <div class="sf-val">세그먼트 무시한 할인</div>
+            <div class="sf-desc">고가(20만+) CVR 0.8%<br>저가 CVR 9.2% — <strong>11.5배 격차</strong></div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-so">결과</div>
+            <div class="sf-val">할인 예산 일부 낭비</div>
+            <div class="sf-desc">구매 의향 없는 층에 집중<br><span class="num-red">이익률 개선 기회 소실</span></div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-act">기회</div>
+            <div class="sf-val">효율 1.2 이상 목표</div>
+            <div class="sf-desc">세그먼트 재배분 + 할부 신설<br>기간 <strong>6주</strong> · CVR 목표 2.0%</div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 1</span><span class="dash-step-hdr-label">현황 파악 — 지금 어디 있지?</span></div>
+      <!-- KPI row -->
+      <div class="dash-kpi-row">
+        <div class="dk-box">
+          <div class="dk-lbl">평균 할인율</div>
+          <div class="dk-val">15.6%</div>
+          <div class="dk-delta dn">↑ +2.4%p QoQ — 비용 증가</div>
+        </div>
+        <div class="dk-box" style="border-color:rgba(239,125,134,.3)">
+          <div class="dk-lbl">할인 효율 점수</div>
+          <div class="dk-val">0.82</div>
+          <div class="dk-delta dn">할인 1원 → 매출 0.82원</div>
+        </div>
+        <div class="dk-box">
+          <div class="dk-lbl">고가 CVR</div>
+          <div class="dk-val">2.3%</div>
+          <div class="dk-delta dn">↓ −1.1%p QoQ</div>
+        </div>
+        <div class="dk-box" style="border-color:rgba(239,176,93,.3)">
+          <div class="dk-lbl">r(Sales, Discount)</div>
+          <div class="dk-val">−0.03</div>
+          <div class="dk-delta warn">할인이 매출에 무효과</div>
+        </div>
+      </div>
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 2</span><span class="dash-step-hdr-label">원인 확인 — 왜 이렇게 됐지?</span></div>
+      <!-- Row 1: scatter discount×margin — full width -->
+      <div class="dash-charts full">
+        <div class="chart-card">
+          <div class="cc-title">할인율↑ = 마진율↓ — r = −0.73, 우연이 아닌 구조적 관계</div>
+          <div class="cc-desc">할인 1%p 상승 시 마진 −1.3%p. r=−0.73, p<0.01. Furniture 고할인 구간에서 가장 뚜렷</div>
+          <svg viewBox="0 0 500 240" width="100%" height="auto">
+            <line x1="50" y1="10" x2="50" y2="195" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="50" y1="195" x2="480" y2="195" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <text x="265" y="215" text-anchor="middle" font-size="9" fill="var(--so)">할인율 →</text>
+            <text x="28" y="100" text-anchor="middle" font-size="9" fill="var(--so)" transform="rotate(-90,28,100)">마진율 →</text>
+            <!-- trend line -->
+            <line x1="70" y1="40" x2="460" y2="175" stroke="rgba(96,79,67,.25)" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <!-- Technology dots (green, low discount ~8%, high margin ~35%) -->
+            <circle cx="110" cy="52" r="9" fill="#35c995" opacity=".75"/>
+            <circle cx="135" cy="68" r="7" fill="#35c995" opacity=".7"/>
+            <circle cx="90" cy="44" r="6" fill="#35c995" opacity=".7"/>
+            <circle cx="155" cy="60" r="8" fill="#35c995" opacity=".65"/>
+            <circle cx="120" cy="38" r="5" fill="#35c995" opacity=".7"/>
+            <text x="185" y="36" font-size="10" fill="#218d72" font-weight="700">Technology (낮은 할인)</text>
+            <!-- Office dots (blue, mid discount ~15%, mid margin ~28%) -->
+            <circle cx="250" cy="96" r="7" fill="#5b8ef0" opacity=".7"/>
+            <circle cx="275" cy="108" r="8" fill="#5b8ef0" opacity=".65"/>
+            <circle cx="230" cy="88" r="6" fill="#5b8ef0" opacity=".7"/>
+            <circle cx="295" cy="100" r="6" fill="#5b8ef0" opacity=".65"/>
+            <text x="305" y="84" font-size="10" fill="#3b5bbf">Office (중간)</text>
+            <!-- Furniture dots (red, high discount ~18%, low margin ~11%) -->
+            <circle cx="360" cy="148" r="10" fill="#ef7d86" opacity=".75"/>
+            <circle cx="390" cy="158" r="8" fill="#ef7d86" opacity=".7"/>
+            <circle cx="340" cy="142" r="7" fill="#ef7d86" opacity=".7"/>
+            <circle cx="415" cy="165" r="9" fill="#ef7d86" opacity=".65"/>
+            <circle cx="375" cy="138" r="6" fill="#ef7d86" opacity=".7"/>
+            <text x="370" y="185" text-anchor="middle" font-size="10" fill="#9b2d38" font-weight="700">Furniture (높은 할인)</text>
+            <!-- legend -->
+            <rect x="55" y="20" width="10" height="10" rx="5" fill="#35c995" opacity=".75"/>
+            <text x="68" y="29" font-size="9" fill="#218d72">Technology</text>
+            <rect x="55" y="36" width="10" height="10" rx="5" fill="#5b8ef0" opacity=".7"/>
+            <text x="68" y="45" font-size="9" fill="#3b5bbf">Office</text>
+            <rect x="55" y="52" width="10" height="10" rx="5" fill="#ef7d86" opacity=".75"/>
+            <text x="68" y="61" font-size="9" fill="#9b2d38">Furniture</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 2: CVR by price bucket + Discount bins -->
+      <div class="dash-charts">
+        <div class="chart-card">
+          <div class="cc-title">고가 CVR 0.8% vs 저가 9.2% — 할인이 아닌 가격 장벽이 진짜 문제</div>
+          <div class="cc-desc">$0–50: CVR 9.2% / $50–200: 4.1% / $200+: 0.8%. 구조적 진입 장벽 → 할인보다 분할결제가 효과적</div>
+          <svg viewBox="0 0 360 200" width="100%" height="auto">
+            <line x1="40" y1="10" x2="40" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="155" x2="340" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <rect x="54" y="32" width="56" height="123" fill="#35c995" rx="4" opacity=".85"/>
+            <text x="82" y="27" text-anchor="middle" font-size="11" fill="#218d72" font-weight="700">9.2%</text>
+            <rect x="126" y="60" width="56" height="95" fill="#35c995" rx="4" opacity=".75"/>
+            <text x="154" y="55" text-anchor="middle" font-size="11" fill="#218d72" font-weight="700">6.7%</text>
+            <rect x="198" y="93" width="56" height="62" fill="#efb05d" rx="4" opacity=".8"/>
+            <text x="226" y="88" text-anchor="middle" font-size="11" fill="#a0620a" font-weight="700">4.3%</text>
+            <rect x="270" y="143" width="56" height="12" fill="#ef7d86" rx="4" opacity=".85"/>
+            <text x="298" y="138" text-anchor="middle" font-size="11" fill="#9b2d38" font-weight="700">0.8%</text>
+            <text x="82" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">~5만원</text>
+            <text x="154" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">5~10만</text>
+            <text x="226" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">10~20만</text>
+            <text x="298" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">20만+</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">할인 20%+ 구간에서 매출 오히려 감소 — 가격 신호 왜곡</div>
+          <div class="cc-desc">0~10%: 매출 최고 / 20~30%: 평균 / 40%+: 최저. 과도한 할인이 품질 의심 신호로 작용</div>
+          <svg viewBox="0 0 260 180" width="100%" height="auto">
+            <line x1="30" y1="10" x2="30" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="148" x2="250" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <rect x="38" y="38" width="34" height="110" fill="#5b8ef0" rx="3" opacity=".8"/>
+            <text x="55" y="34" text-anchor="middle" font-size="9" fill="#3b5bbf" font-weight="700">$680K</text>
+            <rect x="80" y="28" width="34" height="120" fill="#35c995" rx="3" opacity=".85"/>
+            <text x="97" y="24" text-anchor="middle" font-size="9" fill="#218d72" font-weight="700">$720K</text>
+            <rect x="122" y="82" width="34" height="66" fill="#efb05d" rx="3" opacity=".8"/>
+            <text x="139" y="78" text-anchor="middle" font-size="9" fill="#a0620a">$380K</text>
+            <rect x="164" y="105" width="34" height="43" fill="#ef7d86" rx="3" opacity=".75"/>
+            <text x="181" y="101" text-anchor="middle" font-size="9" fill="#9b2d38">$220K</text>
+            <rect x="206" y="120" width="34" height="28" fill="#ef7d86" rx="3" opacity=".6"/>
+            <text x="223" y="116" text-anchor="middle" font-size="9" fill="#9b2d38">$102K</text>
+            <text x="55" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">0%</text>
+            <text x="97" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">20%</text>
+            <text x="139" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">40%</text>
+            <text x="181" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">60%</text>
+            <text x="223" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">80%</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 3: Discount ROI by segment + Furniture margin decompose -->
+      <div class="dash-charts">
+        <div class="chart-card">
+          <div class="cc-title">할인 ROI 1.0 넘는 세그먼트는 At-Risk 하나뿐 — Champions에 쓰는 할인은 순손실</div>
+          <div class="cc-desc">At-Risk ROI 1.24 · Potential 0.91 · Loyal 0.73 · Champions 0.51. Champions 할인 예산 절반 이상이 ROI 마이너스</div>
+          <svg viewBox="0 0 260 180" width="100%" height="auto">
+            <line x1="30" y1="10" x2="30" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="148" x2="250" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- ROI=1.0 baseline -->
+            <line x1="30" y1="88" x2="250" y2="88" stroke="rgba(96,79,67,.3)" stroke-dasharray="4,3" stroke-width="1.5"/>
+            <text x="252" y="91" font-size="8" fill="var(--mu)">1.0</text>
+            <!-- bars: ROI values. Champions 0.42, Loyal 0.61, Promising 0.78, At-Risk 1.24, Others 0.55 -->
+            <rect x="38" y="115" width="30" height="33" fill="#35c995" rx="3" opacity=".75"/>
+            <text x="53" y="111" text-anchor="middle" font-size="9" fill="#218d72">0.42</text>
+            <rect x="80" y="100" width="30" height="48" fill="#35c995" rx="3" opacity=".7"/>
+            <text x="95" y="96" text-anchor="middle" font-size="9" fill="#218d72">0.61</text>
+            <rect x="122" y="90" width="30" height="58" fill="#efb05d" rx="3" opacity=".8"/>
+            <text x="137" y="86" text-anchor="middle" font-size="9" fill="#a0620a">0.78</text>
+            <rect x="164" y="40" width="30" height="48" fill="#ef7d86" rx="3" opacity=".85"/>
+            <text x="179" y="36" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">1.24</text>
+            <rect x="206" y="108" width="30" height="40" fill="rgba(150,135,120,.45)" rx="3"/>
+            <text x="221" y="104" text-anchor="middle" font-size="9" fill="var(--mu)">0.55</text>
+            <text x="53" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">Champ.</text>
+            <text x="95" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">Loyal</text>
+            <text x="137" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">Promis.</text>
+            <text x="179" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">At-Risk</text>
+            <text x="221" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">Others</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">원가 62% + 할인 17.7% = 수익 80% 소진 — 순이익 여지 10.7%뿐</div>
+          <div class="cc-desc">수익 $1 중 원가 $0.62, 할인 $0.177, 순이익 $0.107. 할인 5%p 축소 = 이익 50% 이상 증가</div>
+          <svg viewBox="0 0 260 180" width="100%" height="auto">
+            <!-- Horizontal stacked bar -->
+            <text x="20" y="60" text-anchor="start" font-size="10" fill="var(--dk)" font-weight="700">Furniture 매출 구조</text>
+            <!-- Bar total width 220px at y=80 -->
+            <!-- COGS: 61.6% = 135px -->
+            <rect x="20" y="72" width="135" height="28" fill="rgba(150,135,120,.5)" rx="0"/>
+            <text x="87" y="89" text-anchor="middle" font-size="9" fill="var(--dk)" font-weight="600">원가 62%</text>
+            <!-- Discount: 17.7% = 39px -->
+            <rect x="155" y="72" width="39" height="28" fill="#ef7d86" rx="0" opacity=".8"/>
+            <text x="174" y="89" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">할인</text>
+            <!-- Net margin: 10.7% = 24px -->
+            <rect x="194" y="72" width="23" height="28" fill="#35c995" rx="0" opacity=".85"/>
+            <text x="205" y="89" text-anchor="middle" font-size="8" fill="#fff">이익</text>
+            <!-- Other/operating: remaining -->
+            <rect x="217" y="72" width="23" height="28" fill="rgba(96,79,67,.2)" rx="0"/>
+            <text x="228" y="89" text-anchor="middle" font-size="8" fill="var(--mu)">기타</text>
+            <!-- Labels below -->
+            <text x="87" y="115" text-anchor="middle" font-size="9" fill="var(--mu)">원가 62%</text>
+            <text x="174" y="115" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">할인 17.7%</text>
+            <text x="205" y="115" text-anchor="middle" font-size="9" fill="#218d72" font-weight="700">이익 10.7%</text>
+
+            <text x="20" y="140" font-size="9" fill="var(--mu)">Technology 비교</text>
+            <!-- Technology bar -->
+            <rect x="20" y="148" width="90" height="20" fill="rgba(150,135,120,.35)" rx="0"/>
+            <text x="65" y="161" text-anchor="middle" font-size="8" fill="var(--mu)">원가 48%</text>
+            <rect x="110" y="148" width="18" height="20" fill="#5b8ef0" rx="0" opacity=".6"/>
+            <text x="119" y="161" text-anchor="middle" font-size="8" fill="var(--mu)">할인</text>
+            <rect x="128" y="148" width="77" height="20" fill="#35c995" rx="0" opacity=".75"/>
+            <text x="166" y="161" text-anchor="middle" font-size="8" fill="#218d72" font-weight="700">이익 35%</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 4: AI Simulation — full width -->
+      <div class="dash-charts full">
+        <div class="chart-card">
+          <div class="cc-title">AI 시뮬레이션: Furniture 할인 10%로 낮추면 이익 +$6~8K<span class="ai-badge-inline">AI 추정</span></div>
+          <div class="cc-desc">현재 vs 할인 10% 시나리오 이익 비교. 추정치 기반 시뮬레이션</div>
+          <svg viewBox="0 0 700 200" width="100%" height="auto">
+            <line x1="40" y1="155" x2="660" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="10" x2="40" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Current profit bar -->
+            <rect x="140" y="65" width="120" height="90" fill="#efb05d" rx="8" opacity=".85"/>
+            <text x="200" y="58" text-anchor="middle" font-size="14" fill="#a0620a" font-weight="700">$79K</text>
+            <text x="200" y="172" text-anchor="middle" font-size="10" fill="var(--mu)">현재 이익 (Furniture)</text>
+            <!-- Arrow -->
+            <text x="360" y="120" text-anchor="middle" font-size="28" fill="#4fb799">→</text>
+            <text x="360" y="148" text-anchor="middle" font-size="10" fill="var(--mu)">할인 10%p 축소</text>
+            <!-- Simulated profit bar -->
+            <rect x="440" y="38" width="120" height="117" fill="#35c995" rx="8" opacity=".85"/>
+            <text x="500" y="32" text-anchor="middle" font-size="14" fill="#218d72" font-weight="700">$86K</text>
+            <text x="500" y="172" text-anchor="middle" font-size="10" fill="var(--mu)">시뮬레이션 이익 (할인 10%)</text>
+            <!-- Delta annotation -->
+            <rect x="420" y="178" width="160" height="18" fill="rgba(53,201,149,.12)" rx="6"/>
+            <text x="500" y="191" text-anchor="middle" font-size="10" fill="#218d72" font-weight="700">+$6~8K 추정 (AI 모델 기반)</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 5: Price elasticity curve + Category discount ROI -->
+      <div class="dash-charts">
+        <div class="chart-card">
+          <div class="cc-title">가격을 1% 올리면 수요가 얼마나 빠질까?</div>
+          <div class="cc-desc">Technology(탄력적), Furniture(비탄력적), Office(중간). 카테고리별 전략 차별화 근거</div>
+          <svg viewBox="0 0 400 200" width="100%" height="auto">
+            <line x1="30" y1="10" x2="30" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="148" x2="360" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="79" x2="360" y2="79" stroke="rgba(96,79,67,.12)" stroke-dasharray="4,3" stroke-width="1"/>
+            <text x="18" y="82" text-anchor="middle" font-size="8" fill="var(--so)">0</text>
+            <text x="195" y="163" text-anchor="middle" font-size="8" fill="var(--so)">가격 인상 % →</text>
+            <!-- Technology: elastic, steep decline -->
+            <polyline points="50,20 100,52 150,92 200,118 250,134 300,142"
+              fill="none" stroke="#5b8ef0" stroke-width="2.5" stroke-linejoin="round"/>
+            <text x="305" y="140" font-size="9" fill="#3b5bbf">Tech(탄력적)</text>
+            <!-- Furniture: inelastic, gentle decline -->
+            <polyline points="50,58 100,68 150,80 200,92 250,100 300,108"
+              fill="none" stroke="#ef7d86" stroke-width="2.5" stroke-linejoin="round"/>
+            <text x="305" y="106" font-size="9" fill="#9b2d38">Furn(비탄력)</text>
+            <!-- Office: medium -->
+            <polyline points="50,40 100,58 150,78 200,102 250,118 300,128"
+              fill="none" stroke="#35c995" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="6,3"/>
+            <text x="305" y="126" font-size="9" fill="#218d72">Office(중간)</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">할인 투자 대비 카테고리별 매출 증가, 실제로 효과 있나?</div>
+          <div class="cc-desc">그룹드 막대: 할인 비용(짙은 색)과 그로 인한 증분 매출(연한 색). Furniture 역전</div>
+          <svg viewBox="0 0 300 180" width="100%" height="auto">
+            <line x1="30" y1="10" x2="30" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="148" x2="280" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Technology: cost 30, incremental 55 -->
+            <rect x="45" y="90" width="30" height="58" fill="#5b8ef0" rx="3" opacity=".85"/>
+            <text x="60" y="86" text-anchor="middle" font-size="9" fill="#3b5bbf">$30K</text>
+            <rect x="79" y="52" width="30" height="96" fill="#5b8ef0" rx="3" opacity=".45"/>
+            <text x="94" y="48" text-anchor="middle" font-size="9" fill="#3b5bbf">$55K</text>
+            <text x="72" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">Technology</text>
+            <!-- Furniture: cost 62, incremental 48 (ROI < 1) -->
+            <rect x="130" y="55" width="30" height="93" fill="#ef7d86" rx="3" opacity=".85"/>
+            <text x="145" y="51" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">$62K</text>
+            <rect x="164" y="76" width="30" height="72" fill="#ef7d86" rx="3" opacity=".4"/>
+            <text x="179" y="72" text-anchor="middle" font-size="9" fill="#9b2d38">$48K</text>
+            <text x="157" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">Furniture</text>
+            <!-- Office: cost 28, incremental 32 -->
+            <rect x="218" y="92" width="30" height="56" fill="#efb05d" rx="3" opacity=".85"/>
+            <text x="233" y="88" text-anchor="middle" font-size="9" fill="#a0620a">$28K</text>
+            <rect x="248" y="84" width="30" height="64" fill="#efb05d" rx="3" opacity=".45"/>
+            <text x="263" y="80" text-anchor="middle" font-size="9" fill="#a0620a">$32K</text>
+            <text x="243" y="163" text-anchor="middle" font-size="8" fill="var(--mu)">Office</text>
+            <!-- legend -->
+            <rect x="32" y="170" width="8" height="6" fill="rgba(100,100,100,.7)" rx="1"/>
+            <text x="43" y="176" font-size="8" fill="var(--mu)">할인 비용</text>
+            <rect x="88" y="170" width="8" height="6" fill="rgba(100,100,100,.35)" rx="1"/>
+            <text x="99" y="176" font-size="8" fill="var(--mu)">증분 매출</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 3</span><span class="dash-step-hdr-label">액션 아이템 — 그래서 뭘 해야 해?</span></div>
+
+      <!-- Segment Discount Optimizer -->
+      <div class="sim-widget sim-segdiscount" style="background:rgba(247,241,226,.7);border-color:rgba(239,176,93,.3)">
+        <div class="sim-title">🎛️ 고객마다 다른 할인율을 주면 ROI가 어떻게 달라질까? <span class="sim-badge">세그먼트별 할인</span></div>
+        <div class="sim-note">VIP 고객에게 높은 할인은 불필요합니다 — 이미 구매할 고객이기 때문이에요. 이탈 위험 고객(At-Risk)에 집중하는 게 ROI가 훨씬 높습니다. 슬라이더로 직접 확인해보세요.</div>
+        <div class="sim-slider-group">
+          <div class="sim-slider-row">
+            <div class="sim-slider-label"><span class="sim-label">VIP 고객 (Champions) — 잘 안 떠남</span><span class="sim-range-val seg-val" data-seg="champ">5%</span></div>
+            <input type="range" class="sim-range" data-seg="champ" min="0" max="30" value="5" oninput="runSegDiscountSim(this)">
+          </div>
+          <div class="sim-slider-row">
+            <div class="sim-slider-label"><span class="sim-label">이탈 위험 (At-Risk) — 할인에 반응</span><span class="sim-range-val seg-val" data-seg="atrisk">20%</span></div>
+            <input type="range" class="sim-range" data-seg="atrisk" min="0" max="40" value="20" oninput="runSegDiscountSim(this)">
+          </div>
+          <div class="sim-slider-row">
+            <div class="sim-slider-label"><span class="sim-label">신규 고객 (New) — 첫 구매 유도</span><span class="sim-range-val seg-val" data-seg="new">10%</span></div>
+            <input type="range" class="sim-range" data-seg="new" min="0" max="25" value="10" oninput="runSegDiscountSim(this)">
+          </div>
+        </div>
+        <div class="sim-results">
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">총 할인 비용</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">매출 증분 예측</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">할인 ROI</div></div>
+        </div>
+      </div>
+
+      <!-- Price Elasticity Sim -->
+      <div class="sim-widget sim-elasticity" style="background:rgba(237,231,245,.7);border-color:rgba(91,107,191,.25)">
+        <div class="sim-title">📈 가격을 올리면 수요가 줄까, 매출이 늘까? <span class="sim-badge" style="background:rgba(91,107,191,.12);color:#3b5bbf;border-color:rgba(91,107,191,.2)">가격 탄력성</span></div>
+        <div class="sim-note">이 데이터의 가격 탄력성은 -0.3 (비탄력적)입니다. 가격을 10% 올려도 수요는 3%밖에 안 빠져요. 할인으로 매출 올리는 것보다 가격 인상이 더 유리할 수 있습니다.</div>
+        <div class="sim-row">
+          <span class="sim-label">가격을</span>
+          <input class="sim-input" type="number" value="5" min="1" max="30" step="1" oninput="runElasticitySim(this)">
+          <span class="sim-label">% 인상한다면?</span>
+        </div>
+        <div class="sim-results">
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">수요 변화 예측</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">매출 순변화</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">마진율 개선</div></div>
+        </div>
+      </div>
+
+      <!-- Action Board -->
+      <div class="dash-actions">
+        <div class="da-item">
+          <div class="da-p">P1 즉시</div>
+          <div class="da-title">Furniture 할인 구조 재설계 — 15% 상한 캡 적용</div>
+          <div class="da-why">할인 10%p 축소 → 마진 +$6~8K 추정. 할인 비용 $62K 중 $14K 절감 가능</div>
+        </div>
+        <div class="da-item">
+          <div class="da-p">P2 2주</div>
+          <div class="da-title">고가 상품(20만+) 전용 할부 옵션 신설</div>
+          <div class="da-why">CVR 0.8% → 목표 2.0%. 할인보다 할부 옵션이 고가 전환에 3.4× 효과 예상</div>
+        </div>
+        <div class="da-item">
+          <div class="da-p">P3 모니터링</div>
+          <div class="da-title">할인 효율 점수 0.82 → 1.2 목표 — At-Risk 전용 타깃팅</div>
+          <div class="da-why">At-Risk Discount ROI 1.24로 유일하게 효율적. 나머지 세그먼트 할인 축소 시 +$18K 절감</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     DASHBOARD 4: 시계열 예측
+═══════════════════════════════════════════════════════ -->
+<div class="dash-panel" id="dp3">
+  <div class="dash">
+    <div class="dash-topbar">
+      <div class="dash-topbar-left">
+        <div class="dash-topbar-title">매출 예측 — <em>Holt-Winters · Seasonality Decomp · Volatility</em></div>
+        <div class="dash-topbar-problem">문제: 3월 급락은 구조적인가, 일시적인가?</div>
+      </div>
+      <span class="dash-topbar-meta">2019–2022 학습 데이터 · 2023 Q2 예측 · 계절성 분해 포함</span>
+    </div>
+    <div class="dash-body">
+
+      <!-- Data Story Block -->
+      <div class="story-block">
+        <div class="story-flow">
+          <div class="sf-cell">
+            <div class="sf-label lbl-now">현황</div>
+            <div class="sf-val">3월 −31% MoM</div>
+            <div class="sf-desc">Technology 단독 <span class="num-red">−77%</span><br>Furniture·Office는 오히려 증가</div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-why">원인</div>
+            <div class="sf-val">단일 카테고리 의존</div>
+            <div class="sf-desc">Tech 변동성 <strong>±38%</strong><br>Q1 시즌 저점 (지수 0.72) 겹침</div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-so">결과</div>
+            <div class="sf-val">예측 신뢰도 저하</div>
+            <div class="sf-desc">4월 회복 예상 +74%<br>단 Tech 재발 시 <span class="num-red">패턴 반복</span></div>
+          </div>
+          <div class="sf-cell">
+            <div class="sf-label lbl-risk">리스크</div>
+            <div class="sf-val">피크 기회손실 위험</div>
+            <div class="sf-desc">12월 지수 ×1.89 — 9월 선확보 필요<br>기간 <strong>5개월</strong> · 임계값 $50K</div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 1</span><span class="dash-step-hdr-label">현황 파악 — 지금 어디 있지?</span></div>
+      <!-- KPI row -->
+      <div class="dash-kpi-row">
+        <div class="dk-box" style="border-color:rgba(53,201,149,.3)">
+          <div class="dk-lbl">다음달 예측 매출</div>
+          <div class="dk-val">$198K</div>
+          <div class="dk-delta up">↑ +5.2% MoM 예측</div>
+        </div>
+        <div class="dk-box">
+          <div class="dk-lbl">예측 정확도 (MAPE)</div>
+          <div class="dk-val">87.3%</div>
+          <div class="dk-delta up">±12.7% 오차 범위</div>
+        </div>
+        <div class="dk-box">
+          <div class="dk-lbl">YoY 성장률 추세</div>
+          <div class="dk-val">+12.3%</div>
+          <div class="dk-delta up">↑ 2022 기준</div>
+        </div>
+        <div class="dk-box" style="border-color:rgba(239,176,93,.3)">
+          <div class="dk-lbl">Technology 변동성</div>
+          <div class="dk-val">±38%</div>
+          <div class="dk-delta warn">단일 카테고리 리스크</div>
+        </div>
+      </div>
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 2</span><span class="dash-step-hdr-label">원인 확인 — 왜 이렇게 됐지?</span></div>
+      <!-- Row 1: Main forecast line — full width -->
+      <div class="dash-charts full">
+        <div class="chart-card">
+          <div class="cc-title">4월 $198K 예측 — 3월 급락에서 +74% 회복 가능<span class="ai-badge-inline">AI 추정</span></div>
+          <div class="cc-desc">Holt (α=0.3, β=0.2). 95% CI: $162K~$234K. Technology 재발 시 하한값 우세 — 채널 리스크 모니터링 필요</div>
+          <svg viewBox="0 0 700 240" width="100%" height="auto">
+            <defs>
+              <linearGradient id="ci2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#35c995" stop-opacity=".18"/>
+                <stop offset="100%" stop-color="#35c995" stop-opacity=".04"/>
+              </linearGradient>
+            </defs>
+            <line x1="40" y1="195" x2="680" y2="195" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="10" x2="40" y2="195" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Historical (12 months) -->
+            <polyline points="40,172 90,178 140,148 190,162 240,138 290,130 340,118 390,108 440,90 490,98 540,60 590,30"
+              fill="none" stroke="#2f2b27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <!-- CI band for forecast -->
+            <polygon points="590,30 620,20 650,14 680,10 680,32 650,38 620,44 590,48" fill="url(#ci2)"/>
+            <!-- Forecast dashed -->
+            <polyline points="590,30 620,22 650,16 680,12"
+              fill="none" stroke="#35c995" stroke-width="2.5" stroke-dasharray="8,5"/>
+            <!-- Divider -->
+            <line x1="590" y1="10" x2="590" y2="195" stroke="rgba(96,79,67,.2)" stroke-dasharray="3,3" stroke-width="1"/>
+            <text x="593" y="9" font-size="9" fill="var(--mu)">→예측</text>
+            <!-- Annotations -->
+            <circle cx="540" cy="60" r="5" fill="#35c995"/>
+            <text x="540" y="52" text-anchor="middle" font-size="10" fill="#218d72" font-weight="700">$142K</text>
+            <circle cx="680" cy="12" r="6" fill="#35c995" stroke="#fff" stroke-width="2"/>
+            <text x="656" y="10" text-anchor="end" font-size="10" fill="#218d72" font-weight="700">$198K</text>
+            <!-- 3월 dip annotation -->
+            <circle cx="190" cy="162" r="5" fill="#ef7d86"/>
+            <text x="190" y="155" text-anchor="middle" font-size="9" fill="#9b2d38">3월↓</text>
+            <text x="40" y="210" font-size="9" fill="var(--so)">Jan '22</text>
+            <text x="290" y="210" font-size="9" fill="var(--so)">Jul '22</text>
+            <text x="540" y="210" font-size="9" fill="var(--so)">Dec '22</text>
+            <text x="640" y="210" font-size="9" fill="#35c995">Apr '23</text>
+            <text x="668" y="210" font-size="9" fill="#35c995">Jun</text>
+            <!-- legend -->
+            <line x1="460" y1="28" x2="490" y2="28" stroke="#2f2b27" stroke-width="2"/>
+            <text x="494" y="32" font-size="9" fill="var(--dk)">실제 매출</text>
+            <line x1="460" y1="44" x2="490" y2="44" stroke="#35c995" stroke-width="2" stroke-dasharray="6,3"/>
+            <text x="494" y="48" font-size="9" fill="#218d72">AI 예측 (Holt, 95% CI)</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 2: 3월 급락 stacked + seasonality -->
+      <div class="dash-charts">
+        <div class="chart-card">
+          <div class="cc-title">3월 급락 원인: Technology 단독 −77% — Furniture·Office는 증가</div>
+          <div class="cc-desc">1~3월 스택 바. Technology 3월 $20K vs 전월 $87K (-77%)</div>
+          <svg viewBox="0 0 360 200" width="100%" height="auto">
+            <line x1="40" y1="10" x2="40" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="155" x2="340" y2="155" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Jan: Tech 74K, Others = total 74K -->
+            <rect x="64" y="52" width="64" height="103" fill="#5b8ef0" rx="0" opacity=".8"/>
+            <rect x="64" y="36" width="64" height="16" fill="#35c995" rx="0" opacity=".7"/>
+            <text x="96" y="31" text-anchor="middle" font-size="10" fill="#218d72" font-weight="700">$74K</text>
+            <!-- Feb: Tech 87K, Others = 72K -->
+            <rect x="148" y="44" width="64" height="111" fill="#5b8ef0" rx="0" opacity=".8"/>
+            <rect x="148" y="28" width="64" height="16" fill="#35c995" rx="0" opacity=".7"/>
+            <text x="180" y="23" text-anchor="middle" font-size="10" fill="#218d72" font-weight="700">$87K</text>
+            <!-- Mar: Tech 20K (-77%), Others similar -->
+            <rect x="232" y="102" width="64" height="53" fill="#5b8ef0" rx="0" opacity=".8"/>
+            <rect x="232" y="30" width="64" height="72" fill="#ef7d86" rx="0" opacity=".75"/>
+            <text x="264" y="25" text-anchor="middle" font-size="10" fill="#9b2d38" font-weight="700">$20K</text>
+            <text x="96" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">1월</text>
+            <text x="180" y="168" text-anchor="middle" font-size="9" fill="var(--mu)">2월</text>
+            <text x="264" y="168" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">3월 -77%</text>
+            <rect x="42" y="178" width="8" height="6" fill="#5b8ef0" rx="1" opacity=".8"/>
+            <text x="53" y="184" font-size="9" fill="var(--mu)">Technology</text>
+            <rect x="140" y="178" width="8" height="6" fill="#35c995" rx="1" opacity=".7"/>
+            <text x="151" y="184" font-size="9" fill="var(--mu)">기타</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">Q1이 Q4의 38% 수준 — 3월 하락의 40%는 계절이 설명하지만 나머지 60%는 별도 원인</div>
+          <div class="cc-desc">12월 지수 1.89 · Q1 평균 0.72. Technology 3월 −77%는 계절 기대치(−28%)의 2.8배 → 초과 하락분은 채널 문제</div>
+          <svg viewBox="0 0 360 200" width="100%" height="auto">
+            <!-- Baseline at 1.0 = y 110 (range 0.5-2.0) -->
+            <line x1="30" y1="110" x2="340" y2="110" stroke="rgba(96,79,67,.2)" stroke-dasharray="4,3" stroke-width="1"/>
+            <text x="22" y="113" text-anchor="middle" font-size="8" fill="var(--so)">1.0</text>
+            <line x1="30" y1="10" x2="30" y2="165" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="165" x2="340" y2="165" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- 12 monthly bars; scale: 1.0 = 110px from top=165, so baseline y=55 (165-110) -->
+            <!-- Jan 0.68: height=75, y=90 -->
+            <rect x="32" y="90" width="20" height="75" fill="#ef7d86" rx="2" opacity=".75"/>
+            <!-- Feb 0.71: height=78, y=87 -->
+            <rect x="56" y="87" width="20" height="78" fill="#ef7d86" rx="2" opacity=".75"/>
+            <!-- Mar 0.79: height=87, y=78 -->
+            <rect x="80" y="78" width="20" height="87" fill="#efb05d" rx="2" opacity=".8"/>
+            <!-- Apr 0.88: height=97, y=68 -->
+            <rect x="104" y="68" width="20" height="97" fill="#efb05d" rx="2" opacity=".8"/>
+            <!-- May 1.02: height=112, y=53 -->
+            <rect x="128" y="53" width="20" height="112" fill="#35c995" rx="2" opacity=".75"/>
+            <!-- Jun 1.05: height=116, y=49 -->
+            <rect x="152" y="49" width="20" height="116" fill="#35c995" rx="2" opacity=".75"/>
+            <!-- Jul 1.08: height=119, y=46 -->
+            <rect x="176" y="46" width="20" height="119" fill="#35c995" rx="2" opacity=".8"/>
+            <!-- Aug 1.12: height=123, y=42 -->
+            <rect x="200" y="42" width="20" height="123" fill="#35c995" rx="2" opacity=".8"/>
+            <!-- Sep 1.18: height=130, y=35 -->
+            <rect x="224" y="35" width="20" height="130" fill="#4fb799" rx="2" opacity=".85"/>
+            <!-- Oct 1.22: height=134, y=31 -->
+            <rect x="248" y="31" width="20" height="134" fill="#4fb799" rx="2" opacity=".85"/>
+            <!-- Nov 1.45: height=160, y=12 -->
+            <rect x="272" y="12" width="20" height="153" fill="#35c995" rx="2" opacity=".9"/>
+            <!-- Dec 1.89: height capped -->
+            <rect x="296" y="10" width="20" height="155" fill="#35c995" rx="2"/>
+            <text x="306" y="8" text-anchor="middle" font-size="9" fill="#218d72" font-weight="700">×1.89</text>
+            <!-- month labels every 3 -->
+            <text x="42" y="178" text-anchor="middle" font-size="8" fill="var(--so)">1월</text>
+            <text x="114" y="178" text-anchor="middle" font-size="8" fill="var(--so)">4월</text>
+            <text x="186" y="178" text-anchor="middle" font-size="8" fill="var(--so)">7월</text>
+            <text x="258" y="178" text-anchor="middle" font-size="8" fill="var(--so)">10월</text>
+            <text x="306" y="178" text-anchor="middle" font-size="8" fill="var(--so)">12</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 3: Multi-line category trend (full) + YoY + quarterly -->
+      <div class="dash-charts full">
+        <div class="chart-card">
+          <div class="cc-title">Technology 변동폭 ±38% = Furniture의 3배 — 매출 36% 의존이 전체 예측 정확도를 낮춤</div>
+          <div class="cc-desc">Tech CV 38% · Furniture 12% · Office 9%. 가장 큰 카테고리가 가장 불안정 — 포트폴리오 다변화 필요</div>
+          <svg viewBox="0 0 560 220" width="100%" height="auto">
+            <line x1="40" y1="180" x2="540" y2="180" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="10" x2="40" y2="180" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Technology (volatile) -->
+            <polyline points="40,118 84,128 128,100 172,138 216,92 260,108 304,88 348,68 392,50 436,140 480,36"
+              fill="none" stroke="#5b8ef0" stroke-width="2.5" stroke-linejoin="round"/>
+            <!-- Furniture (relatively stable) -->
+            <polyline points="40,138 84,142 128,132 172,140 216,136 260,130 304,128 348,124 392,118 436,114 480,106"
+              fill="none" stroke="#ef7d86" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6,3"/>
+            <!-- Office Supplies (gradual growth) -->
+            <polyline points="40,150 84,148 128,140 172,138 216,132 260,128 304,122 348,116 392,108 436,100 480,92"
+              fill="none" stroke="#35c995" stroke-width="2" stroke-linejoin="round" stroke-dasharray="3,3"/>
+            <text x="486" y="36" font-size="10" fill="#3b5bbf">Tech</text>
+            <text x="486" y="106" font-size="10" fill="#9b2d38">Furn.</text>
+            <text x="486" y="90" font-size="10" fill="#218d72">Off.</text>
+            <text x="40" y="196" font-size="9" fill="var(--so)">Jan</text>
+            <text x="260" y="196" font-size="9" fill="var(--so)">Jul</text>
+            <text x="480" y="196" font-size="9" fill="var(--so)">Dec</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 4: YoY growth + quarterly pattern -->
+      <div class="dash-charts">
+        <div class="chart-card">
+          <div class="cc-title">2020 침체 후 21-22년 회복 — 구조적 성장 트렌드는 유지 중</div>
+          <div class="cc-desc">2019→2020: −18% / 2020→2021: +31% / 2021→2022: +14%. 코로나 이후 회복, 기저효과 감소 중 → 성장 속도 정상화</div>
+          <svg viewBox="0 0 260 180" width="100%" height="auto">
+            <line x1="30" y1="10" x2="30" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="148" x2="250" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="88" x2="250" y2="88" stroke="rgba(96,79,67,.2)" stroke-dasharray="4,3" stroke-width="1"/>
+            <text x="24" y="91" text-anchor="end" font-size="7" fill="var(--so)">0%</text>
+            <!-- 2019: baseline, no YoY -->
+            <rect x="45" y="88" width="38" height="0" fill="rgba(150,135,120,.4)" rx="3"/>
+            <text x="64" y="85" text-anchor="middle" font-size="9" fill="var(--mu)">—</text>
+            <text x="64" y="163" text-anchor="middle" font-size="9" fill="var(--mu)">2019</text>
+            <!-- 2020: -2.1% -->
+            <rect x="98" y="88" width="38" height="13" fill="#ef7d86" rx="3" opacity=".8"/>
+            <text x="117" y="115" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">-2.1%</text>
+            <text x="117" y="163" text-anchor="middle" font-size="9" fill="var(--mu)">2020</text>
+            <!-- 2021: +8.4% (bar goes up) -->
+            <rect x="151" y="56" width="38" height="32" fill="#35c995" rx="3" opacity=".8"/>
+            <text x="170" y="52" text-anchor="middle" font-size="9" fill="#218d72" font-weight="700">+8.4%</text>
+            <text x="170" y="163" text-anchor="middle" font-size="9" fill="var(--mu)">2021</text>
+            <!-- 2022: +12.3% -->
+            <rect x="204" y="40" width="38" height="48" fill="#35c995" rx="3" opacity=".85"/>
+            <text x="223" y="36" text-anchor="middle" font-size="9" fill="#218d72" font-weight="700">+12.3%</text>
+            <text x="223" y="163" text-anchor="middle" font-size="9" fill="var(--mu)">2022</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">Q4 $148K = Q1의 2.4배 — 9월 이전 재고 확보 안 하면 기회손실</div>
+          <div class="cc-desc">Q1 $62K · Q2 $89K · Q3 $94K · Q4 $148K. 9~10월부터 수요 급증 → 이 시점까지 재고 미확보 시 $50K+ 기회손실</div>
+          <svg viewBox="0 0 260 180" width="100%" height="auto">
+            <line x1="30" y1="10" x2="30" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="148" x2="250" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <rect x="42" y="100" width="44" height="48" fill="#ef7d86" rx="5" opacity=".8"/>
+            <text x="64" y="96" text-anchor="middle" font-size="10" fill="#9b2d38" font-weight="700">$62K</text>
+            <rect x="98" y="80" width="44" height="68" fill="#efb05d" rx="5" opacity=".8"/>
+            <text x="120" y="76" text-anchor="middle" font-size="10" fill="#a0620a" font-weight="700">$78K</text>
+            <rect x="154" y="62" width="44" height="86" fill="#35c995" rx="5" opacity=".8"/>
+            <text x="176" y="58" text-anchor="middle" font-size="10" fill="#218d72" font-weight="700">$96K</text>
+            <rect x="210" y="18" width="44" height="130" fill="#35c995" rx="5" opacity=".9"/>
+            <text x="232" y="14" text-anchor="middle" font-size="10" fill="#218d72" font-weight="700">$148K</text>
+            <text x="64" y="163" text-anchor="middle" font-size="9" fill="var(--mu)">Q1</text>
+            <text x="120" y="163" text-anchor="middle" font-size="9" fill="var(--mu)">Q2</text>
+            <text x="176" y="163" text-anchor="middle" font-size="9" fill="var(--mu)">Q3</text>
+            <text x="232" y="163" text-anchor="middle" font-size="9" fill="var(--mu)">Q4</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 5: Technology volatility + Residuals histogram -->
+      <div class="dash-charts">
+        <div class="chart-card">
+          <div class="cc-title">Technology 월 변동폭 타 카테고리의 3배 — B2B 대형 계약 편중이 원인</div>
+          <div class="cc-desc">Tech 월 에러바 평균 ±$32K vs Furniture ±$11K. 계약 기반 수주 구조 → 소규모 반복 채널 추가 필요</div>
+          <svg viewBox="0 0 260 180" width="100%" height="auto">
+            <line x1="30" y1="10" x2="30" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="148" x2="250" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Technology: mean bar + error range -->
+            <rect x="45" y="68" width="40" height="60" fill="#ef7d86" rx="4" opacity=".75"/>
+            <line x1="65" y1="38" x2="65" y2="138" stroke="#9b2d38" stroke-width="2"/>
+            <line x1="55" y1="38" x2="75" y2="38" stroke="#9b2d38" stroke-width="2"/>
+            <line x1="55" y1="138" x2="75" y2="138" stroke="#9b2d38" stroke-width="2"/>
+            <text x="65" y="158" text-anchor="middle" font-size="9" fill="var(--mu)">Tech</text>
+            <text x="65" y="30" text-anchor="middle" font-size="9" fill="#9b2d38" font-weight="700">±38%</text>
+            <!-- Furniture: much smaller range -->
+            <rect x="110" y="72" width="40" height="44" fill="#efb05d" rx="4" opacity=".75"/>
+            <line x1="130" y1="62" x2="130" y2="126" stroke="#a0620a" stroke-width="2"/>
+            <line x1="120" y1="62" x2="140" y2="62" stroke="#a0620a" stroke-width="2"/>
+            <line x1="120" y1="126" x2="140" y2="126" stroke="#a0620a" stroke-width="2"/>
+            <text x="130" y="158" text-anchor="middle" font-size="9" fill="var(--mu)">Furn.</text>
+            <text x="130" y="54" text-anchor="middle" font-size="9" fill="#a0620a" font-weight="700">±18%</text>
+            <!-- Office: smallest range -->
+            <rect x="175" y="78" width="40" height="36" fill="#5b8ef0" rx="4" opacity=".7"/>
+            <line x1="195" y1="70" x2="195" y2="122" stroke="#3b5bbf" stroke-width="2"/>
+            <line x1="185" y1="70" x2="205" y2="70" stroke="#3b5bbf" stroke-width="2"/>
+            <line x1="185" y1="122" x2="205" y2="122" stroke="#3b5bbf" stroke-width="2"/>
+            <text x="195" y="158" text-anchor="middle" font-size="9" fill="var(--mu)">Office</text>
+            <text x="195" y="62" text-anchor="middle" font-size="9" fill="#3b5bbf" font-weight="700">±12%</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="cc-title">모델 잔차 정규분포 확인 — 예측값 신뢰 가능, 단 이상값 2건 주의</div>
+          <div class="cc-desc">잔차 RMSE $8.3K, Shapiro-Wilk p=0.34 (정규분포 기각 불가). 2021-03 이상값은 코로나 영향 — 제거 후 재모델링 권장</div>
+          <svg viewBox="0 0 260 180" width="100%" height="auto">
+            <line x1="30" y1="10" x2="30" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="30" y1="148" x2="250" y2="148" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- center line (0 error) -->
+            <line x1="140" y1="10" x2="140" y2="148" stroke="rgba(96,79,67,.2)" stroke-dasharray="3,3" stroke-width="1"/>
+            <text x="142" y="9" font-size="7" fill="var(--so)">0</text>
+            <!-- histogram bins (approximate normal dist centered at 0) -->
+            <rect x="42" y="130" width="20" height="18" fill="#5b8ef0" rx="2" opacity=".7"/>
+            <rect x="64" y="110" width="20" height="38" fill="#5b8ef0" rx="2" opacity=".75"/>
+            <rect x="86" y="72" width="20" height="76" fill="#35c995" rx="2" opacity=".8"/>
+            <rect x="108" y="38" width="20" height="110" fill="#35c995" rx="2" opacity=".85"/>
+            <rect x="130" y="22" width="20" height="126" fill="#35c995" rx="2"/>
+            <rect x="152" y="34" width="20" height="114" fill="#35c995" rx="2" opacity=".85"/>
+            <rect x="174" y="68" width="20" height="80" fill="#35c995" rx="2" opacity=".8"/>
+            <rect x="196" y="108" width="20" height="40" fill="#5b8ef0" rx="2" opacity=".75"/>
+            <rect x="218" y="128" width="20" height="20" fill="#5b8ef0" rx="2" opacity=".7"/>
+            <text x="52" y="163" text-anchor="middle" font-size="7" fill="var(--so)">-30%</text>
+            <text x="140" y="163" text-anchor="middle" font-size="7" fill="var(--so)">0</text>
+            <text x="228" y="163" text-anchor="middle" font-size="7" fill="var(--so)">+30%</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 6: AI forecast grouped bar — full width -->
+      <div class="dash-charts full">
+        <div class="chart-card">
+          <div class="cc-title">Technology Q2 회복 +68% 예측, Furniture 안정 유지 — 재고 계획 신뢰도 차이<span class="ai-badge-inline">AI 추정</span></div>
+          <div class="cc-desc">Tech Q2 $112K(±22K) · Furniture $89K(±8K) · Office $82K(±6K). Furniture 예측 신뢰구간 좁음 → 재고 계획 용이</div>
+          <svg viewBox="0 0 700 220" width="100%" height="auto">
+            <line x1="40" y1="175" x2="660" y2="175" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="10" x2="40" y2="175" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- April grouped bars -->
+            <rect x="80" y="90" width="52" height="85" fill="#5b8ef0" rx="4" opacity=".8"/>
+            <rect x="138" y="102" width="52" height="73" fill="#ef7d86" rx="4" opacity=".8"/>
+            <rect x="196" y="96" width="52" height="79" fill="#35c995" rx="4" opacity=".75"/>
+            <text x="150" y="185" text-anchor="middle" font-size="10" fill="var(--mu)">4월</text>
+            <!-- May -->
+            <rect x="290" y="72" width="52" height="103" fill="#5b8ef0" rx="4" opacity=".8"/>
+            <rect x="348" y="94" width="52" height="81" fill="#ef7d86" rx="4" opacity=".8"/>
+            <rect x="406" y="90" width="52" height="85" fill="#35c995" rx="4" opacity=".75"/>
+            <text x="360" y="185" text-anchor="middle" font-size="10" fill="var(--mu)">5월</text>
+            <!-- June: highest for Tech -->
+            <rect x="500" y="52" width="52" height="123" fill="#5b8ef0" rx="4" opacity=".8"/>
+            <text x="526" y="46" text-anchor="middle" font-size="10" fill="#3b5bbf" font-weight="700">$68K</text>
+            <rect x="558" y="88" width="52" height="87" fill="#ef7d86" rx="4" opacity=".8"/>
+            <rect x="616" y="82" width="32" height="93" fill="#35c995" rx="4" opacity=".75"/>
+            <text x="570" y="185" text-anchor="middle" font-size="10" fill="var(--mu)">6월</text>
+            <!-- legend -->
+            <rect x="55" y="198" width="10" height="8" fill="#5b8ef0" rx="2" opacity=".8"/>
+            <text x="68" y="206" font-size="9" fill="var(--mu)">Technology</text>
+            <rect x="155" y="198" width="10" height="8" fill="#ef7d86" rx="2" opacity=".8"/>
+            <text x="168" y="206" font-size="9" fill="var(--mu)">Furniture</text>
+            <rect x="255" y="198" width="10" height="8" fill="#35c995" rx="2" opacity=".75"/>
+            <text x="268" y="206" font-size="9" fill="var(--mu)">Office Supplies</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Row 7: Holt decomposition full-width -->
+      <div class="dash-charts full" style="margin-bottom:16px">
+        <div class="chart-card">
+          <div class="cc-title">수준(level)은 상승, 추세(trend)는 4월 이후 양전환 — Holt 모델 두 컴포넌트 근거<span class="ai-badge-inline">모델 기반</span></div>
+          <div class="cc-desc">α=0.3: 최근값에 30% 반응 / β=0.2: 트렌드 변화 20% 반응. 4월 추세 컴포넌트 양전환 → 회복 기대 근거</div>
+          <svg viewBox="0 0 700 200" width="100%" height="auto">
+            <line x1="40" y1="158" x2="680" y2="158" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <line x1="40" y1="10" x2="40" y2="158" stroke="rgba(96,79,67,.15)" stroke-width="1"/>
+            <!-- Level component (actual smoothed line) -->
+            <polyline points="40,120 80,116 120,108 160,118 200,105 240,100 280,94 320,88 360,80 400,84 440,62 480,42 520,38 560,34 600,30 640,26 680,22"
+              fill="none" stroke="#2f2b27" stroke-width="2.5" stroke-linejoin="round"/>
+            <!-- Trend component (dashed) - separate scale, centered -->
+            <polyline points="40,90 80,88 120,84 160,92 200,86 240,82 280,80 320,78 360,72 400,74 440,62 480,52 520,50 560,46 600,44 640,42 680,40"
+              fill="none" stroke="#35c995" stroke-width="2" stroke-dasharray="7,4" stroke-linejoin="round"/>
+            <!-- Divider: actual vs forecast -->
+            <line x1="480" y1="10" x2="480" y2="148" stroke="rgba(96,79,67,.2)" stroke-dasharray="3,3" stroke-width="1"/>
+            <text x="482" y="9" font-size="8" fill="var(--mu)">예측 →</text>
+            <!-- Labels -->
+            <text x="40" y="163" font-size="8" fill="var(--so)">Jan 21</text>
+            <text x="240" y="163" font-size="8" fill="var(--so)">Jul 21</text>
+            <text x="440" y="163" font-size="8" fill="var(--so)">Dec 22</text>
+            <text x="560" y="163" font-size="8" fill="#35c995">Apr 23</text>
+            <text x="680" y="163" font-size="8" fill="#35c995">Jun 23</text>
+            <!-- Legend -->
+            <line x1="500" y1="28" x2="522" y2="28" stroke="#2f2b27" stroke-width="2"/>
+            <text x="526" y="31" font-size="9" fill="var(--dk)">수준 (Level, α=0.3)</text>
+            <line x1="500" y1="42" x2="522" y2="42" stroke="#35c995" stroke-width="2" stroke-dasharray="6,3"/>
+            <text x="526" y="45" font-size="9" fill="#218d72">추세 (Trend, β=0.2)</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="dash-step-hdr"><span class="dash-step-hdr-num">STEP 3</span><span class="dash-step-hdr-label">액션 아이템 — 그래서 뭘 해야 해?</span></div>
+
+      <!-- Holt-Winters Parameter Sim -->
+      <div class="sim-widget sim-holt" style="background:rgba(247,241,226,.7);border-color:rgba(239,176,93,.3)">
+        <div class="sim-title">🧮 AI 예측 민감도를 바꾸면 예측값이 어떻게 달라질까? <span class="sim-badge">Holt-Winters 파라미터</span></div>
+        <div class="sim-note">α(알파)는 "최근 데이터를 얼마나 믿을지"입니다. 높을수록 최근 변화에 민감하게 반응하고, 낮을수록 오랜 추세를 따릅니다. β(베타)는 "성장/하락 추세를 얼마나 강하게 반영할지"입니다.</div>
+        <div class="sim-slider-group">
+          <div class="sim-slider-row">
+            <div class="sim-slider-label"><span class="sim-label">α 수준 — 최근 데이터 반영 (높을수록 민감)</span><span class="sim-range-val param-val" data-param="alpha">0.3</span></div>
+            <input type="range" class="sim-range" data-param="alpha" min="0.1" max="0.9" value="0.3" step="0.1" oninput="runHoltSim(this)">
+          </div>
+          <div class="sim-slider-row">
+            <div class="sim-slider-label"><span class="sim-label">β 추세 — 성장 추세 반영 (높을수록 낙관적)</span><span class="sim-range-val param-val" data-param="beta">0.2</span></div>
+            <input type="range" class="sim-range" data-param="beta" min="0.1" max="0.9" value="0.2" step="0.1" oninput="runHoltSim(this)">
+          </div>
+        </div>
+        <div class="sim-results">
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">다음달 예측 매출</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">예측 변동폭</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">안정성 평가</div></div>
+        </div>
+      </div>
+
+      <!-- Tech Dependency Sim -->
+      <div class="sim-widget sim-techdep" style="background:rgba(247,229,235,.7);border-color:rgba(239,125,134,.25)">
+        <div class="sim-title">⚡ Technology 비중을 낮추면 예측이 얼마나 안정될까? <span class="sim-badge" style="background:rgba(239,125,134,.12);color:#8a2233;border-color:rgba(239,125,134,.2)">리스크 시뮬레이션</span></div>
+        <div class="sim-note">현재 Technology 매출 비중 36%, 변동성 ±38%입니다. 이 카테고리 하나가 흔들리면 전체 예측이 크게 빗나갑니다. 비중을 낮춰 다른 카테고리로 분산하면 어떻게 달라지는지 보세요.</div>
+        <div class="sim-slider-row">
+          <div class="sim-slider-label"><span class="sim-label">Technology 매출 비중</span><span class="sim-range-val tech-dep-val">36%</span></div>
+          <input type="range" class="sim-range" min="15" max="60" value="36" oninput="runTechDependSim(this)">
+        </div>
+        <div class="sim-results">
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">예측 변동성</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">마진율 변화</div></div>
+          <div class="sim-res"><div class="sim-res-val">—</div><div class="sim-res-lbl">리스크 수준</div></div>
+        </div>
+      </div>
+
+      <!-- Scenario Comparison -->
+      <div class="sim-widget sim-scenario" style="background:rgba(225,241,236,.7);border-color:rgba(79,183,153,.25)">
+        <div class="sim-title">🔭 앞으로 3개월, 어떤 시나리오가 펼쳐질까? <span class="sim-badge" style="background:rgba(79,183,153,.12);color:#218d72;border-color:rgba(79,183,153,.2)">시나리오 분석</span></div>
+        <div class="sim-note">낙관·기본·비관 시나리오를 눌러보세요. 각 시나리오는 어떤 상황이 일어났을 때의 예측인지 설명합니다. 어떤 리스크에 대비해야 할지 판단할 수 있어요.</div>
+        <div class="sim-scenario-row">
+          <button class="sim-scenario-btn" data-scenario="opt" onclick="selectScenario(this)">🌟 낙관<br><span style="font-size:10px;font-weight:400;opacity:.8">성장 지속</span></button>
+          <button class="sim-scenario-btn active" data-scenario="base" onclick="selectScenario(this)">📊 기본<br><span style="font-size:10px;font-weight:400;opacity:.8">현재 추세</span></button>
+          <button class="sim-scenario-btn" data-scenario="pess" onclick="selectScenario(this)">⚠️ 비관<br><span style="font-size:10px;font-weight:400;opacity:.8">리스크 현실화</span></button>
+        </div>
+        <div class="sim-results">
+          <div class="sim-res"><div class="sim-res-val" style="color:#5b8ef0">$198K</div><div class="sim-res-lbl">4월 예측</div></div>
+          <div class="sim-res"><div class="sim-res-val" style="color:#5b8ef0">$204K</div><div class="sim-res-lbl">5월 예측</div></div>
+          <div class="sim-res"><div class="sim-res-val" style="color:#5b8ef0">$211K</div><div class="sim-res-lbl">6월 예측</div></div>
+        </div>
+        <div class="scenario-note" style="color:#5b8ef0">현재 추세 유지, MAPE 87.3%</div>
+      </div>
+
+      <!-- Action Board -->
+      <div class="dash-actions">
+        <div class="da-item">
+          <div class="da-p">P1 3개월 전 준비</div>
+          <div class="da-title">12월 피크 대비 Technology 재고 9월 선확보</div>
+          <div class="da-why">계절성 지수 12월 ×1.89. Technology 변동성 ±38% — 재고 부족 시 최대 $80K 기회 손실</div>
+        </div>
+        <div class="da-item">
+          <div class="da-p">P2 Q1 대응</div>
+          <div class="da-title">1~3월 저수요기 할인 최소화 + Q4로 이전</div>
+          <div class="da-why">Q1 계절성 지수 0.72. 비수기 할인 효과 제한 — 예산을 Q4로 이전 시 효율 2.4× 향상</div>
+        </div>
+        <div class="da-item">
+          <div class="da-p">P3 모니터링</div>
+          <div class="da-title">Technology 4월 파이프라인 $50K 이하 시 채널 전략 재검토</div>
+          <div class="da-why">3월 -77% MoM = 파이프라인 공백. 단일 계약 의존 리스크 — 포트폴리오 다변화 필요</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div><!-- /dashSection -->
+
+  </div>
+
+  <script>
+    function switchTab(idx) {
+      document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+      document.querySelectorAll('.dash-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+function updateRangeFill(input) {
+  const min = parseFloat(input.min) || 0;
+  const max = parseFloat(input.max) || 100;
+  const pct = ((parseFloat(input.value) - min) / (max - min)) * 100;
+  input.style.background = `linear-gradient(to right, #4fb799 ${pct}%, rgba(96,79,67,.15) ${pct}%)`;
+}
+
+/* ── SIMULATION FUNCTIONS ── */
+
+function runSim(inputEl) {
+  // Support being called as oninput handler or as bulk init
+  const widgets = inputEl
+    ? [inputEl.closest('.sim-widget')]
+    : document.querySelectorAll('.sim-widget');
+  widgets.forEach(container => {
+    if (!container) return;
+    const input = container.querySelector('.sim-input');
+    if (!input) return;
+    const d = Math.max(0, Math.min(30, parseFloat(input.value) || 0));
+    const baseDiscount = 17.7;
+    const baseMargin = 10.7;
+    const marginDelta = (baseDiscount - d) * 1.3;
+    const newMargin = Math.max(0, baseMargin + marginDelta).toFixed(1);
+    const profitDelta = Math.round((baseDiscount - d) * 700);
+    const sign = profitDelta >= 0 ? '+' : '';
+    const vals = container.querySelectorAll('.sim-res-val');
+    if (vals[0]) vals[0].textContent = newMargin + '%';
+    if (vals[1]) vals[1].textContent = sign + '$' + Math.abs(profitDelta / 1000).toFixed(1) + 'K';
+    if (vals[2]) vals[2].textContent = sign + marginDelta.toFixed(1) + '%p';
+  });
+}
+
+/* ── dp0: Pareto SKU ── */
+function runParetoSim(inputEl) {
+  const w = inputEl.closest('.sim-pareto');
+  const x = Math.max(5, Math.min(50, parseFloat(inputEl.value) || 20));
+  const pts = [[5,55],[10,65],[15,72],[20,80],[25,85],[30,88],[40,92],[50,95]];
+  let cov = 95;
+  for (let i = 0; i < pts.length - 1; i++) {
+    if (x >= pts[i][0] && x <= pts[i+1][0]) {
+      const t = (x - pts[i][0]) / (pts[i+1][0] - pts[i][0]);
+      cov = Math.round(pts[i][1] + t * (pts[i+1][1] - pts[i][1]));
+      break;
+    }
+  }
+  if (x < 5) cov = 55;
+  const skuCount = Math.round(x / 100 * 3500);
+  const efficiency = (cov / x).toFixed(1);
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = cov + '%';
+  if (vals[1]) vals[1].textContent = skuCount + '개';
+  if (vals[2]) vals[2].textContent = efficiency + '×';
+}
+
+/* ── dp0: Category Mix ── */
+function runMixSim(inputEl) {
+  updateRangeFill(inputEl);
+  const w = inputEl.closest('.sim-mix');
+  const techInput  = w.querySelector('[data-key="tech"]');
+  const officeInput = w.querySelector('[data-key="office"]');
+  const tech   = Math.min(60, parseFloat(techInput.value) || 36);
+  const office = Math.min(50, parseFloat(officeInput.value) || 31);
+  const furn   = Math.max(0, 100 - tech - office);
+  w.querySelector('.tech-val').textContent   = tech + '%';
+  w.querySelector('.office-val').textContent = office + '%';
+  const furnNote = w.querySelector('.furn-note');
+  if (furnNote) furnNote.innerHTML = 'Furniture(마진 10.7%)는 자동으로 나머지: <strong>' + furn + '%</strong>';
+  const margin = ((tech/100)*35 + (furn/100)*10.7 + (office/100)*25).toFixed(1);
+  const profit = Math.round(2300 * parseFloat(margin) / 100);
+  const risk   = tech > 45 ? '높음 ⚠' : tech > 30 ? '보통' : '낮음 ✓';
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = margin + '%';
+  if (vals[1]) vals[1].textContent = '$' + profit + 'K';
+  if (vals[2]) vals[2].textContent = risk;
+}
+
+/* ── dp1: At-Risk Conversion ── */
+function runAtRiskSim(inputEl) {
+  const w = inputEl.closest('.sim-atrisk');
+  const n = Math.max(0, Math.min(2099, parseFloat(inputEl.value) || 500));
+  const ltvGain  = n * 7700;
+  const profitEst = Math.round(ltvGain * 0.3);
+  const pct = Math.round(n / 2099 * 100);
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = '+$' + (ltvGain / 1000).toFixed(0) + 'K';
+  if (vals[1]) vals[1].textContent = '+$' + (profitEst / 1000).toFixed(0) + 'K';
+  if (vals[2]) vals[2].textContent = pct + '%';
+}
+
+/* ── dp1: Campaign ROI ── */
+function runCampaignROI(inputEl) {
+  const w = inputEl.closest('.sim-campaign');
+  const budget = Math.max(100, Math.min(50000, parseFloat(inputEl.value) || 3000));
+  const converted  = Math.round(budget / 15);
+  const ltvReturn  = converted * 7700;
+  const roi = Math.round(ltvReturn / budget);
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = converted + '명';
+  if (vals[1]) vals[1].textContent = '+$' + (ltvReturn / 1000).toFixed(0) + 'K';
+  if (vals[2]) vals[2].textContent = roi + '×';
+}
+
+/* ── dp2: Segment Discount ── */
+function runSegDiscountSim(inputEl) {
+  updateRangeFill(inputEl);
+  const w = inputEl.closest('.sim-segdiscount');
+  w.querySelectorAll('.seg-val').forEach(el => {
+    const seg   = el.dataset.seg;
+    const input = w.querySelector('[data-seg="' + seg + '"]');
+    if (input) el.textContent = input.value + '%';
+  });
+  const champD  = parseFloat(w.querySelector('[data-seg="champ"]').value);
+  const atRiskD = parseFloat(w.querySelector('[data-seg="atrisk"]').value);
+  const newD    = parseFloat(w.querySelector('[data-seg="new"]').value);
+  const discCost = Math.round(920000 * champD/100 + 690000 * atRiskD/100 + 690000 * newD/100);
+  const revBoost = Math.round(920000*(champD/100)*0.1 + 690000*(atRiskD/100)*1.24 + 690000*(newD/100)*0.8);
+  const roi = discCost > 0 ? (revBoost / discCost).toFixed(2) : '∞';
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = '$' + (discCost / 1000).toFixed(0) + 'K';
+  if (vals[1]) vals[1].textContent = '+$' + (revBoost / 1000).toFixed(0) + 'K';
+  if (vals[2]) vals[2].textContent = roi + '×';
+}
+
+/* ── dp2: Price Elasticity ── */
+function runElasticitySim(inputEl) {
+  const w = inputEl.closest('.sim-elasticity');
+  const priceUp = Math.max(0, Math.min(30, parseFloat(inputEl.value) || 5));
+  const demandChange  = (-0.3 * priceUp).toFixed(1);
+  const revenueChange = (((1 + priceUp/100) * (1 + (-0.3 * priceUp)/100)) - 1) * 100;
+  const marginChange  = (priceUp * 0.9).toFixed(1);
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = demandChange + '%';
+  if (vals[1]) vals[1].textContent = (revenueChange >= 0 ? '+' : '') + revenueChange.toFixed(1) + '%';
+  if (vals[2]) vals[2].textContent = '+' + marginChange + '%p';
+}
+
+/* ── dp3: Holt-Winters ── */
+function runHoltSim(inputEl) {
+  updateRangeFill(inputEl);
+  const w = inputEl.closest('.sim-holt');
+  const alphaInput = w.querySelector('[data-param="alpha"]');
+  const betaInput  = w.querySelector('[data-param="beta"]');
+  w.querySelectorAll('.param-val').forEach(el => {
+    const p = el.dataset.param;
+    const i = w.querySelector('[data-param="' + p + '"]');
+    if (i) el.textContent = i.value;
+  });
+  const alpha = parseFloat(alphaInput.value);
+  const beta  = parseFloat(betaInput.value);
+  const forecast   = Math.round(198 * (1 + (beta - 0.2) * 2.5) * (1 + (alpha - 0.3) * 0.3));
+  const volatility = Math.round(38 * (1 + (alpha - 0.3) * 0.6));
+  const stability  = alpha < 0.3 ? '안정적 (장기 추세)' : alpha > 0.6 ? '민감 (최근 반응)' : '균형';
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = '$' + forecast + 'K';
+  if (vals[1]) vals[1].textContent = '±' + volatility + '%';
+  if (vals[2]) vals[2].textContent = stability;
+}
+
+/* ── dp3: Technology Dependency ── */
+function runTechDependSim(inputEl) {
+  updateRangeFill(inputEl);
+  const w = inputEl.closest('.sim-techdep');
+  const techPct = Math.max(15, Math.min(60, parseFloat(inputEl.value) || 36));
+  const valEl = w.querySelector('.tech-dep-val');
+  if (valEl) valEl.textContent = techPct + '%';
+  const newVol = Math.round(38 * techPct / 36);
+  const marginDelta = ((techPct - 36) * -0.08).toFixed(1);
+  const risk = techPct > 45 ? '위험 ⚠' : techPct > 35 ? '주의' : '안전 ✓';
+  const vals = w.querySelectorAll('.sim-res-val');
+  if (vals[0]) vals[0].textContent = '±' + newVol + '%';
+  if (vals[1]) vals[1].textContent = (parseFloat(marginDelta) >= 0 ? '+' : '') + marginDelta + '%p';
+  if (vals[2]) vals[2].textContent = risk;
+}
+
+/* ── dp3: Scenario Toggle ── */
+function selectScenario(btn) {
+  const w = btn.closest('.sim-scenario');
+  w.querySelectorAll('.sim-scenario-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const s = btn.dataset.scenario;
+  const data = {
+    opt:  { q:['$215K','$228K','$241K'], note:'Tech 회복 + 계절성 피크 조기 도래', color:'#218d72' },
+    base: { q:['$198K','$204K','$211K'], note:'현재 추세 유지, MAPE 87.3%',          color:'#5b8ef0' },
+    pess: { q:['$168K','$155K','$148K'], note:'Tech 의존 리스크 현실화 + 재고 부족', color:'#9b2d38' },
+  };
+  const d = data[s];
+  const vals = w.querySelectorAll('.sim-res-val');
+  d.q.forEach((v, i) => { if (vals[i]) { vals[i].textContent = v; vals[i].style.color = d.color; } });
+  const noteEl = w.querySelector('.scenario-note');
+  if (noteEl) { noteEl.textContent = d.note; noteEl.style.color = d.color; }
+}
+
+/* ── Init all sims on load & after clone ── */
+function initAllSims(root) {
+  const r = root || document;
+  r.querySelectorAll('.sim-pareto .sim-input').forEach(el => runParetoSim(el));
+  r.querySelectorAll('.sim-mix [data-key="tech"]').forEach(el => runMixSim(el));
+  r.querySelectorAll('.sim-atrisk .sim-input').forEach(el => runAtRiskSim(el));
+  r.querySelectorAll('.sim-campaign .sim-input').forEach(el => runCampaignROI(el));
+  r.querySelectorAll('.sim-segdiscount [data-seg="champ"]').forEach(el => runSegDiscountSim(el));
+  r.querySelectorAll('.sim-elasticity .sim-input').forEach(el => runElasticitySim(el));
+  r.querySelectorAll('.sim-holt [data-param="alpha"]').forEach(el => runHoltSim(el));
+  r.querySelectorAll('.sim-techdep input[type="range"]').forEach(el => runTechDependSim(el));
+  // Fill all remaining range sliders not handled above
+  r.querySelectorAll('.sim-range').forEach(el => updateRangeFill(el));
+  runSim();
+}
+document.addEventListener('DOMContentLoaded', () => initAllSims());
+
+  </script>
+</body>
+</html>

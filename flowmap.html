@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 데이터 분석팀 — 7개 역할 파이프라인</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --border-dark: rgba(110,93,80,0.16);
+      --border-strong: rgba(96,79,67,0.24);
+      --card-offwhite: rgba(247,244,239,0.96);
+      --card-lavender: rgba(237,231,245,0.94);
+      --card-mint: rgba(225,241,236,0.94);
+      --card-rose: rgba(247,229,235,0.94);
+      --card-cream: rgba(247,241,226,0.94);
+      --card-beige: rgba(239,232,223,0.95);
+      --card-surface: rgba(250,246,240,0.98);
+      --accent: #4fb799;
+      --text-dark: #2f2b27;
+      --text-muted: #766c63;
+      --text-soft: #9a9086;
+      --shadow-card: 0 14px 32px rgba(42,30,18,0.1);
+      --shadow-hover: 0 22px 44px rgba(42,30,18,0.16);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+      padding: 36px;
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-dark);
+    }
+    .header-left { display: flex; flex-direction: column; gap: 2px; }
+    .header-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+    }
+    .header-title {
+      font-family: 'Barlow', sans-serif;
+      font-size: 38px; font-weight: 300; line-height: 1;
+    }
+    .header-title-italic {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic; font-size: 38px;
+      color: rgba(255,255,255,0.88);
+    }
+    .header-desc {
+      font-size: 14px; color: rgba(255,255,255,0.45);
+      margin-top: 10px; line-height: 1.6; max-width: 480px;
+    }
+    .header-badge {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 18px;
+      background: rgba(14,14,15,0.94);
+      border: 1px solid var(--border-dark);
+      border-radius: 24px;
+      font-size: 12px; font-weight: 500;
+      color: rgba(255,255,255,0.7);
+    }
+    .dot-green {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent);
+    }
+
+    /* FLOW LABEL */
+    .flow-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.3);
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .flow-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* PIPELINE ROW */
+    .pipeline-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0;
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    /* connector line between cards */
+    .pipeline-row::before {
+      content: '';
+      position: absolute;
+      top: 52px;
+      left: calc(100% / 14);
+      right: calc(100% / 14);
+      height: 1px;
+      background: linear-gradient(90deg,
+        rgba(96,79,67,0.0) 0%,
+        rgba(96,79,67,0.22) 8%,
+        rgba(96,79,67,0.22) 92%,
+        rgba(96,79,67,0.0) 100%
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .pipe-wrap {
+      padding: 0 7px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* CARD */
+    .pipe-card {
+      border-radius: 20px;
+      border: 1px solid rgba(96,79,67,0.14);
+      padding: 18px 16px 16px;
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      box-shadow: var(--shadow-card);
+    }
+    .pipe-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(96,79,67,0.3);
+    }
+    .pipe-card.active {
+      transform: translateY(-5px);
+      box-shadow: 0 24px 48px rgba(42,30,18,0.18);
+      border-color: rgba(79,183,153,0.5);
+      outline: 2px solid rgba(79,183,153,0.2);
+    }
+
+    .c-offwhite { background: var(--card-offwhite); }
+    .c-lavender  { background: var(--card-lavender); }
+    .c-rose      { background: var(--card-rose); }
+    .c-cream     { background: var(--card-cream); }
+    .c-mint      { background: var(--card-mint); }
+
+    /* Card top row */
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .card-icon {
+      width: 36px; height: 36px;
+      border-radius: 11px;
+      background: rgba(47,43,39,0.09);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: #1a1a1a;
+      flex-shrink: 0;
+    }
+    .card-step {
+      font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--text-muted);
+      line-height: 1;
+      padding-top: 2px;
+    }
+
+    /* Role name */
+    .card-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 10px;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+
+    /* Skill badge */
+    .card-skill {
+      display: inline-flex; align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 7px;
+      margin-bottom: 14px;
+      align-self: flex-start;
+    }
+    .card-skill.skill-green {
+      color: #2a7a5e;
+      background: rgba(79,183,153,0.14);
+      border: 1px solid rgba(79,183,153,0.2);
+    }
+    .card-skill.skill-muted {
+      color: rgba(47,43,39,0.5);
+      background: rgba(47,43,39,0.06);
+      border: 1px solid rgba(47,43,39,0.08);
+    }
+    .card-skill.skill-rose {
+      color: #8a3552;
+      background: rgba(219,39,119,0.08);
+      border: 1px solid rgba(219,39,119,0.14);
+    }
+
+    /* Divider */
+    .card-divider {
+      height: 1px;
+      background: rgba(96,79,67,0.1);
+      margin-bottom: 12px;
+    }
+
+    /* Outputs */
+    .card-outputs { margin-top: auto; }
+    .card-output-label {
+      font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-soft);
+      margin-bottom: 7px;
+    }
+    .card-output-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 10px; color: var(--text-muted);
+      margin-bottom: 5px; line-height: 1.3;
+    }
+    .card-output-item::before {
+      content: ''; width: 3px; height: 3px;
+      border-radius: 50%; background: var(--text-soft);
+      flex-shrink: 0;
+    }
+
+    /* ARROW between cards */
+    .pipe-arrow {
+      position: absolute;
+      right: -4px; top: 50px;
+      z-index: 2;
+      color: rgba(96,79,67,0.35);
+      font-size: 12px;
+      pointer-events: none;
+    }
+    .pipe-wrap:last-child .pipe-arrow { display: none; }
+
+    /* DETAIL PANEL */
+    .detail-panel {
+      background: var(--card-beige);
+      border: 1px solid var(--border-strong);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 28px 56px rgba(0,0,0,0.22);
+      margin-bottom: 24px;
+      transition: all 0.3s ease;
+    }
+    .detail-panel.hidden { display: none; }
+
+    .detail-header {
+      display: flex; align-items: center; gap: 18px;
+      padding: 22px 28px;
+      border-bottom: 1px solid rgba(96,79,67,0.12);
+    }
+    .detail-header-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: rgba(47,43,39,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 700; color: #1a1a1a;
+      flex-shrink: 0;
+    }
+    .detail-header-text {}
+    .detail-header-text h3 {
+      font-family: 'Barlow', sans-serif;
+      font-size: 22px; font-weight: 500; color: var(--text-dark); margin-bottom: 4px;
+    }
+    .detail-header-text p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .detail-close {
+      margin-left: auto; cursor: pointer;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(47,43,39,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--text-muted);
+      border: none; flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .detail-close:hover { background: rgba(47,43,39,0.14); }
+
+    .detail-body {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr;
+    }
+    .detail-col {
+      padding: 22px 26px;
+      border-right: 1px solid rgba(96,79,67,0.1);
+    }
+    .detail-col:last-child { border-right: none; }
+    .detail-col-label {
+      font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.13em;
+      color: var(--text-soft); margin-bottom: 14px;
+    }
+    .detail-items { display: flex; flex-direction: column; gap: 8px; }
+    .detail-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 12px; color: var(--text-dark); line-height: 1.55;
+      background: var(--card-surface);
+      border: 1px solid rgba(96,79,67,0.1);
+      border-radius: 10px; padding: 10px 12px;
+    }
+    .detail-item-icon {
+      font-size: 12px; flex-shrink: 0; margin-top: 1px;
+    }
+    .detail-item code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      background: rgba(79,183,153,0.1);
+      border: 1px solid rgba(79,183,153,0.18);
+      color: #2a7a5e; padding: 1px 6px; border-radius: 5px;
+    }
+
+    /* PRINCIPLE SECTION */
+    .principle-section {
+      background: rgba(14,14,15,0.96);
+      border: 1px solid var(--border-dark);
+      border-radius: 20px;
+      padding: 28px 32px;
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+    }
+    .principle-item {}
+    .principle-num {
+      font-family: 'Barlow', sans-serif;
+      font-size: 36px; font-weight: 300;
+      color: rgba(255,255,255,0.12); margin-bottom: 6px;
+    }
+    .principle-title {
+      font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85);
+      margin-bottom: 6px;
+    }
+    .principle-desc {
+      font-size: 12px; color: rgba(255,255,255,0.38); line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="header-eyebrow">Fastcampus Webinar · 2026</div>
+    <div>
+      <span class="header-title">AI 데이터 분석팀 </span>
+      <span class="header-title-italic">— 7개 역할</span>
+    </div>
+    <div class="header-desc">
+      7명이 동시에 일하는 게 아닙니다. 각 역할이 배턴을 순서대로 넘기며,<br>
+      CSV 하나가 대시보드와 임원 보고서로 변환됩니다.
+    </div>
+  </div>
+  <div class="header-badge">
+    <div class="dot-green"></div>
+    7단계 파이프라인 · 완료
+  </div>
+</header>
+
+<div class="flow-label">파이프라인 — 역할을 클릭하면 상세 내용을 볼 수 있습니다</div>
+
+<!-- DETAIL PANEL (hidden by default) -->
+<div class="detail-panel hidden" id="detailPanel">
+  <div class="detail-header">
+    <div class="detail-header-icon" id="detailIcon"></div>
+    <div class="detail-header-text">
+      <h3 id="detailName"></h3>
+      <p id="detailDesc"></p>
+    </div>
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="detail-body">
+    <div class="detail-col">
+      <div class="detail-col-label">하는 일</div>
+      <div class="detail-items" id="detailTasks"></div>
+    </div>
+    <div class="detail-col">
+      <div class="detail-col-label">실행 방법</div>
+      <div class="detail-items" id="detailMethod"></div>
+    </div>
+    <div class="detail-col">
+      <div class="detail-col-label">산출물</div>
+      <div class="detail-items" id="detailOutputs"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PIPELINE CARDS -->
+<div class="pipeline-row" id="pipelineRow"></div>
+
+<!-- PRINCIPLES -->
+<div class="principle-section">
+  <div class="principle-item">
+    <div class="principle-num">01</div>
+    <div class="principle-title">왜 순차적으로 실행하는가</div>
+    <div class="principle-desc">데이터 분석은 의존성이 있는 작업입니다. EDA 없이 분석할 수 없고, 분석 없이 대시보드를 설계할 수 없습니다. 동시 실행은 앞 결과를 모른 채 작업하는 것과 같습니다.</div>
+  </div>
+  <div class="principle-item">
+    <div class="principle-num">02</div>
+    <div class="principle-title">역할을 나누면 뭐가 달라지는가</div>
+    <div class="principle-desc">각 에이전트는 자기 역할에 맞는 전문 지시서(CLAUDE.md)를 갖습니다. 하나의 긴 프롬프트보다 역할별로 집중된 지시가 품질을 높입니다.</div>
+  </div>
+  <div class="principle-item">
+    <div class="principle-num">03</div>
+    <div class="principle-title">파일이 곧 소통 방식이다</div>
+    <div class="principle-desc">각 에이전트는 파일을 만들고, 다음 에이전트는 그 파일을 읽습니다. 직접 메시지를 주고받지 않아도 됩니다. 파이프라인의 상태는 언제나 파일로 추적됩니다.</div>
+  </div>
+</div>
+
+<script>
+const ROLES = [
+  {
+    id: 'data-ingestion',
+    step: 'STEP 01',
+    name: '@data-ingestion',
+    icon: '⊕',
+    color: 'c-offwhite',
+    skill: 'direct execution',
+    skillType: 'skill-muted',
+    desc: 'CSV를 받아 구조를 파악하고 다음 단계가 쓸 수 있는 프로파일을 만듭니다.',
+    outputs: ['dataset_profile.md', 'sample.csv 확인'],
+    tasks: [
+      { icon: '▸', text: '컬럼 타입 분류 (수치/범주/날짜)' },
+      { icon: '▸', text: '결측치 · 중복 · 이상치 점검' },
+      { icon: '▸', text: '분석 가능 축 확인 (지역/세그먼트/카테고리)' },
+    ],
+    method: [
+      { icon: '◎', text: '직접 실행 — Claude가 CSV를 읽고 파일 생성' },
+      { icon: '◎', text: '별도 스킬 없음. CLAUDE.md 지시 기반' },
+    ],
+    detailOutputs: [
+      { icon: '📄', text: 'dataset_profile.md — 컬럼 구조 + 품질 진단' },
+    ]
+  },
+  {
+    id: 'eda',
+    step: 'STEP 02',
+    name: '@eda',
+    icon: '◇',
+    color: 'c-lavender',
+    skill: '/eda skill',
+    skillType: 'skill-green',
+    desc: '데이터 안에 어떤 패턴이 있는지 탐색하고 핵심 발견 3개를 도출합니다.',
+    outputs: ['eda_report.md', '핵심 질문 3개'],
+    tasks: [
+      { icon: '▸', text: '카테고리/지역/채널별 매출·마진 집계' },
+      { icon: '▸', text: '시계열 추세 확인 (월별 변화)' },
+      { icon: '▸', text: '핵심 발견 3개 정리 → @problem에 전달' },
+    ],
+    method: [
+      { icon: '◎', text: <>/eda 스킬 실행 — <code>SKILL.md</code> 기반</> },
+      { icon: '◎', text: 'dataset_profile.md + CSV 직접 읽기' },
+    ],
+    detailOutputs: [
+      { icon: '📄', text: 'eda_report.md — 발견 3개 + 수치 근거' },
+    ]
+  },
+  {
+    id: 'problem',
+    step: 'STEP 03',
+    name: '@problem',
+    icon: '+',
+    color: 'c-rose',
+    skill: '→ /eda 결과 정제',
+    skillType: 'skill-muted',
+    desc: 'EDA 발견을 의사결정으로 이어지는 분석 질문으로 변환합니다.',
+    outputs: ['problem_definition.md', '분석 질문 3개'],
+    tasks: [
+      { icon: '▸', text: '비즈니스 맥락에서 질문 5개 도출' },
+      { icon: '▸', text: '각 질문에 가설 1개 대응' },
+      { icon: '▸', text: '우선순위 결정 → @metrics에 KPI 요청' },
+    ],
+    method: [
+      { icon: '◎', text: 'eda_report.md 읽기 → 질문 정의' },
+      { icon: '◎', text: '별도 스킬 없음. EDA 결과 정제' },
+    ],
+    detailOutputs: [
+      { icon: '📄', text: 'problem_definition.md — Q1~Q3 + 가설' },
+    ]
+  },
+  {
+    id: 'metrics',
+    step: 'STEP 04',
+    name: '@metrics',
+    icon: '□',
+    color: 'c-cream',
+    skill: 'metric-detective',
+    skillType: 'skill-rose',
+    desc: '분석 질문을 답하기 위한 KPI를 정확하게 정의하고 실제 값을 계산합니다.',
+    outputs: ['kpi_summary.md', '벤치마크'],
+    tasks: [
+      { icon: '▸', text: 'KPI 이름 · 계산식 · 단위 확정' },
+      { icon: '▸', text: '절대값/상대값 혼용 오류 제거' },
+      { icon: '▸', text: '실제 데이터로 KPI 값 계산' },
+    ],
+    method: [
+      { icon: '◎', text: <><code>metric-detective</code> 에이전트 호출</> },
+      { icon: '◎', text: 'KPI 정의 충돌 · 단위 오류 자동 탐지' },
+    ],
+    detailOutputs: [
+      { icon: '📄', text: 'kpi_summary.md — KPI 정의 + 현재값' },
+    ]
+  },
+  {
+    id: 'analysis',
+    step: 'STEP 05',
+    name: '@analysis',
+    icon: '⌘',
+    color: 'c-mint',
+    skill: '/analyze skill',
+    skillType: 'skill-green',
+    desc: '방법론을 선택하고 변화의 의미를 해석해 대시보드용 인사이트를 만듭니다.',
+    outputs: ['analysis_report.md', '발견 3개'],
+    tasks: [
+      { icon: '▸', text: '분석 질문에 맞는 방법론 선택 + 근거' },
+      { icon: '▸', text: '핵심 변화 3개 이내 + 왜 중요한지' },
+      { icon: '▸', text: '대시보드용 한 줄 인사이트 도출' },
+    ],
+    method: [
+      { icon: '◎', text: <>/analyze 스킬 실행 — <code>SKILL.md</code> 기반</> },
+      { icon: '◎', text: 'problem_definition.md + kpi_summary.md 읽기' },
+    ],
+    detailOutputs: [
+      { icon: '📄', text: 'analysis_report.md — 인사이트 + 액션' },
+    ]
+  },
+  {
+    id: 'dashboard',
+    step: 'STEP 06',
+    name: '@dashboard',
+    icon: '▦',
+    color: 'c-lavender',
+    skill: '/visualize skill',
+    skillType: 'skill-green',
+    desc: '분석 인사이트를 DataBridge 디자인 시스템으로 HTML 대시보드로 만듭니다.',
+    outputs: ['dashboard.html', 'HTML 대시보드'],
+    tasks: [
+      { icon: '▸', text: '독자 정의 + 텍스트 와이어프레임' },
+      { icon: '▸', text: '질문에 맞는 차트 선택 + 근거' },
+      { icon: '▸', text: 'DataBridge 디자인 원칙 적용하여 HTML 제작' },
+    ],
+    method: [
+      { icon: '◎', text: <>/visualize 스킬 실행 — <code>SKILL.md</code> 기반</> },
+      { icon: '◎', text: '순수 SVG/Canvas — CDN 차트 라이브러리 금지' },
+    ],
+    detailOutputs: [
+      { icon: '🖥', text: 'dashboard.html — 브라우저로 바로 열기' },
+    ]
+  },
+  {
+    id: 'report',
+    step: 'STEP 07',
+    name: '@report',
+    icon: '≡',
+    color: 'c-mint',
+    skill: '/review skill',
+    skillType: 'skill-green',
+    desc: '대시보드를 점검하고 임원이 5분 안에 읽을 수 있는 보고서를 만듭니다.',
+    outputs: ['executive_report.md', 'action_plan.md'],
+    tasks: [
+      { icon: '▸', text: '3초 룰 체크 — 핵심이 즉시 보이는가' },
+      { icon: '▸', text: 'P0/P1/P2 수정 사항 분류' },
+      { icon: '▸', text: '핵심 액션 아이템 3개 + 최종 판정' },
+    ],
+    method: [
+      { icon: '◎', text: <>/review 스킬 실행 — <code>SKILL.md</code> 기반</> },
+      { icon: '◎', text: 'dashboard.html + analysis_report.md 읽기' },
+    ],
+    detailOutputs: [
+      { icon: '📄', text: 'executive_report.md — 임원 요약' },
+      { icon: '📄', text: 'action_plan.md — P1/P2/P3 액션' },
+    ]
+  }
+];
+
+function esc(v) {
+  return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderCards() {
+  const row = document.getElementById('pipelineRow');
+  row.innerHTML = ROLES.map((r, i) => `
+    <div class="pipe-wrap">
+      <div class="pipe-card ${r.color}" id="card-${r.id}" onclick="selectCard('${r.id}')">
+        <div class="card-top">
+          <div class="card-icon">${esc(r.icon)}</div>
+          <div class="card-step">${esc(r.step)}</div>
+        </div>
+        <div class="card-name">${esc(r.name)}</div>
+        <div class="card-skill ${r.skillType}">${esc(r.skill)}</div>
+        <div class="card-divider"></div>
+        <div class="card-outputs">
+          <div class="card-output-label">산출물</div>
+          ${r.outputs.map(o => `<div class="card-output-item">${esc(o)}</div>`).join('')}
+        </div>
+      </div>
+      ${i < ROLES.length - 1 ? '<div class="pipe-arrow">→</div>' : ''}
+    </div>
+  `).join('');
+}
+
+let activeId = null;
+
+function selectCard(id) {
+  if (activeId === id) { closeDetail(); return; }
+  activeId = id;
+
+  document.querySelectorAll('.pipe-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card-' + id).classList.add('active');
+
+  const r = ROLES.find(x => x.id === id);
+  document.getElementById('detailIcon').textContent = r.icon;
+  document.getElementById('detailName').textContent = r.name;
+  document.getElementById('detailDesc').textContent = r.desc;
+
+  document.getElementById('detailTasks').innerHTML = r.tasks.map(t =>
+    `<div class="detail-item"><span class="detail-item-icon">${esc(t.icon)}</span><span>${esc(t.text)}</span></div>`
+  ).join('');
+
+  document.getElementById('detailMethod').innerHTML = r.method.map(m => {
+    const textHtml = typeof m.text === 'string' ? esc(m.text)
+      : m.text.props.children.map(c =>
+          typeof c === 'string' ? esc(c) : `<code>${esc(c.props.children)}</code>`
+        ).join('');
+    return `<div class="detail-item"><span class="detail-item-icon">${esc(m.icon)}</span><span>${textHtml}</span></div>`;
+  }).join('');
+
+  document.getElementById('detailOutputs').innerHTML = r.detailOutputs.map(o =>
+    `<div class="detail-item"><span class="detail-item-icon">${esc(o.icon)}</span><span>${esc(o.text)}</span></div>`
+  ).join('');
+
+  // Color the detail header icon like the card
+  const colorMap = { 'c-offwhite': 'rgba(247,244,239,0.96)', 'c-lavender': 'rgba(237,231,245,0.94)', 'c-rose': 'rgba(247,229,235,0.94)', 'c-cream': 'rgba(247,241,226,0.94)', 'c-mint': 'rgba(225,241,236,0.94)' };
+  document.getElementById('detailIcon').style.background = colorMap[r.color] || 'rgba(47,43,39,0.08)';
+
+  const panel = document.getElementById('detailPanel');
+  panel.classList.remove('hidden');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeDetail() {
+  activeId = null;
+  document.querySelectorAll('.pipe-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('detailPanel').classList.add('hidden');
+}
+
+// Fix method text rendering (JSX-like objects → plain HTML)
+ROLES.forEach(r => {
+  r.method = r.method.map(m => {
+    if (typeof m.text !== 'string') {
+      const children = m.text.props.children;
+      const html = children.map(c =>
+        typeof c === 'string' ? c : `<code style="font-family:'JetBrains Mono',monospace;font-size:10px;background:rgba(79,183,153,0.1);border:1px solid rgba(79,183,153,0.18);color:#2a7a5e;padding:1px 6px;border-radius:5px">${c.props.children}</code>`
+      ).join('');
+      return { ...m, _html: html };
+    }
+    return m;
+  });
+});
+
+function renderCards() {
+  const row = document.getElementById('pipelineRow');
+  row.innerHTML = ROLES.map((r, i) => `
+    <div class="pipe-wrap">
+      <div class="pipe-card ${r.color}" id="card-${r.id}" onclick="selectCard('${r.id}')">
+        <div class="card-top">
+          <div class="card-icon">${esc(r.icon)}</div>
+          <div class="card-step">${esc(r.step)}</div>
+        </div>
+        <div class="card-name">${esc(r.name)}</div>
+        <div class="card-skill ${r.skillType}">${esc(r.skill)}</div>
+        <div class="card-divider"></div>
+        <div class="card-outputs">
+          <div class="card-output-label">산출물</div>
+          ${r.outputs.map(o => `<div class="card-output-item">${esc(o)}</div>`).join('')}
+        </div>
+      </div>
+      ${i < ROLES.length - 1 ? '<div class="pipe-arrow">→</div>' : ''}
+    </div>
+  `).join('');
+}
+
+function selectCard(id) {
+  if (activeId === id) { closeDetail(); return; }
+  activeId = id;
+
+  document.querySelectorAll('.pipe-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card-' + id).classList.add('active');
+
+  const r = ROLES.find(x => x.id === id);
+  document.getElementById('detailIcon').textContent = r.icon;
+  document.getElementById('detailName').textContent = r.name;
+  document.getElementById('detailDesc').textContent = r.desc;
+
+  document.getElementById('detailTasks').innerHTML = r.tasks.map(t =>
+    `<div class="detail-item"><span class="detail-item-icon">${esc(t.icon)}</span><span>${esc(t.text)}</span></div>`
+  ).join('');
+
+  document.getElementById('detailMethod').innerHTML = r.method.map(m =>
+    `<div class="detail-item"><span class="detail-item-icon">${esc(m.icon)}</span><span>${m._html || esc(m.text)}</span></div>`
+  ).join('');
+
+  document.getElementById('detailOutputs').innerHTML = r.detailOutputs.map(o =>
+    `<div class="detail-item"><span class="detail-item-icon">${esc(o.icon)}</span><span>${esc(o.text)}</span></div>`
+  ).join('');
+
+  const colorMap = { 'c-offwhite':'rgba(247,244,239,0.96)', 'c-lavender':'rgba(237,231,245,0.94)', 'c-rose':'rgba(247,229,235,0.94)', 'c-cream':'rgba(247,241,226,0.94)', 'c-mint':'rgba(225,241,236,0.94)' };
+  document.getElementById('detailIcon').style.background = colorMap[r.color] || 'rgba(47,43,39,0.08)';
+
+  const panel = document.getElementById('detailPanel');
+  panel.classList.remove('hidden');
+  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+renderCards();
+</script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 데이터 분석팀 — 파이프라인 모니터</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --bd: rgba(110,93,80,0.16);
+      --bds: rgba(96,79,67,0.24);
+      --offwhite: rgba(247,244,239,0.97);
+      --lavender: rgba(237,231,245,0.96);
+      --mint: rgba(225,241,236,0.96);
+      --rose: rgba(247,229,235,0.96);
+      --cream: rgba(247,241,226,0.96);
+      --beige: rgba(239,232,223,0.97);
+      --acc: #4fb799;
+      --dk: #2f2b27;
+      --mu: #766c63;
+      --so: #9a9086;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #000; color: #fff; min-height: 100vh; padding: 32px 36px 80px; }
+
+    /* ── HEADER ── */
+    .hdr { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--bd); }
+    .hdr-title { font-family: 'Barlow', sans-serif; font-size: 30px; font-weight: 300; }
+    .hdr-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: rgba(255,255,255,.85); }
+    .hdr-right { display: flex; align-items: center; gap: 12px; }
+    .dash-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 99px; background: var(--mint); color: #103b33; text-decoration: none; font-size: 12px; font-weight: 700; border: 1px solid rgba(16,185,129,.18); transition: transform .18s; }
+    .dash-btn:hover { transform: translateY(-1px); }
+    .status-pill { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(14,14,15,.9); border: 1px solid var(--bd); border-radius: 99px; font-size: 12px; color: rgba(255,255,255,.6); }
+    .s-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--acc); }
+    .s-dot.running { background: #F59E0B; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* ══ PIPELINE MAP ══ */
+    .pipe-section { margin-bottom: 40px; }
+    .pipe-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: rgba(255,255,255,.28);
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .pipe-eyebrow::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.07); }
+
+    .pipe-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0;
+      position: relative;
+    }
+    /* connector line */
+    .pipe-row::before {
+      content: '';
+      position: absolute;
+      top: 38px;
+      left: calc(100% / 14);
+      right: calc(100% / 14);
+      height: 1px;
+      background: linear-gradient(90deg, rgba(96,79,67,0) 0%, rgba(96,79,67,.22) 8%, rgba(96,79,67,.22) 92%, rgba(96,79,67,0) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .pipe-wrap { padding: 0 5px; position: relative; z-index: 1; }
+
+    .pipe-card {
+      border-radius: 16px;
+      border: 1px solid rgba(96,79,67,.14);
+      padding: 13px 12px 12px;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+      box-shadow: 0 6px 18px rgba(42,30,18,.09);
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .pipe-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(42,30,18,.14); border-color: rgba(96,79,67,.26); }
+    .pipe-card.active { transform: translateY(-4px); border-color: rgba(79,183,153,.55); box-shadow: 0 0 0 2px rgba(79,183,153,.18), 0 16px 32px rgba(42,30,18,.14); }
+
+    .pc-offwhite { background: var(--offwhite); }
+    .pc-lavender  { background: var(--lavender); }
+    .pc-rose      { background: var(--rose); }
+    .pc-cream     { background: var(--cream); }
+    .pc-mint      { background: var(--mint); }
+
+    .pc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 9px; }
+    .pc-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #1a1a1a; flex-shrink: 0; }
+    .pc-step { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .13em; color: var(--so); padding-top: 2px; }
+    .pc-name { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600; color: var(--dk); margin-bottom: 7px; line-height: 1.35; }
+    .pc-skill {
+      display: inline-flex; align-items: center;
+      font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600;
+      padding: 3px 8px; border-radius: 5px; margin-bottom: 9px; align-self: flex-start;
+    }
+    .sk-green  { color: #2a7a5e; background: rgba(79,183,153,.14); border: 1px solid rgba(79,183,153,.2); }
+    .sk-muted  { color: rgba(47,43,39,.5); background: rgba(47,43,39,.06); border: 1px solid rgba(47,43,39,.08); }
+    .sk-rose   { color: #8a3552; background: rgba(219,39,119,.08); border: 1px solid rgba(219,39,119,.14); }
+    .pc-divider { height: 1px; background: rgba(96,79,67,.1); margin-bottom: 8px; }
+    .pc-outputs { margin-top: auto; }
+    .pc-out-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--so); margin-bottom: 5px; }
+    .pc-out-item { display: flex; align-items: center; gap: 5px; font-size: 9.5px; color: var(--mu); margin-bottom: 4px; line-height: 1.3; }
+    .pc-out-item::before { content: ''; width: 3px; height: 3px; border-radius: 50%; background: var(--so); flex-shrink: 0; }
+
+    .pipe-arrow { position: absolute; right: -3px; top: 36px; z-index: 2; color: rgba(96,79,67,.35); font-size: 10px; pointer-events: none; }
+    .pipe-wrap:last-child .pipe-arrow { display: none; }
+
+    /* ══ OUTPUT GALLERY ══ */
+    .gallery-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: rgba(255,255,255,.28);
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .gallery-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.07); }
+
+    .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+    /* ══ OUTPUT CARD (webinar-guide style) ══ */
+    .out-card {
+      border-radius: 22px;
+      border: 1px solid var(--bd);
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(42,30,18,.08);
+      scroll-margin-top: 28px;
+      transition: box-shadow .2s, transform .2s, border-color .2s;
+    }
+    .out-card:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(42,30,18,.12); }
+    .out-card.ring { border-color: var(--acc); box-shadow: 0 0 0 2px var(--acc), 0 16px 40px rgba(42,30,18,.14); }
+
+    .oc-s1 { background: var(--offwhite); }
+    .oc-s2 { background: var(--lavender); }
+    .oc-s3 { background: var(--rose); }
+    .oc-s4 { background: var(--cream); }
+    .oc-s5 { background: var(--mint); }
+    .oc-s6 { background: var(--beige); }
+    .oc-s7 { background: var(--mint); }
+
+    .oc-top { padding: 22px 22px 16px; }
+    .oc-step { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--so); margin-bottom: 10px; }
+    .oc-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(47,43,39,.09); display: flex; align-items: center; justify-content: center; font-size: 17px; margin-bottom: 10px; }
+    .oc-name { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--dk); margin-bottom: 4px; }
+    .oc-meta { font-size: 11px; color: var(--mu); line-height: 1.55; }
+    .oc-divider { height: 1px; background: var(--bd); }
+
+    .oc-body { padding: 16px 20px 20px; }
+    .ai-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .ai-ava { width: 24px; height: 24px; border-radius: 7px; background: rgba(79,183,153,.18); display: flex; align-items: center; justify-content: center; font-size: 11px; }
+    .ai-nm { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: var(--dk); }
+    .ai-bg { margin-left: auto; font-size: 10px; padding: 2px 9px; background: rgba(47,43,39,.08); border: 1px solid rgba(47,43,39,.1); border-radius: 99px; font-weight: 700; color: var(--mu); }
+
+    /* content atoms */
+    .r-text { font-size: 12px; color: var(--dk); line-height: 1.7; margin-bottom: 10px; }
+    .r-text strong { font-weight: 700; }
+    .r-find { display: flex; gap: 9px; align-items: flex-start; background: rgba(47,43,39,.05); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 9px 11px; margin-bottom: 7px; }
+    .r-fn { width: 20px; height: 20px; border-radius: 50%; background: rgba(79,183,153,.14); color: #218d72; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+    .r-ft { font-size: 11.5px; color: var(--dk); line-height: 1.6; }
+    .r-ft strong { font-weight: 700; }
+    .r-tbl { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px; }
+    .r-tbl th { background: rgba(47,43,39,.09); color: var(--dk); font-weight: 700; font-size: 9px; text-transform: uppercase; letter-spacing: .05em; padding: 7px 10px; text-align: left; }
+    .r-tbl td { padding: 7px 10px; color: var(--dk); border-top: 1px solid rgba(96,79,67,.08); vertical-align: top; line-height: 1.5; }
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 7px; margin-bottom: 10px; }
+    .kpi-box { background: rgba(47,43,39,.06); border: 1px solid rgba(96,79,67,.08); border-radius: 10px; padding: 9px; text-align: center; }
+    .kpi-v { font-family: 'Barlow', sans-serif; font-size: 17px; font-weight: 600; color: var(--dk); margin-bottom: 3px; }
+    .kpi-l { font-size: 9px; color: var(--mu); text-transform: uppercase; letter-spacing: .06em; }
+    .sec-list { display: flex; flex-direction: column; gap: 7px; }
+    .sec-row { padding: 9px 11px; border-radius: 9px; border: 1px solid rgba(96,79,67,.1); background: rgba(47,43,39,.04); }
+    .sec-h { font-size: 9px; font-weight: 700; color: var(--dk); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+    .sec-b { font-size: 11.5px; color: #5d534b; line-height: 1.6; }
+    .q-list { display: flex; flex-direction: column; gap: 7px; }
+    .q-item { display: flex; gap: 10px; align-items: flex-start; background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 10px; }
+    .q-num { width: 22px; height: 22px; background: var(--rose); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #A13D5C; flex-shrink: 0; }
+    .q-txt { font-size: 11.5px; color: #5d534b; line-height: 1.5; }
+    .act-list { display: flex; flex-direction: column; gap: 7px; }
+    .act-row { background: rgba(47,43,39,.04); border: 1px solid rgba(96,79,67,.1); border-radius: 9px; padding: 11px; }
+    .act-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .act-p { font-size: 9px; font-weight: 700; color: #0D9488; text-transform: uppercase; letter-spacing: .08em; }
+    .act-own { font-size: 10px; color: var(--mu); }
+    .act-ttl { font-size: 12px; font-weight: 600; color: var(--dk); margin-bottom: 4px; line-height: 1.4; }
+    .act-imp { font-size: 10.5px; color: #4a9f87; margin-bottom: 4px; }
+    .act-why { font-size: 11px; color: #5d534b; line-height: 1.6; }
+    .rout-box { background: rgba(47,43,39,.05); border: 1px solid rgba(96,79,67,.1); border-radius: 10px; padding: 11px; margin-bottom: 10px; }
+    .rout-lbl { font-size: 9px; font-weight: 700; color: var(--so); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+    .r-sec-num { font-size: 11px; font-weight: 700; color: var(--dk); margin: 12px 0 6px; letter-spacing: .01em; }
+    .tag-ok  { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 10px; font-weight: 700; background: rgba(53,201,149,.14); color: #1a7a5a; border: 1px solid rgba(53,201,149,.2); }
+    .tag-warn{ display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 10px; font-weight: 700; background: rgba(239,176,93,.14); color: #8a5e1e; border: 1px solid rgba(239,176,93,.2); }
+    .tag-bad { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 10px; font-weight: 700; background: rgba(239,125,134,.14); color: #8a2233; border: 1px solid rgba(239,125,134,.2); }
+
+    @media (max-width: 1100px) {
+      .pipe-row { grid-template-columns: repeat(4, 1fr); }
+      .gallery { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .pipe-row { grid-template-columns: repeat(2, 1fr); }
+      .gallery { grid-template-columns: 1fr; }
+      body { padding: 20px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div>
+    <div class="hdr-title">AI 데이터 분석팀 <em>· 파이프라인 모니터</em></div>
+  </div>
+  <div class="hdr-right">
+    <a class="dash-btn" href="./analysis-lab.html">AI 분석 실험실 →</a>
+    <a class="dash-btn" href="./runs/latest/outputs/06_dashboard.html">대시보드 열기 →</a>
+    <div class="status-pill">
+      <div class="s-dot" id="sDot"></div>
+      <span id="sText">로딩 중…</span>
+    </div>
+  </div>
+</header>
+
+<!-- PIPELINE MAP -->
+<div class="pipe-section">
+  <div class="pipe-eyebrow">파이프라인 — 역할 카드를 클릭하면 결과물로 이동합니다</div>
+  <div class="pipe-row" id="pipeRow"></div>
+</div>
+
+<!-- OUTPUT GALLERY -->
+<div class="gallery-label">산출물</div>
+<div class="gallery" id="gallery"></div>
+
+<script>
+/* ── ROLE DATA ── */
+const ROLES = [
+  {
+    id:'data-ingestion', step:'STEP 01', name:'@data-ingestion', icon:'⊕',
+    color:'pc-offwhite', ocColor:'oc-s1',
+    skill:'direct execution', skillType:'sk-muted',
+    outputs:['dataset_profile.md','sample.csv 확인'],
+    badge:'분석 완료', meta:'24행 · 12컬럼 · 결측치 0건',
+    content:`
+      <div class="r-text">업로드된 데이터(24행, 12컬럼)를 직접 분석했어요. 결측치 요약 + 이상치 포인트 + 전처리 전략을 정리해드릴게요.</div>
+
+      <div class="r-sec-num">1. 결측치 확인</div>
+      <table class="r-tbl">
+        <tr><th>컬럼</th><th>결측치</th><th>결측 비율</th><th>판정</th></tr>
+        <tr><td>모든 컬럼</td><td>0건</td><td>0%</td><td><span class="tag-ok">정상</span></td></tr>
+      </table>
+      <div class="r-find"><div class="r-fn">✓</div><div class="r-ft">결측치 0건. <strong>전체 12개 컬럼 모두 완전한 데이터.</strong> 전처리 없이 바로 분석 진행 가능.</div></div>
+
+      <div class="r-sec-num">2. 이상치 확인</div>
+      <table class="r-tbl">
+        <tr><th>컬럼</th><th>평균</th><th>최솟값</th><th>최댓값</th><th>이상치 가능성</th></tr>
+        <tr><td>revenue</td><td>$16,547</td><td>$2,100</td><td>$48,300</td><td><span class="tag-ok">정상 분포</span></td></tr>
+        <tr><td>discount</td><td>15.2%</td><td>5%</td><td>35%</td><td><span class="tag-warn">35% 2건 — 검토 필요</span></td></tr>
+        <tr><td>visitors</td><td>1,284</td><td>420</td><td>2,210</td><td><span class="tag-ok">정상 분포</span></td></tr>
+      </table>
+      <div class="r-find"><div class="r-fn">!</div><div class="r-ft">discount 35% 2건 — IQR 상한(27.5%) 초과. <strong>Furniture 카테고리에서만 발생.</strong> 영업 담당자 확인 후 캡핑 또는 제거 권장.</div></div>
+
+      <div class="r-sec-num">3. 전처리 전략 요약</div>
+      <div class="r-find"><div class="r-fn">1</div><div class="r-ft">discount 이상치 2건 → <strong>IQR 캡핑(27.5%)으로 처리</strong> (제거 아님 — 데이터 24행이라 제거 시 손실 과다)</div></div>
+      <div class="r-find"><div class="r-fn">2</div><div class="r-ft">profit 컬럼 없음 → <strong>파생 컬럼 추가: profit = revenue − cost</strong></div></div>
+      <div class="r-find"><div class="r-fn">3</div><div class="r-ft">test_group 컬럼 (A/B) → <strong>실험 분석용 그룹 변수로 보존</strong>. 같은 날짜·조건에서 A/B 각 1건씩 페어 구조.</div></div>`
+  },
+  {
+    id:'eda', step:'STEP 02', name:'@eda', icon:'◇',
+    color:'pc-lavender', ocColor:'oc-s2',
+    skill:'/eda skill', skillType:'sk-green',
+    outputs:['eda_report.md','핵심 질문 3개'],
+    badge:'완료', meta:'Technology 52% 집중 · Furniture 마진 위험',
+    content:`
+      <div class="rout-box">
+        <div class="rout-lbl">핵심 관점</div>
+        <div class="r-find"><div class="r-fn">i</div><div class="r-ft">발견 3개 모두 액션과 연결됨. 탐색이 아니라 결정의 근거.</div></div>
+        <div class="r-find"><div class="r-fn">i</div><div class="r-ft">Furniture와 Technology는 서로 다른 문제. 묶어서 보면 오해 생김.</div></div>
+      </div>
+      <div class="rout-box">
+        <div class="rout-lbl">핵심 발견</div>
+        <div class="r-find"><div class="r-fn">1</div><div class="r-ft"><strong>Technology가 전체 매출의 52%($207K).</strong> 단일 카테고리 집중 — 포트폴리오 리스크.</div></div>
+        <div class="r-find"><div class="r-fn">2</div><div class="r-ft"><strong>Furniture 마진 10.7%</strong> = Technology(35%)의 1/3. 할인율 평균 17.7%가 직접 원인.</div></div>
+        <div class="r-find"><div class="r-fn">3</div><div class="r-ft"><strong>3월 매출 -31%의 실체는 Technology -77%.</strong> 나머지 카테고리는 오히려 증가.</div></div>
+      </div>`
+  },
+  {
+    id:'problem', step:'STEP 03', name:'@problem', icon:'+',
+    color:'pc-rose', ocColor:'oc-s3',
+    skill:'→ /eda 결과 정제', skillType:'sk-muted',
+    outputs:['problem_definition.md','분석 질문 3개'],
+    badge:'3개 확정', meta:'수익성 / 실험 유의성 / 매출 급락',
+    content:`
+      <div class="rout-box">
+        <div class="rout-lbl">핵심 관점</div>
+        <div class="r-find"><div class="r-fn">i</div><div class="r-ft">각 질문은 가격 · 예산 · 채널 중 하나의 결정으로 이어져야 함.</div></div>
+        <div class="r-find"><div class="r-fn">i</div><div class="r-ft">질문을 먼저 확정해야 분석 방향이 흔들리지 않음.</div></div>
+      </div>
+      <div class="q-list">
+        <div class="q-item"><div class="q-num">Q1</div><div class="q-txt">Furniture 마진이 10.7%인 이유가 할인 때문인가, 원가 때문인가?</div></div>
+        <div class="q-item"><div class="q-num">Q2</div><div class="q-txt">B그룹 전환율 +1.1%p 차이는 통계적으로 의미 있는가?</div></div>
+        <div class="q-item"><div class="q-num">Q3</div><div class="q-txt">3월 매출 급락은 구조적 문제인가, Technology 파이프라인 일시 감소인가?</div></div>
+      </div>`
+  },
+  {
+    id:'metrics', step:'STEP 04', name:'@metrics', icon:'□',
+    color:'pc-cream', ocColor:'oc-s4',
+    skill:'metric-detective', skillType:'sk-rose',
+    outputs:['kpi_summary.md','벤치마크'],
+    badge:'계산 완료', meta:'매출 $397K · 마진 30.6% · 전환율 12.6%',
+    content:`
+      <div class="kpi-row">
+        <div class="kpi-box"><div class="kpi-v">$397K</div><div class="kpi-l">매출</div></div>
+        <div class="kpi-box"><div class="kpi-v">$121K</div><div class="kpi-l">이익</div></div>
+        <div class="kpi-box"><div class="kpi-v">30.6%</div><div class="kpi-l">마진율</div></div>
+        <div class="kpi-box"><div class="kpi-v">12.6%</div><div class="kpi-l">전환율</div></div>
+        <div class="kpi-box"><div class="kpi-v">$121</div><div class="kpi-l">AOV</div></div>
+      </div>
+      <div class="rout-box">
+        <div class="rout-lbl">핵심 관점</div>
+        <div class="r-find"><div class="r-fn">i</div><div class="r-ft">B그룹이 할인을 덜 줬는데 전환율이 더 높음 — 할인이 전환을 만들지 않는다는 방향성.</div></div>
+        <div class="r-find"><div class="r-fn">!</div><div class="r-ft"><strong>절대값(%p)과 상대값(%) 혼용 금지.</strong> B−A 차이는 1.1%p이지, "9% 높다"가 아님.</div></div>
+      </div>
+      <div class="sec-list">
+        <div class="sec-row"><div class="sec-h">A/B 비교</div><div class="sec-b">B그룹: 전환율 13.1% · 마진 31.6% vs A그룹: 전환율 12.0% · 마진 29.5%</div></div>
+        <div class="sec-row"><div class="sec-h">마진 경보</div><div class="sec-b">Furniture 10.7% vs Technology 35.0% — 할인율 17.7%가 3배 차이를 만드는 직접 원인</div></div>
+      </div>`
+  },
+  {
+    id:'analysis', step:'STEP 05', name:'@analysis', icon:'⌘',
+    color:'pc-mint', ocColor:'oc-s5',
+    skill:'/analyze skill', skillType:'sk-green',
+    outputs:['analysis_report.md','발견 3개'],
+    badge:'완료', meta:'Furniture 할인 축소가 핵심 레버',
+    content:`
+      <div class="rout-box">
+        <div class="rout-lbl">핵심 관점</div>
+        <div class="r-find"><div class="r-fn">i</div><div class="r-ft">인사이트 3개 모두 바로 실행 가능한 액션으로 연결됨.</div></div>
+        <div class="r-find"><div class="r-fn">!</div><div class="r-ft"><strong>+$6~8K는 모델 기반 추정값.</strong> 보고 시 반드시 "추정"으로 명시 필요.</div></div>
+      </div>
+      <div class="rout-box">
+        <div class="rout-lbl">핵심 발견</div>
+        <div class="r-find"><div class="r-fn">1</div><div class="r-ft"><strong>Furniture 할인 10%p 축소 시 이익 추정 +$6~8K.</strong> 지금 당장 실행 가능한 1순위 레버.</div></div>
+        <div class="r-find"><div class="r-fn">2</div><div class="r-ft"><strong>B그룹 우위는 방향성은 명확.</strong> 표본 24행이라 통계 확정 불가 — 재실험으로 검증 필요.</div></div>
+        <div class="r-find"><div class="r-fn">3</div><div class="r-ft"><strong>3월 급락 = Technology 단건 이슈.</strong> '전체 침체'로 보고하면 오진.</div></div>
+      </div>`
+  },
+  {
+    id:'dashboard', step:'STEP 06', name:'@dashboard', icon:'▦',
+    color:'pc-lavender', ocColor:'oc-s6',
+    skill:'/visualize skill', skillType:'sk-green',
+    outputs:['dashboard.html','HTML 대시보드'],
+    badge:'공유 가능', meta:'KPI → 원인 → 액션 흐름 구성',
+    content:`
+      <div class="rout-box">
+        <div class="rout-lbl">핵심 관점</div>
+        <div class="r-find"><div class="r-fn">i</div><div class="r-ft">차트 4개로 3가지 질문 모두 답함. 차트 수를 늘리면 오히려 집중력이 분산.</div></div>
+        <div class="r-find"><div class="r-fn">!</div><div class="r-ft"><strong>3초 룰:</strong> 화면을 보자마자 Furniture 마진 10.7%가 보여야 함.</div></div>
+      </div>
+      <div class="sec-list">
+        <div class="sec-row"><div class="sec-h">상단 KPI</div><div class="sec-b">매출 · 이익 · Furniture 마진(10.7% 경보) · B그룹 전환율 우위(+1.1%p)</div></div>
+        <div class="sec-row"><div class="sec-h">차트 구성</div><div class="sec-b">카테고리별 매출+마진 / 월별 Tech vs 기타 / A/B 비교 / 지역 마진율 — 4개로 3가지 질문 모두 답함</div></div>
+        <div class="sec-row"><div class="sec-h">액션 보드</div><div class="sec-b">P1 Furniture 할인 축소 / P2 A/B 재실험 / P3 Technology 파이프라인 모니터</div></div>
+      </div>`
+  },
+  {
+    id:'report', step:'STEP 07', name:'@report', icon:'≡',
+    color:'pc-mint', ocColor:'oc-s7',
+    skill:'/review skill', skillType:'sk-green',
+    outputs:['executive_report.md','action_plan.md'],
+    badge:'승인 ✅', meta:'P1 Furniture 할인 / P2 A/B 재실험',
+    content:`
+      <div class="rout-box">
+        <div class="rout-lbl">핵심 관점</div>
+        <div class="r-find"><div class="r-fn">i</div><div class="r-ft">임원은 맥락을 모름. 수치마다 단위 · 기준 · 비교 대상이 함께 있어야 함.</div></div>
+        <div class="r-find"><div class="r-fn">!</div><div class="r-ft"><strong>A/B 결론은 방향성 참고로 제한.</strong> 확정 표현 쓰면 잘못된 의사결정 유발.</div></div>
+      </div>
+      <div class="act-list">
+        <div class="act-row">
+          <div class="act-top"><div class="act-p">P1 즉시</div><div class="act-own">영업팀</div></div>
+          <div class="act-ttl">Furniture 할인 15%p 이상 거래에 승인 프로세스 신설</div>
+          <div class="act-imp">목표: 평균 할인율 10%p 이하 → 이익 추정 +$6~8K</div>
+          <div class="act-why">Chair·Desk 할인 17~21%로 마진이 8~14%까지 떨어지는 건이 반복되고 있음.</div>
+        </div>
+        <div class="act-row">
+          <div class="act-top"><div class="act-p">P2 2주 내</div><div class="act-own">마케팅팀</div></div>
+          <div class="act-ttl">B그룹 조건으로 n≥100 A/B 재실험 설계</div>
+          <div class="act-imp">전환율 차이 1.1%p의 통계적 유의성 확인</div>
+          <div class="act-why">지금 데이터만으로는 할인 정책 전환의 근거로 쓰기에 표본이 너무 작음.</div>
+        </div>
+        <div class="act-row">
+          <div class="act-top"><div class="act-p">P3 매주</div><div class="act-own">분석팀</div></div>
+          <div class="act-ttl">4월 Technology 매출 추적 — $50K 미만 시 채널 전략 재검토</div>
+          <div class="act-imp">계절성 vs 구조적 문제 판단</div>
+          <div class="act-why">3월 -77% MoM이 반복되면 단일 카테고리 의존도 재편 검토가 필요함.</div>
+        </div>
+      </div>`
+  }
+];
+
+/* ── RENDER PIPELINE ── */
+function renderPipeline() {
+  document.getElementById('pipeRow').innerHTML = ROLES.map((r, i) => `
+    <div class="pipe-wrap">
+      <div class="pipe-card ${r.color}" id="pc-${r.id}" onclick="jumpTo(${i})">
+        <div class="pc-top">
+          <div class="pc-icon">${r.icon}</div>
+          <div class="pc-step">${r.step}</div>
+        </div>
+        <div class="pc-name">${r.name}</div>
+        <div class="pc-skill ${r.skillType}">${r.skill}</div>
+        <div class="pc-divider"></div>
+        <div class="pc-outputs">
+          <div class="pc-out-label">산출물</div>
+          ${r.outputs.map(o => `<div class="pc-out-item">${o}</div>`).join('')}
+        </div>
+      </div>
+      ${i < ROLES.length - 1 ? '<div class="pipe-arrow">→</div>' : ''}
+    </div>
+  `).join('');
+}
+
+/* ── RENDER GALLERY ── */
+function renderGallery() {
+  document.getElementById('gallery').innerHTML = ROLES.map((r, i) => `
+    <div class="out-card ${r.ocColor}" id="oc-${i}">
+      <div class="oc-top">
+        <div class="oc-step">${r.step} · ${r.name}</div>
+        <div class="oc-icon">${r.icon}</div>
+        <div class="oc-name">${r.name}</div>
+        <div class="oc-meta">${r.meta}</div>
+      </div>
+      <div class="oc-divider"></div>
+      <div class="oc-body">
+        <div class="ai-hdr">
+          <div class="ai-ava">✦</div>
+          <span class="ai-nm">AI 분석 결과</span>
+          <span class="ai-bg">${r.badge}</span>
+        </div>
+        ${r.content}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ── JUMP ── */
+function jumpTo(idx) {
+  // highlight pipe card
+  document.querySelectorAll('.pipe-card').forEach((c, i) => c.classList.toggle('active', i === idx));
+
+  // scroll to output card
+  const card = document.getElementById('oc-' + idx);
+  if (!card) return;
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // flash ring
+  document.querySelectorAll('.out-card').forEach(c => c.classList.remove('ring'));
+  card.classList.add('ring');
+  setTimeout(() => card.classList.remove('ring'), 1600);
+}
+
+/* ── STATUS ── */
+async function loadStatus() {
+  let status = {
+    overall_status: 'completed',
+    run_id: '20260408-001',
+    finished_at: '2026-04-08T10:08:32+00:00'
+  };
+  try {
+    const r = await fetch('./runs/latest/status.json?t=' + Date.now());
+    if (r.ok) status = await r.json();
+  } catch(e) {}
+
+  const done = status.overall_status === 'completed';
+  document.getElementById('sDot').className = 's-dot' + (done ? '' : ' running');
+  document.getElementById('sText').textContent = done
+    ? `완료 · ${new Date(status.finished_at).toLocaleString('ko-KR', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}`
+    : '실행 중…';
+}
+
+renderPipeline();
+renderGallery();
+loadStatus();
+setInterval(loadStatus, 10000);
+</script>
+</body>
+</html>
