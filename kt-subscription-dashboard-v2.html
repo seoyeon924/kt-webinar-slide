@@ -20,7 +20,7 @@
   --c-text-sub: #333333;
   --c-text-dim: #888888;
   --c-text-muted: #AAAAAA;
-  --c-accent: #E8000D;
+  --c-accent: #B83530;
   --c-positive: #1e6640;
   --c-hover: #F8F8F8;
   --c-border-w: 1px;
@@ -539,10 +539,10 @@ body[data-concept="notion-brutalist"] .sb-nav-item { font-size: 13px; }
 // ─── THEME SYSTEM ─────────────────────────────────────────────────
 const THEMES = {
   kt: {
-    label:'KT', swatch:'#E8000D', concept:'flat',
-    vars:{'--c-bg':'#F5F5F5','--c-surface':'#FFFFFF','--c-surface-alt':'#F4F4F4','--c-border':'#E0E0E0','--c-border-sub':'#F0F0F0','--c-text':'#111111','--c-text-sub':'#333333','--c-text-dim':'#888888','--c-text-muted':'#AAAAAA','--c-accent':'#E8000D','--c-positive':'#1e6640','--c-hover':'#F8F8F8','--c-border-w':'1px'},
-    catColors:{'AI도구':'#E8000D','클라우드':'#2A2A2A','개발도구':'#606060','협업':'#909090','BI/디자인':'#B8B8B8'},
-    teamColors:['#E8000D','#2A2A2A','#555555','#888888','#AAAAAA','#CCCCCC'],
+    label:'KT', swatch:'#B83530', concept:'flat',
+    vars:{'--c-bg':'#F5F5F5','--c-surface':'#FFFFFF','--c-surface-alt':'#F4F4F4','--c-border':'#E0E0E0','--c-border-sub':'#F0F0F0','--c-text':'#111111','--c-text-sub':'#333333','--c-text-dim':'#888888','--c-text-muted':'#AAAAAA','--c-accent':'#B83530','--c-positive':'#1e6640','--c-hover':'#F8F8F8','--c-border-w':'1px'},
+    catColors:{'AI도구':'#B83530','클라우드':'#2A2A2A','개발도구':'#606060','협업':'#909090','BI/디자인':'#B8B8B8'},
+    teamColors:['#B83530','#2A2A2A','#555555','#888888','#AAAAAA','#CCCCCC'],
     chart:{grid:'#F0F0F0',axis:'#E8E8E8',yLabel:'#BBBBBB',barValue:'#555555',barName:'#AAAAAA'}
   },
   brutalist: {
@@ -622,6 +622,7 @@ let drillTeam = null;
 let CAT_COLORS = { ...THEMES.kt.catColors };
 let CHART = { ...THEMES.kt.chart };
 let T = { accent: THEMES.kt.vars['--c-accent'], positive: THEMES.kt.vars['--c-positive'] };
+
 
 function applyTheme(name) {
   currentTheme = name;
@@ -730,6 +731,21 @@ const BUDGET_BASIS = {
   adobe:   { prev:1750000, basis:'기본 유지' },
 };
 
+function seededRand(seed) {
+  let s = seed;
+  return function() { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+
+function genMonths() {
+  const m = [];
+  for (let y = 2024; y <= 2025; y++) for (let mo = 1; mo <= 12; mo++) {
+    if (y === 2025 && mo > 6) break;
+    m.push({ ym: `${y}-${String(mo).padStart(2,'0')}`, y, mo });
+  }
+  return m;
+}
+const MONTHS = genMonths();
+
 // ─── 데이터 신선도 ───────────────────────────
 const DATA_LAST_YM = MONTHS[MONTHS.length - 1]?.ym || '2025-06';
 const DATA_UPDATE_LABEL = '데이터 기준: ' + DATA_LAST_YM + ' · 갱신: 매월 10일';
@@ -760,21 +776,6 @@ const TEAM_WEIGHTS = {
   figma:   {ai:0.05,cloud:0.04,dev:0.12,dx:0.16,sec:0.02,ux:0.61},
   adobe:   {ai:0.06,cloud:0.04,dev:0.08,dx:0.18,sec:0.02,ux:0.62},
 };
-
-function seededRand(seed) {
-  let s = seed;
-  return function() { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
-}
-
-function genMonths() {
-  const m = [];
-  for (let y = 2024; y <= 2025; y++) for (let mo = 1; mo <= 12; mo++) {
-    if (y === 2025 && mo > 6) break;
-    m.push({ ym: `${y}-${String(mo).padStart(2,'0')}`, y, mo });
-  }
-  return m;
-}
-const MONTHS = genMonths();
 
 const DATA = [];
 (function buildData() {
@@ -996,7 +997,7 @@ function computeActions(cur, prev) {
     const overBudget = BUDGETS[s.id] && v > BUDGETS[s.id];
     const mom = pv > 0 ? (v - pv) / pv * 100 : 0;
     if (overBudget && mom > 25) {
-      actions.push({ pri:'critical', label:'즉시 재협상', svc:s.name, detail:'+'+mom.toFixed(0)+'% · 예산 '+((v/BUDGETS[s.id])*100).toFixed(0)+'% 집행', owner:owner?.owner, approver:owner?.approver, due:'이번 달 내' });
+      actions.push({ pri:'critical', label:'재협상', svc:s.name, detail:'+'+mom.toFixed(0)+'% · 예산 '+((v/BUDGETS[s.id])*100).toFixed(0)+'% 집행', owner:owner?.owner, approver:owner?.approver, due:'이번 달 내' });
     } else if (overBudget) {
       actions.push({ pri:'critical', label:'예산 조정 요청', svc:s.name, detail:'예산 '+((v/BUDGETS[s.id])*100).toFixed(0)+'% 집행', owner:owner?.owner, approver:owner?.approver, due:'이번 달 내' });
     } else if (mom > 25) {
@@ -1059,7 +1060,7 @@ function renderOverview() {
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
       <div style="background:var(--c-surface);border:${sb};padding:16px 20px;">
         <div style="font-size:10px;color:var(--c-text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">AI 비용 연속 증가</div>
-        <div style="font-size:28px;font-weight:700;color:${T.accent};line-height:1">${consec}개월째</div>
+        <div style="font-size:28px;font-weight:700;color:var(--c-text);line-height:1">${consec}개월째</div>
         <div style="font-size:11px;color:var(--c-text-muted);margin-top:6px;">최근 6개월 기준 · 계약 조건 재검토 권고</div>
       </div>
       <div style="background:var(--c-surface);border:${sb};padding:16px 20px;">
@@ -1120,8 +1121,13 @@ function renderOverview() {
   const ovAiPrev = sumBy(prev.filter(r => SERVICES.find(s=>s.id===r.svc)?.cat==='AI도구'), 'cost');
   const ovAiMoM = ovAiPrev > 0 ? delta(ovAiCur, ovAiPrev) : 0;
   const actions = computeActions(cur, prev);
+  const ytdOvMonths = MONTHS.filter(m => m.ym >= '2025-01' && m.ym <= curYm);
+  const ytdOvCost = ytdOvMonths.reduce((a, m) => a + sumBy(base.filter(r => r.ym === m.ym), 'cost'), 0);
+  const totalMonthlyBdg = SERVICES.reduce((a, s) => a + (BUDGETS[s.id] || 0), 0);
+  const ytdBudget = totalMonthlyBdg * ytdOvMonths.length;
+  const ytdExecPct = ytdBudget ? ((ytdOvCost / ytdBudget) * 100).toFixed(1) : null;
   const priColor = { critical: T.accent, high: '#efb05d', medium: 'var(--c-text-dim)' };
-  const priLabel = { critical: '즉시', high: '2주 내', medium: '이번 분기' };
+  const priLabel = { critical: 'Action', high: '2주 내', medium: '이번 분기' };
   const actionCards = actions.slice(0, 6).map(a =>
     '<div style="background:var(--c-surface);border:1px solid var(--c-border);padding:10px 14px;min-width:190px;flex:0 0 auto;">' +
     '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">' +
@@ -1135,7 +1141,7 @@ function renderOverview() {
   return `
   <div class="page-header">
     <div class="page-header-top">
-      <div><div class="page-title">Overview</div><div class="page-subtitle">2025년 6월 경영 요약 — 즉시 검토 필요 ${overBudgetSvcs.length + expiringSoon.length}건</div></div>
+      <div><div class="page-title">Overview</div><div class="page-subtitle">2025년 6월 경영 요약 — Action 필요 ${overBudgetSvcs.length + expiringSoon.length}건</div></div>
       <div class="page-refresh">${DATA_UPDATE_LABEL}</div>
     </div>
   </div>
@@ -1159,6 +1165,35 @@ function renderOverview() {
         <div class="kpi-label">예산 초과 서비스</div>
         <div class="kpi-value">${overBudgetSvcs.length}개</div>
         <div class="kpi-sub">전체 ${activeServices}개 서비스 중</div>
+      </div>
+      <div class="kpi-card" style="padding:14px 20px;">
+        ${(() => {
+          const pct = ytdExecPct ? parseFloat(ytdExecPct) : 0;
+          const capped = Math.min(pct, 140);
+          const R = 38, cx = 60, cy = 52, sw = 9;
+          const startAngle = -210, endAngle = 30; // 240 degree sweep
+          const sweep = endAngle - startAngle; // 240
+          const filledSweep = (capped / 140) * sweep;
+          const toRad = a => a * Math.PI / 180;
+          const arcPath = (sa, ea) => {
+            const x1 = cx + R * Math.cos(toRad(sa));
+            const y1 = cy + R * Math.sin(toRad(sa));
+            const x2 = cx + R * Math.cos(toRad(ea));
+            const y2 = cy + R * Math.sin(toRad(ea));
+            const lg = Math.abs(ea - sa) > 180 ? 1 : 0;
+            return `M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R} 0 ${lg},1 ${x2.toFixed(1)},${y2.toFixed(1)}`;
+          };
+          const trackPath = arcPath(startAngle, endAngle);
+          const fillPath = pct > 0 ? arcPath(startAngle, startAngle + filledSweep) : '';
+          const fillColor = pct > 100 ? T.accent : pct >= 80 ? T.positive : '#efb05d';
+          return `<div style="font-size:10px;color:var(--c-text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">YTD 집행률 (1–6월)</div>
+<svg width="120" height="70" viewBox="0 0 120 70" style="overflow:visible;display:block;margin:0 auto;">
+  <path d="${trackPath}" fill="none" stroke="var(--c-border)" stroke-width="${sw}" stroke-linecap="round"/>
+  ${fillPath ? `<path d="${fillPath}" fill="none" stroke="${fillColor}" stroke-width="${sw}" stroke-linecap="round"/>` : ''}
+  <text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--c-text)" font-family="inherit">${pct.toFixed(1)}%</text>
+</svg>
+<div style="text-align:center;font-size:10px;color:${fillColor};font-weight:600;margin-top:2px;">${fmt(Math.round(ytdOvCost))} / ${fmt(ytdBudget)}</div>`;
+        })()}
       </div>
     </div>
     <div class="chart-card primary" style="margin-bottom:20px;">
@@ -1225,6 +1260,11 @@ function renderServices() {
     const utilPct = util?.total ? Math.round(util.used / util.total * 100) : null;
     const basis = BUDGET_BASIS[s.id];
     const budgetYoY = basis?.prev ? ((BUDGETS[s.id] - basis.prev) / basis.prev * 100).toFixed(0) : null;
+    const budgetStatus = budgetPct === null ? null : parseInt(budgetPct) > 100
+      ? `<span style="background:${T.accent};color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px">Over Budget</span>`
+      : parseInt(budgetPct) >= 90
+      ? `<span style="background:#35c995;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px">On Budget</span>`
+      : `<span style="background:#5b9cf6;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px">Under Budget</span>`;
     return `<tr style="${overBudget ? 'background:rgba(232,0,13,0.025)' : ''}">
       <td>
         <strong>${s.label}</strong>${expWarn ? `&nbsp;<span style="font-size:10px;background:${T.accent};color:#fff;padding:1px 5px;font-weight:700;">만료임박</span>` : ''}
@@ -1237,6 +1277,7 @@ function renderServices() {
       <td style="text-align:right;color:${d > 0 ? T.accent : T.positive}">${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(1)}%</td>
       <td style="text-align:right;color:${yoyD > 0 ? T.accent : T.positive}">${yoyD > 0 ? '▲' : '▼'} ${Math.abs(yoyD).toFixed(1)}%</td>
       <td style="text-align:right;color:${overBudget ? T.accent : T.positive};font-weight:${overBudget?'700':'400'}" title="${basis ? basis.basis + (budgetYoY ? ' · 전년比 '+budgetYoY+'%' : '') : ''}">${budgetPct ? budgetPct+'%' : '—'}${budgetYoY ? `<div style="font-size:9px;color:var(--c-text-muted)">${parseInt(budgetYoY)>=0?'+':''}${budgetYoY}% YoY</div>` : ''}</td>
+      <td style="text-align:center">${budgetStatus || '—'}</td>
       <td style="text-align:right;font-size:11px;color:${expWarn ? T.accent : 'var(--c-text-muted)'};font-weight:${expWarn?'600':'400'}">${expiry || '—'}</td>
     </tr>`;
   }).join('');
@@ -1290,7 +1331,7 @@ function renderServices() {
     <div class="chart-card">
       <div class="chart-title">예산 초과 · 계약 만료 임박 서비스는 어디인가?</div>
       <div class="chart-subtitle">붉은 배경 = 예산 초과 · 만료임박 = 3개월 이내 계약 만료</div>
-      ${ci('예산 초과 ' + overBudgetSvcs.length + '개 · 3개월 내 계약 만료 ' + svcExpiring + '개 — 즉시 계약 재검토 및 예산 조정 필요')}
+      ${ci('예산 초과 ' + overBudgetSvcs.length + '개 · 3개월 내 계약 만료 ' + svcExpiring + '개 — 계약 재검토 및 예산 조정 필요')}
       <table class="data-table">
         <thead><tr>
           <th>서비스 / 담당</th><th>카테고리</th>
@@ -1300,6 +1341,7 @@ function renderServices() {
           <th style="text-align:right">MoM</th>
           <th style="text-align:right">YoY</th>
           <th style="text-align:right">예산 대비</th>
+          <th style="text-align:center">예산 상태</th>
           <th style="text-align:right">계약 만료</th>
         </tr></thead>
         <tbody>${tableRows}</tbody>
@@ -1477,7 +1519,7 @@ function updateTeamSim(teamId) {
   if (totalEl) {
     const saved = base - simTotal;
     totalEl.innerHTML = fmt(Math.round(simTotal)) +
-      (saved>0?' <span style="font-size:10px;color:'+T.positive+'">(▼ '+fmt(Math.round(saved))+' 절감)</span>':'');
+      (saved>0?'<div style="margin-top:4px;font-size:14px;font-weight:600;color:'+T.positive+'">▼ '+fmt(Math.round(saved))+' 절감</div>':'');
   }
 }
 
@@ -1717,9 +1759,89 @@ function selectTeamDrill(teamId) {
         '<span id="tsim-pct-'+r.id+'" style="flex:0 0 28px;text-align:right;font-size:10px;color:var(--c-text-dim)">0%</span>' +
         '</div>'
       ).join('') +
-      '<div style="font-size:11px;margin-top:4px;color:var(--c-text-dim)">조정 후: <strong id="tsim-total">'+fmt(teamTotal)+'</strong></div>' +
+      '<div style="margin-top:10px;padding:12px 14px;background:var(--c-surface-alt);border-radius:6px;">' +
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--c-text-dim);margin-bottom:6px;">조정 후 총비용</div>' +
+      '<div id="tsim-total" style="font-size:22px;font-weight:700;color:var(--c-text);line-height:1.2;">'+fmt(teamTotal)+'</div>' +
+      '</div>' +
       '</div>';
   }
+}
+
+function setTeamHistTab(tab) {
+  ['trend','yoy','scatter'].forEach(t => {
+    const c = document.getElementById('thc-'+t);
+    const b = document.getElementById('tht-'+t);
+    if (c) c.style.display = t === tab ? 'block' : 'none';
+    if (b) {
+      b.style.background = t === tab ? 'var(--c-accent)' : 'var(--c-surface-alt)';
+      b.style.color      = t === tab ? '#fff' : 'var(--c-text-sub)';
+      b.style.borderColor = t === tab ? 'var(--c-accent)' : 'var(--c-border)';
+    }
+  });
+}
+
+function teamYoyHBarChart(data, width, height) {
+  const pl = 90, pr = 52, pt = 6, pb = 6;
+  const W = width - pl - pr, H = height - pt - pb;
+  const n = data.length;
+  const rowH = H / n;
+  const barH = Math.min(rowH * 0.52, 18);
+  const maxAbs = Math.max(...data.map(d => Math.abs(d.yoyPct)), 1);
+  const maxV = maxAbs * 1.18;
+  const minV = Math.min(...data.map(d => d.yoyPct), 0) < 0 ? -maxV * 0.15 : 0;
+  const range = maxV - minV;
+  function xp(v) { return pl + ((v - minV) / range) * W; }
+  const zeroX = xp(0);
+  let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="width:100%;height:auto;display:block">`;
+  svg += `<line x1="${zeroX}" y1="${pt}" x2="${zeroX}" y2="${height-pb}" stroke="var(--c-border)" stroke-width="1"/>`;
+  data.forEach((d, i) => {
+    const cy = pt + i * rowH + rowH / 2;
+    const bw = Math.abs((d.yoyPct / range) * W);
+    const bx = d.yoyPct >= 0 ? zeroX : zeroX - bw;
+    const col = d.yoyPct > 0 ? T.accent : T.positive;
+    svg += `<text x="${pl-6}" y="${cy-2}" text-anchor="end" font-size="10" fill="var(--c-text-sub)">${d.label.replace('팀','')}</text>`;
+    svg += `<text x="${pl-6}" y="${cy+9}" text-anchor="end" font-size="8" fill="var(--c-text-muted)">${d.headcount}명</text>`;
+    svg += `<rect x="${bx}" y="${cy-barH/2}" width="${Math.max(bw,1)}" height="${barH}" fill="${col}" opacity="0.82" rx="2"/>`;
+    const lx = d.yoyPct >= 0 ? zeroX + bw + 4 : zeroX - bw - 4;
+    svg += `<text x="${lx}" y="${cy+4}" text-anchor="${d.yoyPct>=0?'start':'end'}" font-size="11" font-weight="600" fill="${col}">${d.yoyPct>0?'+':''}${d.yoyPct.toFixed(1)}%</text>`;
+  });
+  svg += '</svg>';
+  return svg;
+}
+
+function teamSizeVsGrowthChart(data, width, height) {
+  const pl = 46, pr = 16, pt = 18, pb = 28;
+  const W = width - pl - pr, H = height - pt - pb;
+  const hcs = data.map(d => d.headcount);
+  const yoys = data.map(d => d.yoyPct);
+  const maxHC = Math.max(...hcs) + 8, minHC = Math.min(...hcs) - 8;
+  const maxY  = Math.max(...yoys) * 1.2, minY = Math.min(...yoys, 0) - 8;
+  const maxCost = Math.max(...data.map(d => d.cost));
+  function cx(hc)  { return pl + ((hc - minHC) / (maxHC - minHC)) * W; }
+  function cy(yoy) { return pt + H - ((yoy - minY) / (maxY - minY)) * H; }
+  function br(cost){ return 9 + (cost / maxCost) * 14; }
+  let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="width:100%;height:auto;display:block">`;
+  [0, 20, 40, 60].forEach(pct => {
+    if (pct < minY || pct > maxY * 1.05) return;
+    const y = cy(pct);
+    svg += `<line x1="${pl}" y1="${y}" x2="${width-pr}" y2="${y}" stroke="var(--c-border)" stroke-dasharray="3,3" stroke-width="1"/>`;
+    svg += `<text x="${pl-4}" y="${y+3}" text-anchor="end" font-size="8" fill="var(--c-text-muted)">${pct}%</text>`;
+  });
+  const uniqueHC = [...new Set(hcs)].sort((a,b)=>a-b);
+  uniqueHC.forEach(hc => {
+    const x = cx(hc);
+    svg += `<text x="${x}" y="${height-4}" text-anchor="middle" font-size="8" fill="var(--c-text-muted)">${hc}명</text>`;
+    svg += `<line x1="${x}" y1="${pt}" x2="${x}" y2="${pt+H}" stroke="var(--c-border-sub)" stroke-width="1"/>`;
+  });
+  svg += `<text x="${pl-4}" y="${pt-6}" font-size="8" fill="var(--c-text-dim)">YoY%</text>`;
+  svg += `<text x="${pl+W/2}" y="${height+2}" text-anchor="middle" font-size="8" fill="var(--c-text-dim)">→ 인원수</text>`;
+  data.forEach(d => {
+    const x = cx(d.headcount), y = cy(d.yoyPct), r = br(d.cost);
+    svg += `<circle cx="${x}" cy="${y}" r="${r}" fill="${d.color}" opacity="0.72"/>`;
+    svg += `<text cx="${x}" cy="${y}" x="${x}" y="${y+3}" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">${d.label.replace(/팀$/,'').replace('AI/데이터','AI').replace('클라우드인프라','클라우드').replace('개발플랫폼','개발').replace('디지털혁신','DX').replace('보안/운영','보안').replace('UX/서비스디자인','UX')}</text>`;
+  });
+  svg += '</svg>';
+  return svg;
 }
 
 function renderTeams() {
@@ -1770,6 +1892,26 @@ function renderTeams() {
   const legendHtml = TEAMS.map((t, ti) =>
     `<span class="legend-item"><span class="legend-dot" style="background:${teamColors[ti]}"></span>${t.name}</span>`
   ).join('');
+  const yoyBarData = [...teamData].sort((a,b) => delta(b.v,b.yv) - delta(a.v,a.yv))
+    .map(t => ({ label: t.label, yoyPct: parseFloat(delta(t.v,t.yv).toFixed(1)), headcount: t.headcount, color: teamColorMap[t.id] }));
+  const scatterData = teamData.map(t => ({
+    label: t.label, headcount: t.headcount,
+    yoyPct: parseFloat(delta(t.v,t.yv).toFixed(1)),
+    cost: t.v, color: teamColorMap[t.id]
+  }));
+  const summaryRows = [...teamData].sort((a,b) => delta(b.v,b.yv) - delta(a.v,a.yv)).map(t => {
+    const yoyD = delta(t.v, t.yv);
+    const perHead = Math.round(t.v / t.headcount);
+    const perHeadYoy = t.yv > 0 ? Math.round((t.v - t.yv) / t.headcount) : 0;
+    return `<tr>
+      <td><strong>${t.label.replace('팀','')}</strong></td>
+      <td style="text-align:right">${t.headcount}명</td>
+      <td style="text-align:right;font-weight:600">${fmt(t.v)}</td>
+      <td style="text-align:right;font-weight:600;color:${yoyD>0?T.accent:T.positive}">${yoyD>0?'▲':'▼'} ${Math.abs(yoyD).toFixed(1)}%</td>
+      <td style="text-align:right">${fmt(perHead)}/인</td>
+      <td style="text-align:right;color:${perHeadYoy>0?T.accent:T.positive}">${perHeadYoy>0?'+':''}${fmt(Math.abs(perHeadYoy))}</td>
+    </tr>`;
+  }).join('');
   const topTeamShare = (teamChartData[0]?.v / totalCur * 100).toFixed(0);
   const aboveAvgTeamsCnt = phChartData.filter(t => t.v > perHeadAvg).length;
   const teamYoYSort = [...teamData].sort((a,b) => delta(b.v,b.yv) - delta(a.v,a.yv));
@@ -1819,32 +1961,71 @@ function renderTeams() {
           ${teamHBarClickChart(phChartData, perHeadAvg)}
         </div>
       </div>
-      <div class="chart-card" style="display:flex;flex-direction:column;">
-        <div class="chart-title" id="drill-title">← 팀을 선택하면 원인을 분석합니다</div>
-        <div class="chart-subtitle">서비스별 구독비용 · 이번 달 · 전월 대비 MoM</div>
-        <div id="drill-insight" class="chart-insight">팀 막대를 클릭하면 주요 원인 서비스가 표시됩니다</div>
-        <div style="flex:1;overflow-y:auto;max-height:320px;">
-          <table class="data-table">
-            <thead><tr>
-              <th>서비스 / 담당</th><th>카테고리</th>
-              <th style="text-align:right">이번 달</th>
-              <th style="text-align:right">MoM</th>
-              <th style="text-align:right">활용률</th>
-            </tr></thead>
-            <tbody id="drill-tbody">
-              <tr><td colspan="5" style="text-align:center;color:var(--c-text-muted);padding:20px">왼쪽 차트에서 팀 선택</td></tr>
-            </tbody>
-          </table>
+      <div class="chart-card" style="display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="flex:1;display:flex;flex-direction:column;">
+          <div class="chart-title" id="drill-title">← 팀을 선택하면 원인을 분석합니다</div>
+          <div class="chart-subtitle">서비스별 구독비용 · 이번 달 · 전월 대비 MoM</div>
+          <div id="drill-insight" class="chart-insight">팀 막대를 클릭하면 주요 원인 서비스가 표시됩니다</div>
+          <div style="margin-top:12px;overflow-y:auto;">
+            <table class="data-table">
+              <thead><tr>
+                <th>서비스 / 담당</th><th>카테고리</th>
+                <th style="text-align:right">이번 달</th>
+                <th style="text-align:right">MoM</th>
+                <th style="text-align:right">활용률</th>
+              </tr></thead>
+              <tbody id="drill-tbody">
+                <tr><td colspan="5" style="text-align:center;color:var(--c-text-muted);padding:20px">왼쪽 차트에서 팀 선택</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div id="team-mini-sim"></div>
+        <div id="team-mini-sim" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--c-border);"></div>
       </div>
     </div>
-    <div class="chart-card" style="margin-bottom:20px;">
-      <div class="chart-title">팀 규모 대비 비용 증가율이 정당한가?</div>
-      <div class="chart-subtitle">팀별 월간 구독비용 추이 2024.01 — 2025.06</div>
-      ${ci('YoY 최고 증가: ' + teamYoYSort[0]?.label + ' +' + delta(teamYoYSort[0]?.v||0,teamYoYSort[0]?.yv||0).toFixed(1) + '% · 최저: ' + teamYoYSort[teamYoYSort.length-1]?.label + ' ' + delta(teamYoYSort[teamYoYSort.length-1]?.v||0,teamYoYSort[teamYoYSort.length-1]?.yv||0).toFixed(1) + '% — 증가율 적정성 리뷰 필요')}
-      ${areaChart(teamHistData, 900, 180)}
-      <div class="legend">${legendHtml}</div>
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:20px;">
+      <div class="chart-card" style="display:flex;flex-direction:column;">
+        <div class="chart-title">팀 규모 대비 비용 증가율이 정당한가?</div>
+        <div style="display:flex;gap:6px;margin:8px 0 12px;">
+          <button id="tht-trend"   onclick="setTeamHistTab('trend')"   style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:3px;border:1px solid var(--c-accent);background:var(--c-accent);color:#fff;cursor:pointer;">비용 합계</button>
+          <button id="tht-yoy"     onclick="setTeamHistTab('yoy')"     style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:3px;border:1px solid var(--c-border);background:var(--c-surface-alt);color:var(--c-text-sub);cursor:pointer;">YoY 증가율</button>
+          <button id="tht-scatter" onclick="setTeamHistTab('scatter')" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:3px;border:1px solid var(--c-border);background:var(--c-surface-alt);color:var(--c-text-sub);cursor:pointer;">팀규모 대비</button>
+        </div>
+        <div id="thc-trend" style="display:block;">
+          <div class="chart-subtitle" style="margin-bottom:6px;">팀별 월간 구독비용 추이 2024.01 — 2025.06</div>
+          ${ci('YoY 최고 증가: ' + yoyBarData[0]?.label + ' +' + yoyBarData[0]?.yoyPct + '% · 최저: ' + yoyBarData[yoyBarData.length-1]?.label + ' ' + yoyBarData[yoyBarData.length-1]?.yoyPct + '%')}
+          ${areaChart(teamHistData, 560, 160)}
+          <div class="legend" style="margin-top:6px;">${legendHtml}</div>
+        </div>
+        <div id="thc-yoy" style="display:none;">
+          <div class="chart-subtitle" style="margin-bottom:6px;">전년 동월(2024.06) 대비 YoY 증가율 — 인원수 함께 표시</div>
+          ${ci('YoY 최고: ' + yoyBarData[0]?.label + ' +' + yoyBarData[0]?.yoyPct + '% · 최저: ' + yoyBarData[yoyBarData.length-1]?.label + ' ' + yoyBarData[yoyBarData.length-1]?.yoyPct + '%')}
+          ${teamYoyHBarChart(yoyBarData, 560, 180)}
+        </div>
+        <div id="thc-scatter" style="display:none;">
+          <div class="chart-subtitle" style="margin-bottom:6px;">X축: 팀 인원수 · Y축: YoY 증가율 · 버블 크기: 비용 규모</div>
+          ${ci('인원이 적어도 비용 증가율이 높은 팀 → 1인당 비용 급증 · 버블이 클수록 절대 비용 규모가 큼')}
+          ${teamSizeVsGrowthChart(scatterData, 560, 200)}
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">팀별 규모 · 비용 증가율</div>
+        <div class="chart-subtitle" style="margin-bottom:8px;">YoY 기준 · 1인당 YoY변화 = 절대 증감액÷인원</div>
+        <table class="data-table">
+          <thead><tr>
+            <th>팀</th>
+            <th style="text-align:right">인원</th>
+            <th style="text-align:right">비용</th>
+            <th style="text-align:right">YoY%</th>
+            <th style="text-align:right">1인당</th>
+            <th style="text-align:right">1인당↑</th>
+          </tr></thead>
+          <tbody>${summaryRows}</tbody>
+        </table>
+        <div style="margin-top:10px;font-size:10px;color:var(--c-text-dim);line-height:1.6;">
+          1인당↑ = (이번달−전년) ÷ 인원<br>인원 규모 대비 실질 비용 부담 증가분
+        </div>
+      </div>
     </div>
     <div class="chart-card">
       <div class="chart-title">인당 비용이 전사 평균을 초과하는 팀은 어디이고, 그 차이는 정당한가?</div>
@@ -1892,7 +2073,7 @@ function renderCost() {
     const d = delta(v, pv);
     const budgetPct = bv ? ((v / bv) * 100).toFixed(0) : null;
     let action;
-    if (d > 25)       action = '즉시 계약 재협상';
+    if (d > 25)       action = 'Action — 재협상';
     else if (d > 15)  action = '담당팀 보고 요청';
     else if (d > 5)   action = '다음 분기 검토';
     else              action = null;
@@ -1918,6 +2099,12 @@ function renderCost() {
   const cloudCostPct = (cloudCur / totalCur * 100).toFixed(0);
   const urgentCnt = optItems.filter(s => s.d > 25).length;
   const moderateCnt = optItems.filter(s => s.d > 15 && s.d <= 25).length;
+  const ytdCostMonths = MONTHS.filter(m => m.ym >= '2025-01' && m.ym <= curYm);
+  const ytdCostSum = ytdCostMonths.reduce((a, m) => a + sumBy(base.filter(r => r.ym === m.ym), 'cost'), 0);
+  const { fwd: costFwd } = holtSmooth(MONTHS.map(m => sumBy(base.filter(r => r.ym === m.ym), 'cost')), 0.35, 0.1, 6);
+  const yearEndForecast = ytdCostSum + costFwd.reduce((a, v) => a + Math.max(0, v), 0);
+  const totalAnnualBudget = SERVICES.reduce((a, s) => a + (BUDGETS[s.id] || 0), 0) * 12;
+  const yearEndVsBudgetPct = totalAnnualBudget ? ((yearEndForecast / totalAnnualBudget) * 100).toFixed(0) : null;
   return `
   <div class="page-header">
     <div class="page-header-top">
@@ -1938,9 +2125,38 @@ function renderCost() {
         <div class="kpi-sub">AI 18개월 성장 ${aiGrowth18m.toFixed(0)}%</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">즉시 재검토 필요</div>
+        <div class="kpi-label">Action — 재검토 필요</div>
         <div class="kpi-value">${optItems.filter(s => s.d > 25).length}개</div>
         <div class="kpi-sub">MoM 25%↑ 서비스</div>
+      </div>
+      <div class="kpi-card" style="padding:14px 20px;">
+        ${(() => {
+          const pct = yearEndVsBudgetPct ? parseInt(yearEndVsBudgetPct) : 0;
+          const capped = Math.min(pct, 140);
+          const R = 38, cx = 60, cy = 52, sw = 9;
+          const startAngle = -210, endAngle = 30;
+          const sweep = endAngle - startAngle;
+          const filledSweep = (capped / 140) * sweep;
+          const toRad = a => a * Math.PI / 180;
+          const arcPath = (sa, ea) => {
+            const x1 = cx + R * Math.cos(toRad(sa));
+            const y1 = cy + R * Math.sin(toRad(sa));
+            const x2 = cx + R * Math.cos(toRad(ea));
+            const y2 = cy + R * Math.sin(toRad(ea));
+            const lg = Math.abs(ea - sa) > 180 ? 1 : 0;
+            return `M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R} 0 ${lg},1 ${x2.toFixed(1)},${y2.toFixed(1)}`;
+          };
+          const trackPath = arcPath(startAngle, endAngle);
+          const fillPath = pct > 0 ? arcPath(startAngle, startAngle + filledSweep) : '';
+          const fillColor = pct > 100 ? T.accent : pct >= 80 ? T.positive : '#efb05d';
+          return `<div style="font-size:10px;color:var(--c-text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">연말 예측 / 연간예산</div>
+<svg width="120" height="70" viewBox="0 0 120 70" style="overflow:visible;display:block;margin:0 auto;">
+  <path d="${trackPath}" fill="none" stroke="var(--c-border)" stroke-width="${sw}" stroke-linecap="round"/>
+  ${fillPath ? `<path d="${fillPath}" fill="none" stroke="${fillColor}" stroke-width="${sw}" stroke-linecap="round"/>` : ''}
+  <text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--c-text)" font-family="inherit">${pct}%</text>
+</svg>
+<div style="text-align:center;font-size:11px;font-weight:600;color:var(--c-text);margin-top:2px;">${fmt(Math.round(yearEndForecast))}</div>`;
+        })()}
       </div>
     </div>
     <div class="chart-card primary" style="margin-bottom:20px;">
@@ -1972,8 +2188,8 @@ function renderCost() {
     </div>
     <div class="chart-card">
       <div class="chart-title">지금 당장 계약 재검토가 필요한 서비스는 무엇인가?</div>
-      <div class="chart-subtitle">MoM 5%↑ 서비스 · 빨강=즉시 재협상(25%↑) · 노랑=팀 보고(15%↑) · 회색=다음 분기</div>
-      ${ci('즉시 재협상(25%↑) ' + urgentCnt + '개 · 팀 보고(15~25%↑) ' + moderateCnt + '개 포함 총 ' + optItems.length + '개 서비스 재검토 대상 — 이번 달 내 조치 권고')}
+      <div class="chart-subtitle">MoM 5%↑ 서비스 · 빨강=Action(25%↑) · 노랑=팀 보고(15%↑) · 회색=다음 분기</div>
+      ${ci('Action(25%↑) ' + urgentCnt + '개 · 팀 보고(15~25%↑) ' + moderateCnt + '개 포함 총 ' + optItems.length + '개 서비스 재검토 대상 — 이번 달 내 조치 권고')}
       <table class="data-table">
         <thead><tr>
           <th>서비스</th><th>카테고리</th>
