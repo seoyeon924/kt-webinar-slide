@@ -2530,56 +2530,58 @@ AI 서비스는 성장 트렌드 적용 · 이상 패턴 포함:
 
       <!-- TAB 2: EDA -->
       <div id="d2c-2" style="flex:1; display:none; flex-direction:column; gap:10px; min-height:0;">
-        <div style="font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:rgba(28,26,24,0.38);">EDA · 기초 분석 결과</div>
-        <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:10px; overflow-y:auto;">
-          <div style="background:rgba(28,26,24,0.04); border-radius:10px; padding:16px;">
-            <div style="font-size:10px; font-weight:700; letter-spacing:0.1em; color:rgba(28,26,24,0.40); text-transform:uppercase; margin-bottom:8px;">데이터 규모</div>
-            <div style="font-size:13px; color:rgba(28,26,24,0.75); line-height:1.8;">15 서비스 × 6 팀 × 18개월<br>= 1,620 rows<br>필드: ym · svc · team · cost · tokens</div>
-          </div>
-          <div style="background:rgba(28,26,24,0.04); border-radius:10px; padding:16px;">
-            <div style="font-size:10px; font-weight:700; letter-spacing:0.1em; color:rgba(28,26,24,0.40); text-transform:uppercase; margin-bottom:8px;">비용 분포</div>
-            <div style="font-size:13px; color:rgba(28,26,24,0.75); line-height:1.8;">월 평균 총비용: <b>1.28억원</b><br>최대: 1.47억 / AWS 인프라 비중 33%<br>AI도구 비중: 12% → 18% (+6%p)</div>
-          </div>
-          <div style="background:rgba(184,160,112,0.08); border:1px solid rgba(184,160,112,0.2); border-radius:10px; padding:16px;">
-            <div style="font-size:10px; font-weight:700; letter-spacing:0.1em; color:rgba(184,160,112,0.7); text-transform:uppercase; margin-bottom:8px;">이상 탐지</div>
-            <div style="font-size:13px; color:rgba(28,26,24,0.75); line-height:1.8;">Copilot 예산 <b style="color:#A07020;">103% 초과</b><br>Bedrock 3개월 연속 <b style="color:#A07020;">+15%</b><br>Notion 활용률 61% (라이선스 낭비)</div>
-          </div>
-          <div style="background:rgba(28,26,24,0.04); border-radius:10px; padding:16px;">
-            <div style="font-size:10px; font-weight:700; letter-spacing:0.1em; color:rgba(28,26,24,0.40); text-transform:uppercase; margin-bottom:8px;">팀별 특성</div>
-            <div style="font-size:13px; color:rgba(28,26,24,0.75); line-height:1.8;">AI·데이터팀: AI도구 비중 최고<br>클라우드팀: AWS/GCP 인프라 집중<br>UX팀: Figma 의존도 61%</div>
-          </div>
-        </div>
+        <div style="font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:rgba(28,26,24,0.38);">EDA · 기초 분석 프롬프트</div>
+        <div class="code-wrap" style="flex:1; border-radius:8px; border:1px solid var(--border); font-size:12px; line-height:1.85; padding:14px 16px; white-space:pre-wrap; overflow-y:auto;">위에서 생성한 샘플 데이터(DATA 배열, 1,620 rows)를
+기반으로 기초 탐색 분석을 수행해줘.
+
+다음 항목을 분석하고 대시보드 설계에
+활용할 요약을 작성해줘:
+
+<span style="color:rgba(122,176,204,0.85);">1. 데이터 규모
+   rows 수 · 컬럼 목록 · 기간 범위
+
+2. 월별 총 비용 추세
+   최솟값 · 최댓값 · 평균 · 전체 성장률
+
+3. 카테고리별 비용 비중
+   AI도구 / 클라우드 / 개발도구 / 협업 / BI·디자인
+   MoM 변화율 포함
+
+4. 서비스별 예산 소진율
+   BUDGETS 대비 % — 초과 서비스 플래그
+
+5. 팀별 지출 분포
+   TEAM_WEIGHTS 기준 상위 3팀
+
+6. 이상 패턴 탐지
+   - 예산 초과 서비스 목록
+   - 3개월 연속 상승 서비스
+   - 활용률 60% 미만 서비스 (UTILIZATION 기준)</span></div>
       </div>
 
       <!-- TAB 3: 지표 설계 -->
       <div id="d2c-3" style="flex:1; display:none; flex-direction:column; gap:10px; min-height:0;">
-        <div style="font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:rgba(28,26,24,0.38);">KPI · 지표 설계</div>
-        <div style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
-          <div style="background:rgba(28,26,24,0.05); border-radius:10px; padding:14px 16px;">
-            <div style="font-size:10px; font-weight:700; letter-spacing:0.12em; color:rgba(28,26,24,0.50); margin-bottom:6px;">NORTH STAR</div>
-            <div style="font-size:16px; font-weight:700; color:#1C1A18;">당월 총 구독비용 <span style="font-size:13px; font-weight:400; color:rgba(28,26,24,0.55);">— 전월 대비 % · 전년동기 대비 %</span></div>
-          </div>
-          <div style="background:rgba(28,26,24,0.04); border-radius:10px; padding:14px 16px;">
-            <div style="font-size:10px; font-weight:700; letter-spacing:0.12em; color:rgba(28,26,24,0.40); margin-bottom:8px;">SUPPORTING KPIs</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:13px; color:rgba(28,26,24,0.70); line-height:1.7;">
-              <div>활성 서비스 수 <span style="font-size:11px; color:rgba(28,26,24,0.40);">/ 예산초과 건수</span></div>
-              <div>AI도구 비중 <span style="font-size:11px; color:rgba(28,26,24,0.40);">/ MoM 변화율</span></div>
-              <div>예산소진율 최대값 <span style="font-size:11px; color:rgba(28,26,24,0.40);">/ 서비스별</span></div>
-              <div>3개월 내 만료 계약 <span style="font-size:11px; color:rgba(28,26,24,0.40);">/ 건수</span></div>
-            </div>
-          </div>
-          <div style="background:rgba(28,26,24,0.04); border-radius:10px; padding:14px 16px;">
-            <div style="font-size:10px; font-weight:700; letter-spacing:0.12em; color:rgba(28,26,24,0.40); margin-bottom:8px;">탭 구조 설계</div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <span style="font-size:12px; padding:3px 10px; background:rgba(28,26,24,0.07); border-radius:4px; color:rgba(28,26,24,0.65);">개요</span>
-              <span style="font-size:12px; padding:3px 10px; background:rgba(28,26,24,0.07); border-radius:4px; color:rgba(28,26,24,0.65);">추세</span>
-              <span style="font-size:12px; padding:3px 10px; background:rgba(28,26,24,0.07); border-radius:4px; color:rgba(28,26,24,0.65);">서비스별</span>
-              <span style="font-size:12px; padding:3px 10px; background:rgba(28,26,24,0.07); border-radius:4px; color:rgba(28,26,24,0.65);">비용분석</span>
-              <span style="font-size:12px; padding:3px 10px; background:rgba(28,26,24,0.07); border-radius:4px; color:rgba(28,26,24,0.65);">시스템 현황</span>
-              <span style="font-size:12px; padding:3px 10px; background:rgba(28,26,24,0.07); border-radius:4px; color:rgba(28,26,24,0.65);">이상 탐지</span>
-            </div>
-          </div>
-        </div>
+        <div style="font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:rgba(28,26,24,0.38);">지표 설계 프롬프트</div>
+        <div class="code-wrap" style="flex:1; border-radius:8px; border:1px solid var(--border); font-size:12px; line-height:1.85; padding:14px 16px; white-space:pre-wrap; overflow-y:auto;">EDA 결과를 바탕으로 KT IT기술부문
+클라우드 구독 모니터링 대시보드의
+지표 체계를 설계해줘.
+
+<span style="color:rgba(122,176,204,0.85);">아래 형식으로 정의해줘:
+
+North Star 지표 1개
+- 지표명 · 계산식 · 표시 형식(단위)
+- 비교 기준: 전월비 % · 예산 대비 %
+
+Supporting KPI 4개
+- 지표명 · 계산식 · 분모 · 단위
+- 각 KPI의 이상 임계값 기준 포함
+
+대시보드 탭 구조 제안
+- 탭 이름 · 각 탭의 주요 지표 목록
+- 임원용 vs 실무자용 구분 포함</span>
+
+독자: IT기술부문 VP급 임원 + 팀 담당자
+목적: 구독 비용 이상 탐지 + 계약 만료 관리</div>
       </div>
 
       <!-- TAB 4: 디자인 프롬프트 -->
